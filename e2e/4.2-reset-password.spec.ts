@@ -2,7 +2,7 @@
 import { expect, test } from "@playwright/test";
 import { PASSWORD, confirmLink, createUser, signIn, uniqueEmail, waitForEmail, formAlert, formStatus } from "./support";
 
-const NEW_PASSWORD = "NotARealPassword2"; // test-only
+const NEW_PASSWORD = "not-a-real-password-2B"; // test-only
 
 test("the reset form gives the same answer whether or not the account exists", async ({ page }) => {
   const user = await createUser("student", "reset-same");

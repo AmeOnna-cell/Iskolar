@@ -16,7 +16,7 @@ async function signedInContext(browser: Browser, role: string, theme: string): P
     auth: { persistSession: false },
   });
   const email = `screens-${role}-${Date.now()}@iskolar.test`;
-  const password = "NotARealPassword1"; // test-only, local stack
+  const password = "not-a-real-password-1A"; // test-only, local stack
   const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { full_name: "Ana Reyes" } });
   if (error) throw error;
   if (role !== "student") await admin.from("profiles").update({ role }).eq("id", data.user.id);

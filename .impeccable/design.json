@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-03T05:30:00+08:00",
+  "title": "Design System: Iskolar",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Civic Blue", "canonical": "#1F4FD1", "tonalRamp": ["#0B1D4F", "#112C78", "#173FAD", "#1F4FD1", "#4C72DE", "#7E9AE8", "#B9C9F3", "#EDF2FF"] },
+      "band": { "role": "primary", "displayName": "Night Registry Navy", "canonical": "#0F2C6E", "tonalRamp": ["#07163A", "#0B2052", "#0F2C6E", "#163A8A", "#2E52A6", "#5C78BE", "#A3B3DC", "#C9D3EE"] },
+      "canvas": { "role": "neutral", "displayName": "Counter Grey", "canonical": "#F3F4F6", "tonalRamp": ["#1D2433", "#3A4254", "#545E70", "#646D7E", "#C9CED8", "#E1E4EA", "#F3F4F6", "#FFFFFF"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#1D2433" },
+      "ink-secondary": { "role": "neutral", "displayName": "Secondary Ink", "canonical": "#545E70" },
+      "ink-hint": { "role": "neutral", "displayName": "Hint Ink", "canonical": "#646D7E" },
+      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "#E1E4EA" },
+      "ok": { "role": "status", "displayName": "Approved Green", "canonical": "#11703F", "tonalRamp": ["#073A20", "#0B5530", "#11703F", "#2E8C59", "#5AAE80", "#97CFAF", "#C9E8D5", "#E6F5EC"] },
+      "warn": { "role": "status", "displayName": "Caution Amber", "canonical": "#8F5300", "tonalRamp": ["#4A2B00", "#6B3E00", "#8F5300", "#B26F12", "#D6943A", "#EDBE74", "#F8DDA8", "#FFF3D9"] },
+      "danger": { "role": "status", "displayName": "Deadline Red", "canonical": "#B42318", "tonalRamp": ["#5C110B", "#871A12", "#B42318", "#CF4A3F", "#E27A71", "#EFA8A2", "#F8D3CF", "#FDECEA"] },
+      "tassel-gold": { "role": "brand", "displayName": "Tassel Gold", "canonical": "#FFC83D" }
+    },
+    "darkTheme": {
+      "canvas": "#0E1117", "surface": "#171B24", "surface-subtle": "#1C212C", "surface-hover": "#202634",
+      "hairline": "#2A3140", "hairline-strong": "#3A4254",
+      "ink": "#E6E9EF", "ink-secondary": "#AAB2C0", "ink-hint": "#8790A0",
+      "primary": "#7EA2FF", "primary-hover": "#A3BCFF", "primary-wash": "#1E2A4A", "on-primary": "#0E1117",
+      "band": "#111C3D", "band-raised": "#18275A",
+      "ok": "#5ACB8B", "ok-wash": "#14301F", "warn": "#F0BC5C", "warn-wash": "#352812", "danger": "#FF8A7E", "danger-wash": "#3D1C19"
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Landing band headline only." },
+      "headline": { "displayName": "Headline", "purpose": "Page titles (h1); 24px below 640px." },
+      "title-lg": { "displayName": "Title Large", "purpose": "Section headings (h2); 18px below 640px." },
+      "title": { "displayName": "Title", "purpose": "Card titles, list leads, criterion labels." },
+      "body": { "displayName": "Body", "purpose": "Running copy and inputs; max 70ch." },
+      "body-sm": { "displayName": "Body Small", "purpose": "Secondary lines, table cells, explanations." },
+      "label": { "displayName": "Label", "purpose": "Buttons, field labels, tabs, nav." },
+      "caption": { "displayName": "Caption", "purpose": "Pills, timestamps, helper text." },
+      "stat": { "displayName": "Stat", "purpose": "Staff overview counts only." }
+    },
+    "shadows": [
+      { "name": "resting", "value": "0 1px 2px rgba(16,24,40,.06)", "purpose": "Barely-there settle under resting cards in light mode; none in dark." },
+      { "name": "overlay", "value": "0 12px 32px rgba(16,24,40,.14)", "purpose": "Menus, dialogs, sheets, toasts. Dark: 0 12px 32px rgba(0,0,0,.5)." }
+    ],
+    "motion": [
+      { "name": "feedback", "value": "150ms cubic-bezier(0.2, 0, 0, 1)", "purpose": "Hover/press color changes, toast in/out, chip toggles." },
+      { "name": "overlay", "value": "200ms cubic-bezier(0.2, 0, 0, 1)", "purpose": "Dialog/sheet/menu open: opacity + 4px translate. None under reduced motion." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "nav", "value": "900px" },
+      { "name": "lg", "value": "1000px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single next action in a region.",
+      "html": "<button class=\"ds-btn-primary\">Start preparing</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border:1px solid transparent;border-radius:6px;background:#1F4FD1;color:#fff;font:600 14px/1.3 Inter,system-ui,sans-serif;cursor:pointer;transition:background .15s}.ds-btn-primary:hover{background:#173FAD}.ds-btn-primary:focus-visible{outline:2px solid #1F4FD1;outline-offset:2px}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Every secondary action.",
+      "html": "<button class=\"ds-btn-outline\">Save</button>",
+      "css": ".ds-btn-outline{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border:1px solid #C9CED8;border-radius:6px;background:#fff;color:#1D2433;font:600 14px/1.3 Inter,system-ui,sans-serif;cursor:pointer;transition:background .15s}.ds-btn-outline:hover{background:#F1F4FA}.ds-btn-outline:focus-visible{outline:2px solid #1F4FD1;outline-offset:2px}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labeled 44px field with blue focus ring.",
+      "html": "<label class=\"ds-field\">GWA last semester<input class=\"ds-input\" inputmode=\"decimal\" placeholder=\"e.g. 1.85\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:8px;font:600 14px/1.3 Inter,system-ui,sans-serif;color:#1D2433}.ds-input{height:44px;padding:0 12px;border:1px solid #C9CED8;border-radius:6px;background:#fff;color:#1D2433;font:400 16px/1.55 Inter,system-ui,sans-serif}.ds-input:focus{outline:none;border-color:#1F4FD1;box-shadow:0 0 0 3px #EDF2FF}"
+    },
+    {
+      "name": "Status Pills",
+      "kind": "chip",
+      "refersTo": "pill",
+      "description": "Status vocabulary: qualify / might / not eligible / neutral.",
+      "html": "<span class=\"ds-pill ds-ok\">You qualify</span> <span class=\"ds-pill ds-warn\">Might qualify</span> <span class=\"ds-pill ds-danger\">Not eligible</span> <span class=\"ds-pill\">Government</span>",
+      "css": ".ds-pill{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:9999px;border:1px solid #E1E4EA;background:#F8F9FB;color:#545E70;font:500 13px/1.45 Inter,system-ui,sans-serif}.ds-ok{background:#E6F5EC;color:#11703F;border-color:transparent}.ds-warn{background:#FFF3D9;color:#8F5300;border-color:transparent}.ds-danger{background:#FDECEA;color:#B42318;border-color:transparent}"
+    },
+    {
+      "name": "Scholarship Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Provider tile, name, provider, pills, deadline.",
+      "html": "<article class=\"ds-card\"><span class=\"ds-plogo\">CHED</span><div><h3 class=\"ds-card-t\">Tulong Dunong Program</h3><p class=\"ds-card-p\">Commission on Higher Education</p><p class=\"ds-card-due\">Closes in 4 days</p></div></article>",
+      "css": ".ds-card{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:24px;background:#fff;border:1px solid #E1E4EA;border-radius:8px;box-shadow:0 1px 2px rgba(16,24,40,.06);font-family:Inter,system-ui,sans-serif}.ds-card:hover{border-color:#C9CED8}.ds-plogo{width:44px;height:44px;border-radius:8px;background:#1D3E8A;color:#fff;display:grid;place-items:center;font:700 11px Inter,system-ui,sans-serif}.ds-card-t{margin:0;font:600 16px/1.35 Inter,system-ui,sans-serif;color:#1D2433}.ds-card-p{margin:4px 0 0;font:400 14px/1.5 Inter,system-ui,sans-serif;color:#545E70}.ds-card-due{margin:12px 0 0;font:600 13px/1.45 Inter,system-ui,sans-serif;color:#8F5300}"
+    },
+    {
+      "name": "Criteria List",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Explainable eligibility: met / not met / unknown per requirement.",
+      "html": "<ul class=\"ds-crit\"><li><span class=\"ds-m ds-m-ok\">✓</span><div><b>GWA of 3.00 or better</b><span>Your GWA is 1.85</span></div><em class=\"ds-st-ok\">Met</em></li><li><span class=\"ds-m ds-m-unk\">?</span><div><b>Household is in 4Ps</b><span>You weren’t sure. Ask your barangay.</span></div><em class=\"ds-st-unk\">Unknown</em></li></ul>",
+      "css": ".ds-crit{list-style:none;margin:0;padding:0;border:1px solid #E1E4EA;border-radius:8px;overflow:hidden;font-family:Inter,system-ui,sans-serif}.ds-crit li{display:grid;grid-template-columns:22px 1fr auto;gap:12px;padding:12px 16px;border-top:1px solid #E1E4EA}.ds-crit li:first-child{border-top:0}.ds-crit b{display:block;font:600 16px/1.35 Inter,system-ui,sans-serif;color:#1D2433}.ds-crit span{font:400 14px/1.5 Inter,system-ui,sans-serif;color:#545E70}.ds-m{width:22px;height:22px;border-radius:9999px;display:grid;place-items:center;font:700 12px Inter;color:#fff}.ds-m-ok{background:#11703F}.ds-m-unk{background:#FFF3D9;color:#8F5300;box-shadow:inset 0 0 0 1px #8F5300}.ds-crit em{font:600 13px/1.45 Inter;font-style:normal}.ds-st-ok{color:#11703F}.ds-st-unk{color:#8F5300}"
+    },
+    {
+      "name": "Bottom Tab Bar",
+      "kind": "nav",
+      "refersTo": "tab-bar",
+      "description": "Mobile primary navigation under 900px.",
+      "html": "<nav class=\"ds-tabbar\"><a aria-current=\"page\">Dashboard</a><a>Search</a><a>Eligibility</a><a>Applications</a><a>Help</a></nav>",
+      "css": ".ds-tabbar{display:grid;grid-template-columns:repeat(5,1fr);height:64px;background:#fff;border-top:1px solid #E1E4EA;font:500 12px/1.3 Inter,system-ui,sans-serif}.ds-tabbar a{display:grid;place-items:center;color:#646D7E;text-decoration:none}.ds-tabbar a[aria-current=page]{color:#1F4FD1;font-weight:600}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Clear Counter",
+    "overview": "Iskolar is the government service window that finally explains things. It carries the authority of an official counter, with deep civic blue, ruled forms, sources and dates on everything, but it talks to the student across the counter in plain words and tells them exactly what to bring, where to get it, and how many days they have left. Trust comes from precision and honesty, not from decoration. The system is calm, ruled and quietly dense.",
+    "keyCharacteristics": [
+      "One deep civic blue (primary) for the single next action and active navigation. Everything else is neutral ink on white.",
+      "Status colors (ok, warn, danger) are a vocabulary, never decoration.",
+      "Flat surfaces on a cool grey canvas. Hairline borders do the separating, and shadows appear only on overlays.",
+      "Inter throughout. Hierarchy comes from weight (400 → 600 → 700) and a short, strict size scale.",
+      "A strict 4px-based spacing scale with generous gaps between groups and tight gaps within them.",
+      "A navy band hero on public pages only, then straight to the quiet canvas.",
+      "Light and dark themes with equal care. The theme toggle is always available."
+    ],
+    "rules": [
+      { "name": "The One Blue Action Rule", "body": "Each view region (page header, card, dialog, sticky bar) has at most one filled Civic Blue button. Every other action is outline or text.", "section": "colors" },
+      { "name": "The Status Means Status Rule", "body": "Green, amber and red appear only to state eligibility, deadline urgency, verification or result. They are never decoration, never section accents, and never brand color.", "section": "colors" },
+      { "name": "The Urgency Ladder Rule", "body": "Open deadlines are Deadline Red at ≤3 days, Caution Amber at ≤7 days, and neutral ink otherwise. Upcoming and closed are always neutral.", "section": "colors" },
+      { "name": "The Five Sizes Rule", "body": "Inside the app, text uses only 13, 14, 16, 20 and 28px (plus 24/18 as the mobile steps of the last two). The prototype's 11.5/12.5/13.5/14.5/15/17/19/22/26px half-steps are retired.", "section": "typography" },
+      { "name": "The Weight Ladder Rule", "body": "400 for reading, 500 for captions and pills, 600 for naming and labeling, 650 for section headings, 700 for page headings only. Never bold a whole paragraph. Never set headings in color.", "section": "typography" },
+      { "name": "The Proximity Rule", "body": "The gap between groups is at least twice the gap within a group. If two things don't belong together, the whitespace has to say so.", "section": "layout" },
+      { "name": "The One Column Dashboard Rule", "body": "The student dashboard is a single centered column in priority order: greeting + one primary action → urgent deadlines with missing documents → next steps → recommended matches → application progress → announcements and alerts → profile completeness. No sidebars.", "section": "layout" },
+      { "name": "The No Lift At Rest Rule", "body": "Hover changes the border to Strong Hairline or the fill to Hover Tint, never the shadow or position. Only overlays get the Overlay shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use only the spacing scale (4 · 8 · 12 · 16 · 24 · 32 · 48 · 64) and keep the gap between groups at least twice the gap within them.",
+      "Do keep exactly one filled Civic Blue button per region. Everything else is outline or text.",
+      "Do show the source, \"Last checked {date}\" and verification status on every listing, and an amber \"Not yet verified\" notice before any document checklist on unverified listings.",
+      "Do keep the eligibility wording exactly: \"You qualify\", \"Might qualify\", \"Not eligible right now\", plus the preliminary-check disclaimer.",
+      "Do color deadlines by The Urgency Ladder Rule (≤3 days red, ≤7 days amber).",
+      "Do use tabular numerals for amounts, counts and dates that align.",
+      "Do give every input a visible label, every icon button an aria-label, and every focusable element the Civic Blue focus ring.",
+      "Do design dark mode alongside light, using the dark role table, never an automatic inversion."
+    ],
+    "donts": [
+      "Don't use green, amber or red for anything but status.",
+      "Don't add shadows to resting cards beyond the hairline shadow, and don't lift cards on hover.",
+      "Don't use gradients, glass blur, colored left-border accent cards or tinted icon circles as decoration.",
+      "Don't introduce font sizes outside the scale or weights outside 400/500/600/650/700.",
+      "Don't put the navy band inside the app shell (dashboard, applications, settings). It belongs to public pages, auth and email headers.",
+      "Don't use Tassel Gold anywhere but the logo.",
+      "Don't animate layout, scroll-jack, or use motion that doesn't confirm a user action. Respect prefers-reduced-motion everywhere.",
+      "Don't copy NerdWallet's greens or square buttons, or Mercury's violet pills or night chrome. They are references for rhythm and table discipline only."
+    ]
+  }
+}

@@ -1,0 +1,1373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iskolar Scholarship Finder</title>
+<meta name="description" content="Prototype of a centralized scholarship information and management system for college students.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F4F6; --card:#FFFFFF; --subtle:#F8F9FB; --hover:#F1F4FA;
+  --border:#E1E4EA; --border-2:#C9CED8;
+  --text:#1D2433; --text-2:#545E70; --text-3:#737C8C;
+  --primary:#1F4FD1; --primary-hover:#173FAD; --primary-50:#EDF2FF; --on-primary:#FFFFFF;
+  --band:#0F2C6E; --band-2:#163A8A;
+  --ok:#11703F; --ok-50:#E6F5EC;
+  --warn:#8F5300; --warn-50:#FFF3D9;
+  --danger:#B42318; --danger-50:#FDECEA;
+  --shadow:0 1px 2px rgba(16,24,40,.06);
+  --shadow-lg:0 12px 32px rgba(16,24,40,.14);
+  --r:8px; --r-sm:6px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1117; --card:#171B24; --subtle:#1C212C; --hover:#202634;
+    --border:#2A3140; --border-2:#3A4254;
+    --text:#E6E9EF; --text-2:#AAB2C0; --text-3:#8790A0;
+    --primary:#7EA2FF; --primary-hover:#A3BCFF; --primary-50:#1E2A4A; --on-primary:#0E1117;
+    --band:#111C3D; --band-2:#18275A;
+    --ok:#5ACB8B; --ok-50:#14301F; --warn:#F0BC5C; --warn-50:#352812; --danger:#FF8A7E; --danger-50:#3D1C19;
+    --shadow:none; --shadow-lg:0 12px 32px rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1117; --card:#171B24; --subtle:#1C212C; --hover:#202634;
+  --border:#2A3140; --border-2:#3A4254;
+  --text:#E6E9EF; --text-2:#AAB2C0; --text-3:#8790A0;
+  --primary:#7EA2FF; --primary-hover:#A3BCFF; --primary-50:#1E2A4A; --on-primary:#0E1117;
+  --band:#111C3D; --band-2:#18275A;
+  --ok:#5ACB8B; --ok-50:#14301F; --warn:#F0BC5C; --warn-50:#352812; --danger:#FF8A7E; --danger-50:#3D1C19;
+  --shadow:none; --shadow-lg:0 12px 32px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;line-height:1.25;font-weight:700;letter-spacing:-0.01em}
+h1{font-size:26px} h2{font-size:18px} h3{font-size:16px;font-weight:600}
+p{margin:0}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+[tabindex="-1"]:focus{outline:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:12px;top:-60px;background:var(--card);padding:10px 14px;border-radius:var(--r);z-index:99}
+.skip:focus{top:12px}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+@media (max-width:640px){.container{padding:0 16px}}
+
+/* Header */
+.hdr{position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--border)}
+.hdr .container{display:flex;align-items:center;height:64px;gap:28px}
+.logo-link{display:flex;align-items:center;gap:9px;font-weight:700;font-size:19px;color:var(--text);letter-spacing:-0.02em}
+.logo-link:hover{text-decoration:none}
+.logo-link svg{width:30px;height:30px}
+.mainnav{display:flex;gap:4px;height:100%}
+.mainnav a{display:flex;align-items:center;padding:0 12px;color:var(--text-2);font-weight:500;font-size:14.5px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.mainnav a:hover{color:var(--text);text-decoration:none}
+.mainnav a[aria-current="page"]{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.icon-btn{position:relative;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;color:var(--text-2);background:none;border:0;cursor:pointer}
+.icon-btn:hover{background:var(--hover);color:var(--text);text-decoration:none}
+.icon-btn svg.i{width:21px;height:21px}
+.badge-n{position:absolute;top:3px;right:2px;min-width:18px;height:18px;border-radius:9px;background:var(--danger);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px;border:2px solid var(--card)}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+.avatar.lg{width:64px;height:64px;font-size:24px}
+.menu{position:relative}
+.menu summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:3px;border-radius:999px}
+.menu summary::-webkit-details-marker{display:none}
+.menu summary:hover{background:var(--hover)}
+.menu-pop{position:absolute;right:0;top:calc(100% + 8px);background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-lg);width:260px;padding:6px;z-index:40}
+.menu-pop .who{padding:10px 12px 12px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.menu-pop .who b{display:block}
+.menu-pop .who span{font-size:13px;color:var(--text-2)}
+.menu-pop a,.menu-pop button{display:flex;width:100%;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);color:var(--text);font-size:14px;background:none;border:0;cursor:pointer;text-align:left}
+.menu-pop a:hover,.menu-pop button:hover{background:var(--hover);text-decoration:none}
+.menu-pop hr{border:0;border-top:1px solid var(--border);margin:6px 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:8px 16px;border-radius:var(--r-sm);border:1px solid transparent;font-weight:600;font-size:14.5px;cursor:pointer;white-space:nowrap;text-decoration:none}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--primary);color:var(--on-primary)}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-outline{background:var(--card);border-color:var(--border-2);color:var(--text)}
+.btn-outline:hover{background:var(--hover)}
+.btn-outline[aria-pressed="true"]{border-color:var(--primary);color:var(--primary);background:var(--primary-50)}
+.btn-text{background:none;color:var(--primary);padding:8px 6px;min-height:auto}
+.btn-text:hover{text-decoration:underline}
+.btn-sm{min-height:32px;padding:5px 12px;font-size:13.5px}
+.btn-block{width:100%}
+.tabbar{display:none}
+@media (max-width:900px){
+  .mainnav,.hdr .desk{display:none}
+  .hdr .container{height:56px}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--border);padding:4px 0 calc(4px + env(safe-area-inset-bottom))}
+  .tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:11.5px;color:var(--text-3);font-weight:500;position:relative}
+  .tabbar a:hover{text-decoration:none}
+  .tabbar a[aria-current="page"]{color:var(--primary);font-weight:600}
+  .tabbar svg.i{width:22px;height:22px}
+  .tabbar .badge-n{top:0;right:calc(50% - 22px)}
+  main{padding-bottom:84px}
+}
+
+/* Generic */
+main{min-height:calc(100vh - 64px);outline:none}
+.page{padding-top:28px;padding-bottom:56px}
+.page-title{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.page-title p{color:var(--text-2);margin-top:4px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.card-h a{font-size:14px;font-weight:600}
+.card-b{padding:16px 20px}
+.muted{color:var(--text-2)}
+.small{font-size:13.5px}
+.tiny{font-size:12.5px;color:var(--text-3)}
+.pill{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--subtle);border:1px solid var(--border);font-size:12.5px;font-weight:500;color:var(--text-2);white-space:nowrap}
+.pill svg.i{width:14px;height:14px;stroke-width:2.2}
+.pill.ok{background:var(--ok-50);border-color:transparent;color:var(--ok)}
+.pill.warn{background:var(--warn-50);border-color:transparent;color:var(--warn)}
+.pill.danger{background:var(--danger-50);border-color:transparent;color:var(--danger)}
+.pill.info{background:var(--primary-50);border-color:transparent;color:var(--primary)}
+.pill.strong{color:var(--text);font-weight:600}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.plogo{width:44px;height:44px;border-radius:var(--r);background:var(--c);color:#fff;display:grid;place-items:center;font-weight:700;font-size:11.5px;letter-spacing:.02em;flex:none}
+.plogo.lg{width:60px;height:60px;font-size:14px}
+.plogo.sm{width:36px;height:36px;font-size:10px;border-radius:var(--r-sm)}
+.due-t{font-size:13px;font-weight:600;color:var(--text-2)}
+.due-t.urgent{color:var(--danger)}
+.due-t.soon{color:var(--warn)}
+.meter{height:6px;background:var(--subtle);border:1px solid var(--border);border-radius:3px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--primary)}
+.meter.done i{background:var(--ok)}
+.empty{padding:40px 24px;text-align:center}
+.empty h3{margin-bottom:6px}
+.empty p{color:var(--text-2);margin:0 auto 16px;max-width:44ch}
+.field{display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:var(--text)}
+.input,.field input,.field select,.field textarea{min-height:40px;padding:8px 12px;border:1px solid var(--border-2);border-radius:var(--r-sm);background:var(--card);font-size:14.5px;font-weight:400;color:var(--text);width:100%}
+.field textarea{min-height:100px;resize:vertical}
+.input:focus,.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-50)}
+.check{display:flex;align-items:center;gap:10px;font-size:14.5px;cursor:pointer;min-height:36px}
+.check input{width:18px;height:18px;accent-color:var(--primary)}
+.notice{display:flex;gap:10px;padding:12px 14px;border-radius:var(--r-sm);background:var(--primary-50);font-size:13.5px;color:var(--text)}
+.notice svg.i{color:var(--primary);margin-top:1px}
+.notice.warn{background:var(--warn-50)}
+.notice.warn svg.i{color:var(--warn)}
+
+/* Landing */
+.band{background:var(--band);color:#fff;padding:52px 0 60px}
+.band h1{font-size:clamp(28px,3.6vw,40px);letter-spacing:-0.02em;max-width:22ch}
+.band p.sub{color:#C9D3EE;margin-top:10px;font-size:16.5px;max-width:56ch}
+.searchbar{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) auto;gap:8px;background:var(--card);padding:8px;border-radius:10px;margin-top:28px;max-width:860px}
+.searchbar .inp{display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:var(--r-sm);color:var(--text-3)}
+.searchbar .inp + .inp{border-left:1px solid var(--border)}
+.searchbar input,.searchbar select{border:0;background:none;height:44px;width:100%;font-size:15px;color:var(--text);outline:none}
+.searchbar .inp:focus-within{box-shadow:0 0 0 2px var(--primary)}
+.searchbar .btn{height:48px;padding:0 24px}
+@media (max-width:700px){.searchbar{grid-template-columns:1fr}.searchbar .inp + .inp{border-left:0;border-top:1px solid var(--border)}}
+.popular{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:#C9D3EE}
+.popular a{color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:4px 12px;font-size:13.5px}
+.popular a:hover{background:rgba(255,255,255,.1);text-decoration:none}
+.band-stats{display:flex;gap:36px;margin-top:34px;flex-wrap:wrap}
+.band-stats b{display:block;font-size:24px}
+.band-stats span{font-size:13.5px;color:#C9D3EE}
+.sec{margin-top:40px}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:14px}
+.sec-h a{font-weight:600;font-size:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media (max-width:980px){.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.grid3{grid-template-columns:minmax(0,1fr)}}
+.callout{display:flex;align-items:center;gap:20px;padding:22px 24px;flex-wrap:wrap}
+.callout .ic{width:48px;height:48px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:grid;place-items:center;flex:none}
+.callout .ic svg.i{width:24px;height:24px}
+.callout div.t{flex:1 1 300px}
+.callout h2{font-size:18px}
+.callout p{color:var(--text-2);margin-top:2px}
+.type-tile{padding:18px;display:flex;flex-direction:column;gap:4px;color:var(--text)}
+.type-tile:hover{border-color:var(--primary);text-decoration:none}
+.type-tile b{font-size:15.5px}
+.type-tile span{font-size:13.5px;color:var(--text-2)}
+.provider-row{display:flex;flex-wrap:wrap;gap:20px 28px;align-items:center;padding:20px 24px}
+.provider-row .p{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500}
+.footer{border-top:1px solid var(--border);background:var(--card);margin-top:56px;padding:28px 0;font-size:13.5px;color:var(--text-2)}
+.footer .container{display:flex;flex-wrap:wrap;gap:16px 32px;justify-content:space-between}
+.footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
+.footer a{color:var(--text-2)}
+
+/* Scholarship card (job-card style) */
+.scard{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;padding:16px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
+.scard:hover{border-color:var(--border-2)}
+.scard.sel{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.scard h3{font-size:16px;line-height:1.3;padding-right:34px}
+.scard h3 a{color:var(--text)}
+.scard h3 a::after{content:"";position:absolute;inset:0;border-radius:var(--r)}
+.scard h3 a:hover{text-decoration:underline}
+.scard h3 a:focus-visible{outline:none}
+.scard:focus-within{outline:2px solid var(--primary);outline-offset:2px}
+.scard .prov{font-size:14px;color:var(--text-2);margin-top:2px}
+.scard .loc{display:flex;align-items:center;gap:5px;font-size:13.5px;color:var(--text-3);margin-top:2px}
+.scard .loc svg.i{width:15px;height:15px}
+.scard .pills{margin-top:10px}
+.scard .foot{display:flex;justify-content:space-between;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap}
+.save-btn{position:absolute;top:10px;right:10px;z-index:2;width:36px;height:36px;border-radius:50%;border:0;background:none;color:var(--text-3);display:grid;place-items:center;cursor:pointer}
+.save-btn:hover{background:var(--hover);color:var(--text)}
+.save-btn[aria-pressed="true"]{color:var(--primary)}
+.save-btn[aria-pressed="true"] svg{fill:currentColor}
+
+/* Explore split view */
+.searchrow{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) auto;gap:8px;margin-bottom:12px}
+.searchrow .inp{position:relative}
+.searchrow .inp svg.i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-3)}
+.searchrow .inp input{padding-left:38px;height:44px}
+.searchrow select{height:44px}
+@media (max-width:700px){.searchrow{grid-template-columns:1fr}}
+.filterrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.fsel{appearance:none;-webkit-appearance:none;height:34px;padding:0 30px 0 14px;border-radius:999px;border:1px solid var(--border-2);background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23737C8C' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 11px center;font-size:13.5px;font-weight:500;cursor:pointer;color:var(--text)}
+.fsel.on{border-color:var(--primary);background-color:var(--primary-50);color:var(--primary)}
+.fbtn{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--border-2);background:var(--card);font-size:13.5px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.fbtn[aria-pressed="true"]{border-color:var(--primary);background:var(--primary-50);color:var(--primary)}
+.fbtn svg.i{width:15px;height:15px}
+.filterrow .right{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text-2)}
+.split{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:16px;align-items:start}
+.list{display:flex;flex-direction:column;gap:10px}
+.dpanel{position:sticky;top:80px;max-height:calc(100vh - 96px);overflow:auto}
+@media (max-width:999px){.split{grid-template-columns:minmax(0,1fr)}.dpanel{display:none}}
+
+/* Detail */
+.d-head{padding:22px 24px;border-bottom:1px solid var(--border)}
+.d-head .row1{display:flex;gap:16px;align-items:flex-start}
+.d-head h1,.d-head h2.title{font-size:22px;line-height:1.25}
+.d-head .prov{color:var(--text-2);margin-top:2px}
+.d-head .loc{display:flex;align-items:center;gap:5px;font-size:14px;color:var(--text-3);margin-top:2px}
+.d-head .pills{margin-top:14px}
+.d-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}
+.d-dates{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--border);margin-top:18px;padding-top:14px;gap:12px}
+.d-dates span{display:block;font-size:12.5px;color:var(--text-3)}
+.d-dates b{font-size:14.5px;font-weight:600}
+.d-dates b.urgent{color:var(--danger)}
+@media (max-width:520px){.d-dates{grid-template-columns:1fr 1fr}}
+.d-sec{padding:20px 24px;border-bottom:1px solid var(--border)}
+.d-sec:last-child{border-bottom:0}
+.d-sec > h2,.d-sec > h3.h{font-size:17px;margin-bottom:12px}
+.d-sec ul.plain{margin:0;padding-left:20px}
+.d-sec ul.plain li{margin:3px 0}
+.kv{display:grid;grid-template-columns:170px minmax(0,1fr);gap:10px 16px;font-size:14.5px;margin-top:14px}
+.kv dt{color:var(--text-3)}
+.kv dd{margin:0}
+@media (max-width:520px){.kv{grid-template-columns:1fr;gap:2px}.kv dd{margin-bottom:10px}}
+.crit{list-style:none;margin:0;padding:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.crit li{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:12px;padding:12px 14px;border-top:1px solid var(--border);align-items:start}
+.crit li:first-child{border-top:0}
+.crit .m{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;margin-top:1px}
+.crit .m svg.i{width:13px;height:13px;stroke-width:3}
+.crit .ok .m{background:var(--ok);color:#fff}
+.crit .bad .m{background:var(--danger);color:#fff}
+.crit .unk .m{background:var(--warn-50);color:var(--warn);border:1px solid var(--warn)}
+.crit .self .m{background:var(--subtle);color:var(--text-3);border:1px solid var(--border-2)}
+.crit b{font-weight:600;font-size:14.5px;display:block}
+.crit span.h{font-size:13.5px;color:var(--text-2)}
+.crit .bad span.h{color:var(--danger)}
+.crit .st{font-size:12.5px;font-weight:600;color:var(--text-3);white-space:nowrap}
+.crit .ok .st{color:var(--ok)}.crit .bad .st{color:var(--danger)}.crit .unk .st{color:var(--warn)}
+.verdict{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r);margin-bottom:12px;font-weight:600}
+.verdict.yes{background:var(--ok-50);color:var(--ok)}
+.verdict.maybe{background:var(--warn-50);color:var(--warn)}
+.verdict.no{background:var(--danger-50);color:var(--danger)}
+.verdict .btn{margin-left:auto}
+.docs{list-style:none;margin:0;padding:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.docs li{border-top:1px solid var(--border)}
+.docs li:first-child{border-top:0}
+.docs label{display:grid;grid-template-columns:20px minmax(0,1fr);gap:12px;padding:12px 14px;cursor:pointer}
+.docs label:hover{background:var(--hover)}
+.docs input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--ok)}
+.docs b{font-weight:600;font-size:14.5px;display:block}
+.docs span{font-size:13.5px;color:var(--text-2)}
+.docs input:checked ~ div b{color:var(--text-3);text-decoration:line-through}
+.docs-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:14px;color:var(--text-2)}
+.docs-top .meter{flex:1;max-width:220px}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;padding-bottom:16px;position:relative}
+.steps li::before{content:counter(s);width:26px;height:26px;border-radius:50%;background:var(--primary-50);color:var(--primary);font-weight:700;font-size:13px;display:grid;place-items:center}
+.steps li:not(:last-child)::after{content:"";position:absolute;left:12px;top:30px;bottom:2px;width:2px;background:var(--border)}
+.steps b{display:block;font-weight:600;font-size:14.5px;margin-top:2px}
+.steps span{font-size:14px;color:var(--text-2)}
+.full-detail{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+.full-detail aside{display:flex;flex-direction:column;gap:16px;position:sticky;top:80px}
+@media (max-width:999px){.full-detail{grid-template-columns:minmax(0,1fr)}.full-detail aside{position:static}}
+.backlink{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:14px;margin-bottom:14px}
+.mini{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--border);color:var(--text)}
+.mini:first-child{border-top:0;padding-top:0}
+.mini:hover{text-decoration:none}
+.mini:hover b{text-decoration:underline}
+.mini b{font-size:14px;font-weight:600;display:block;line-height:1.3}
+.mini span{font-size:13px;color:var(--text-2)}
+
+/* Dashboard */
+.dash{display:grid;grid-template-columns:260px minmax(0,1fr) 300px;gap:20px;align-items:start}
+.dash > aside{display:flex;flex-direction:column;gap:16px}
+.dash .mid{display:flex;flex-direction:column;gap:16px;min-width:0}
+@media (max-width:1180px){.dash{grid-template-columns:240px minmax(0,1fr)}.dash .right{grid-column:1 / -1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){.dash{grid-template-columns:minmax(0,1fr)}.dash .left{order:3}.dash .right{grid-template-columns:minmax(0,1fr);order:4}}
+.profile-card{text-align:center;padding:24px 20px 18px}
+.profile-card .avatar{margin:0 auto 10px}
+.profile-card h2{font-size:17px}
+.profile-card p{font-size:13.5px;color:var(--text-2)}
+.strength{padding:16px 20px;border-top:1px solid var(--border);text-align:left}
+.strength .top{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600;margin-bottom:8px}
+.strength ul{list-style:none;margin:10px 0 0;padding:0;font-size:13.5px}
+.strength li{padding:3px 0}
+.linklist{list-style:none;margin:0;padding:6px}
+.linklist a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);color:var(--text);font-size:14px}
+.linklist a:hover{background:var(--hover);text-decoration:none}
+.linklist a span.c{margin-left:auto;color:var(--text-3);font-size:13px}
+.linklist svg.i{color:var(--text-3)}
+.greet h1{font-size:24px}
+.greet p{color:var(--text-2);margin-top:2px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{padding:16px;display:flex;flex-direction:column;gap:2px;color:var(--text)}
+.stat:hover{border-color:var(--border-2);text-decoration:none}
+.stat .lbl{font-size:13px;color:var(--text-2);font-weight:500}
+.stat .val{font-size:28px;font-weight:700;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:4px}
+.stat .val small{font-size:15px;color:var(--text-3);font-weight:500}
+.stat .ft{font-size:12.5px;color:var(--text-3)}
+.stat .ft.alert{color:var(--danger);font-weight:600}
+.tasks{list-style:none;margin:0;padding:0}
+.tasks li{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 20px;border-top:1px solid var(--border)}
+.tasks li:first-child{border-top:0}
+.tasks .ti{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--subtle);color:var(--text-2)}
+.tasks .ti.urgent{background:var(--danger-50);color:var(--danger)}
+.tasks .ti.warn{background:var(--warn-50);color:var(--warn)}
+.tasks .ti.info{background:var(--primary-50);color:var(--primary)}
+.tasks b{font-weight:600;font-size:14.5px;display:block}
+.tasks span{font-size:13.5px;color:var(--text-2)}
+@media (max-width:560px){.tasks li{grid-template-columns:32px minmax(0,1fr);padding:12px 16px}.tasks li .btn{grid-column:2;justify-self:start}}
+.dl{list-style:none;margin:0;padding:0}
+.dl li{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 20px;border-top:1px solid var(--border)}
+.dl li:first-child{border-top:0}
+.dl li:hover{background:var(--hover)}
+.datechip{width:48px;border:1px solid var(--border);border-radius:var(--r-sm);text-align:center;overflow:hidden;background:var(--card)}
+.datechip span{display:block;font-size:11px;font-weight:600;background:var(--subtle);color:var(--text-2);padding:2px 0;border-bottom:1px solid var(--border)}
+.datechip b{display:block;font-size:18px;padding:3px 0;font-variant-numeric:tabular-nums}
+.datechip.urgent span{background:var(--danger);color:#fff;border-color:var(--danger)}
+.dl a.n{color:var(--text);font-weight:600;font-size:14.5px}
+.dl .sub{font-size:13px;color:var(--text-2);display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.dl .r{text-align:right}
+@media (max-width:560px){.dl li{padding:12px 16px;grid-template-columns:48px minmax(0,1fr)}.dl .r{grid-column:2;text-align:left}}
+.rec{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;padding:16px 20px}
+@media (max-width:700px){.rec{grid-template-columns:minmax(0,1fr)}}
+.plogo.long{font-size:9.5px;letter-spacing:0}.plogo.lg.long{font-size:13px}
+.rec .scard{grid-template-columns:36px minmax(0,1fr);padding:14px;box-shadow:none}
+.rec .scard h3{font-size:14.5px}
+.feed-item{display:flex;gap:12px;padding:12px 20px;border-top:1px solid var(--border)}
+.feed-item:first-child{border-top:0}
+.feed-item b{display:block;font-size:14px;font-weight:600}
+.feed-item p{font-size:13.5px;color:var(--text-2);margin-top:2px}
+
+/* Applications */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
+.tabs button{border:0;background:none;padding:12px 16px;font-weight:600;font-size:14.5px;color:var(--text-2);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--primary);border-bottom-color:var(--primary)}
+.tabs .cnt{display:inline-block;margin-left:6px;min-width:22px;padding:0 6px;border-radius:999px;background:var(--subtle);border:1px solid var(--border);font-size:12px;color:var(--text-2)}
+.app-row{display:grid;grid-template-columns:44px minmax(0,1fr) 220px 170px;gap:16px;align-items:center;padding:16px 20px;border-top:1px solid var(--border)}
+.app-row:first-child{border-top:0}
+.app-row a.n{font-weight:600;color:var(--text)}
+.app-row .sub{font-size:13.5px;color:var(--text-2)}
+.app-row select{height:36px;padding:0 10px;border:1px solid var(--border-2);border-radius:var(--r-sm);background:var(--card);font-size:13.5px;width:100%}
+.app-row .prog{font-size:13px;color:var(--text-2)}
+.app-row .prog .meter{margin-bottom:4px}
+.app-row .renew{grid-column:2 / -1;font-size:13.5px;background:var(--ok-50);color:var(--ok);padding:10px 12px;border-radius:var(--r-sm)}
+@media (max-width:820px){.app-row{grid-template-columns:44px minmax(0,1fr)}.app-row > .prog,.app-row > .ctl{grid-column:2}}
+
+/* Wizard */
+.wiz{max-width:720px;margin:0 auto}
+.wsteps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;list-style:none;padding:0;margin:0 0 18px}
+.wsteps li{font-size:12.5px;font-weight:600;color:var(--text-3);padding-top:8px;border-top:3px solid var(--border)}
+.wsteps li.done,.wsteps li[aria-current="step"]{border-color:var(--primary);color:var(--text)}
+@media (max-width:520px){.wsteps li span{display:none}}
+.wcard{padding:28px}
+@media (max-width:560px){.wcard{padding:20px}}
+.wcard > h2{font-size:20px}
+.wcard > p.lead{color:var(--text-2);margin:4px 0 22px}
+.q{border:0;margin:0 0 22px;padding:0}
+.q legend,.q .ql{font-weight:600;font-size:14.5px;margin-bottom:8px;padding:0;display:block}
+.q .hint{font-size:13px;color:var(--text-3);margin:-4px 0 8px}
+.q input[type=text],.q input[type=number],.q select{max-width:420px}
+.choices{display:flex;flex-wrap:wrap;gap:8px}
+.choices.stack{flex-direction:column;max-width:420px}
+.choice{position:relative}
+.choice input{position:absolute;opacity:0;inset:0;margin:0;width:100%;height:100%;cursor:pointer}
+.choice span{display:flex;align-items:center;min-height:40px;padding:8px 14px;border:1px solid var(--border-2);border-radius:var(--r-sm);font-size:14.5px;background:var(--card)}
+.choice:hover span{background:var(--hover)}
+.choice input:checked + span{border-color:var(--primary);background:var(--primary-50);color:var(--primary);font-weight:600;box-shadow:inset 0 0 0 1px var(--primary)}
+.choice input:focus-visible + span{outline:2px solid var(--primary);outline-offset:2px}
+.err{color:var(--danger);font-size:13.5px;font-weight:600;margin:-8px 0 14px}
+.wnav{display:flex;justify-content:space-between;gap:12px;padding-top:18px;border-top:1px solid var(--border)}
+.res-group{margin-top:24px}
+.res-group h2{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:17px}
+.res-group .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.res-group .list{grid-template-columns:minmax(0,1fr)}}
+.reason{display:flex;gap:6px;font-size:13px;color:var(--text-2);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)}
+.reason svg.i{width:15px;height:15px;margin-top:2px}
+
+/* Alerts / Help / Admin */
+.two{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+@media (max-width:960px){.two{grid-template-columns:minmax(0,1fr)}}
+.note{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;padding:14px 20px;border-top:1px solid var(--border)}
+.note:first-child{border-top:0}
+.note.unread{background:var(--primary-50)}
+.note .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--subtle);color:var(--text-2)}
+.note.deadline .ic{background:var(--danger-50);color:var(--danger)}
+.note.change .ic{background:var(--warn-50);color:var(--warn)}
+.note.new .ic{background:var(--ok-50);color:var(--ok)}
+.note.announce .ic{background:var(--primary-50);color:var(--primary)}
+.note.unread .ic{background:var(--card)}
+.note b{display:block;font-size:14.5px;font-weight:600}
+.note p{font-size:13.5px;color:var(--text-2)}
+.note time{font-size:12.5px;color:var(--text-3);white-space:nowrap}
+.note a.cover::after{content:"";position:absolute;inset:0}
+.note a.cover{color:inherit}
+.prefs fieldset{border:0;margin:0 0 16px;padding:0}
+.prefs legend{font-weight:600;font-size:14.5px;margin-bottom:4px;padding:0}
+.prefs .sub-in{margin:2px 0 8px 28px}
+.faq details{border-top:1px solid var(--border)}
+.faq details:first-child{border-top:0}
+.faq summary{list-style:none;cursor:pointer;padding:14px 20px;font-weight:600;font-size:14.5px;display:flex;justify-content:space-between;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--text-3);border-bottom:2px solid var(--text-3);transform:rotate(45deg);margin-top:4px;flex:none;transition:transform .15s}
+.faq details[open] summary::after{transform:rotate(-135deg);margin-top:8px}
+.faq details > div{padding:0 20px 16px;color:var(--text-2);font-size:14.5px;max-width:70ch}
+.qa{padding:14px 0;border-top:1px solid var(--border);font-size:14.5px}
+.qa:first-child{border-top:0;padding-top:0}
+.qa .reply{margin-top:8px;padding:10px 12px;background:var(--ok-50);border-radius:var(--r-sm);font-size:14px}
+.admin-bar{background:var(--band);color:#fff;font-size:13.5px}
+.admin-bar .container{display:flex;align-items:center;gap:10px;height:40px}
+.admin-bar a{color:#fff;margin-left:auto;font-weight:600}
+.table-wrap{position:relative;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
+th{text-align:left;font-size:12.5px;font-weight:600;color:var(--text-2);padding:10px 16px;border-bottom:1px solid var(--border);background:var(--subtle)}
+td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.tcell{display:flex;gap:10px;align-items:center}
+dialog{border:0;border-radius:10px;padding:0;width:min(500px,calc(100vw - 32px));background:var(--card);color:var(--text);box-shadow:var(--shadow-lg)}
+dialog::backdrop{background:rgba(16,24,40,.5)}
+dialog form{padding:24px;display:flex;flex-direction:column;gap:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);background:#1D2433;color:#fff;padding:11px 16px;border-radius:var(--r);font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:90;display:flex;gap:10px;align-items:center;max-width:calc(100vw - 32px);box-shadow:var(--shadow-lg)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast svg.i{color:#7ee2a8}
+@media (max-width:900px){.toast{bottom:84px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div id="adminbar"></div>
+<header class="hdr"><div class="container" id="hdr"></div></header>
+<main id="main" tabindex="-1"></main>
+<footer class="footer"><div class="container">
+  <p>Iskolar prototype. Sample data for testing only; always confirm details with the official source.</p>
+  <nav aria-label="Footer"><a href="#/explore">Find scholarships</a><a href="#/check">Eligibility check</a><a href="#/help">Help and FAQ</a><a href="#/admin">For scholarship offices</a><a href="#" data-action="reset">Reset demo data</a></nav>
+</div></footer>
+<nav class="tabbar" id="tabbar" aria-label="Main navigation"></nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="dlg" aria-labelledby="dlgTitle"></dialog>
+
+<script>
+/* ---------- Helpers ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAY = 864e5;
+const TODAY = (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })();
+const addDays = n => new Date(TODAY.getTime() + n * DAY);
+const diffDays = d => Math.round((d - TODAY) / DAY);
+const fmt = (d, o = {month:'short', day:'numeric'}) => d.toLocaleDateString('en-US', o);
+const fmtY = d => fmt(d, {month:'short', day:'numeric', year:'numeric'});
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const fromIso = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const ord = n => n + (['th','st','nd','rd'][n] || 'th');
+const lc = s => /^[A-Z][a-z]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+const peso = n => '₱' + n.toLocaleString('en-PH');
+const ago = d => { const n = -diffDays(d); return n <= 0 ? 'Today' : n === 1 ? 'Yesterday' : n < 30 ? `${n}d ago` : fmt(d); };
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const wide = () => matchMedia('(min-width:1000px)').matches;
+
+const ICONS = {
+  home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  check:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="m9 13 2 2 4-4"/>',
+  brief:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/>',
+  bell:'<path d="M6 16v-5a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.4"/><path d="M12 17h.01"/>',
+  shield:'<path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+  yes:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  no:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+  q:'<path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.4"/><path d="M12 17h.01"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5h.01"/>',
+  ext:'<path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/>',
+  back:'<path d="M15 5l-7 7 7 7"/>',
+  warn:'<path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5"/><path d="M12 17.5h.01"/>',
+  cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  mega:'<path d="M3 10v4h4l9 5V5l-9 5z"/><path d="M19.5 9a4 4 0 0 1 0 6"/>',
+  spark:'<path d="M12 3l2 6.5L20.5 12 14 14l-2 7-2-7-6.5-2L10 9.5z"/>',
+  doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/>',
+  pin:'<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  bookmark:'<path d="M6 3h12v18l-6-4.5L6 21z"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  peso:'<path d="M7 21V3h6a5 5 0 0 1 0 10H7"/><path d="M4 7h16M4 10h16"/>',
+  building:'<path d="M3 21h18M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6M9 10h.01M15 10h.01"/>',
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+};
+const icon = (n, cls = 'i') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+const LOGO = `<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#1F4FD1"/><path d="M16 7 5 12.5l11 5.5 11-5.5z" fill="#fff"/><path d="M9.5 15.5v5c0 1.7 2.9 3.5 6.5 3.5s6.5-1.8 6.5-3.5v-5L16 19z" fill="#fff" opacity=".85"/><path d="M25 13v6" stroke="#FFC83D" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+/* ---------- Reference lists ---------- */
+const FIELDS = ['Science & Math','Engineering','IT & Computer Science','Agriculture & Fisheries','Health Sciences','Education','Business & Accountancy','Arts, Humanities & Social Sciences'];
+const STEM = FIELDS.slice(0,4);
+const INCOME = [[150000,'Below ₱150,000'],[250000,'₱150,000 to ₱250,000'],[400000,'₱250,001 to ₱400,000'],[800000,'₱400,001 to ₱800,000'],[99999999,'More than ₱800,000']];
+const incomeLabel = v => (INCOME.find(i => i[0] === v) || [,'—'])[1];
+const REGIONS = ['NCR','CAR','Region I – Ilocos','Region II – Cagayan Valley','Region III – Central Luzon','Region IV-A – CALABARZON','MIMAROPA','Region V – Bicol','Region VI – Western Visayas','Region VII – Central Visayas','Region VIII – Eastern Visayas','Region IX – Zamboanga Peninsula','Region X – Northern Mindanao','Region XI – Davao','Region XII – SOCCSKSARGEN','Caraga','BARMM'];
+
+/* ---------- Eligibility criteria (explainable) ---------- */
+const NOANS = 'You haven’t answered this yet';
+const K = {
+  income: max => ({ q:3, label:`Household income of ${peso(max)} a year or less`,
+    test:p => p.income == null ? null : p.income <= max,
+    have:p => p.income == null ? NOANS : `You said ${incomeLabel(p.income).replace(/^B/,'b').replace(/^M/,'m')}` }),
+  gwa: max => ({ q:2, label:`GWA of ${max.toFixed(2)} or better`,
+    test:p => p.gwa == null ? null : p.gwa <= max,
+    have:p => p.gwa == null ? NOANS : `Your GWA is ${p.gwa.toFixed(2)}` }),
+  year: ys => ({ q:1, label: ys.length === 1 ? `${ord(ys[0])} year student` : `${ys.map(ord).join(' or ')} year student`,
+    test:p => p.year == null ? null : ys.includes(p.year),
+    have:p => p.year == null ? NOANS : `You’re in ${ord(p.year)} year` }),
+  field: fs => ({ q:1, label: fs === STEM ? 'Taking a science, math, engineering, IT or agriculture course' : `Taking a course in ${fs.join(' or ')}`,
+    test:p => p.field == null ? null : fs.includes(p.field),
+    have:p => p.field == null ? NOANS : `Your course area is ${p.field}` }),
+  ofw: () => ({ q:3, label:'Child of an active OWWA-member OFW',
+    test:p => p.ofw == null ? null : p.ofw === 'yes',
+    have:p => p.ofw == null ? NOANS : p.ofw === 'yes' ? 'You said a parent is an OFW' : 'You said neither parent is an OFW' }),
+  fourPs: () => ({ q:3, label:'Household is in 4Ps or the DSWD Listahanan',
+    test:p => p.fourPs == null ? null : p.fourPs === 'yes',
+    have:p => p.fourPs == null ? 'You weren’t sure. Ask your barangay or DSWD office.' : p.fourPs === 'yes' ? 'You said your household is listed' : 'You said your household isn’t listed' }),
+  region: rs => ({ q:4, label:`Lives in ${rs.join(' or ')}`,
+    test:p => p.region == null ? null : rs.includes(p.region),
+    have:p => p.region == null ? NOANS : `You live in ${p.region}` }),
+};
+
+/* ---------- Sample scholarship data (offsets are days from today) ---------- */
+const BASE = [
+  { id:'tdp', name:'Tulong Dunong Program', provider:'Commission on Higher Education (CHED)', type:'Government',
+    amount:'₱15,000 a year', amountNum:15000, opens:-21, closes:4, updated:-2, posted:-21,
+    source:{label:'ched.gov.ph', url:'https://ched.gov.ph'}, verified:true,
+    summary:'Financial help for students in CHED-recognized schools whose families have limited income.',
+    benefits:['₱7,500 per semester, released through your school','Can be used for tuition, books or daily expenses'],
+    duration:'One academic year', renewal:'Re-apply every academic year. Keep passing grades in all subjects.',
+    obligations:'No return service. You may be asked to submit grades each semester.',
+    criteria:[K.income(400000), K.gwa(3.0)],
+    notes:['Enrolled in a CHED-recognized school','Not receiving another government scholarship this year'],
+    docs:[['Certificate of Registration (COR)','Registrar’s office or your student portal'],['Certificate of Grades for last semester','Registrar’s office'],['Proof of income: parents’ ITR or Certificate of Indigency','ITR from BIR or the employer; Certificate of Indigency from your barangay hall'],['PSA birth certificate','PSA outlet or psaserbilis.com.ph (allow 3 to 7 days for delivery)'],['Valid school ID (photocopy, front and back)','Your own ID']],
+    steps:[['Get the application form','Download it from the CHED regional office page or ask your school’s scholarship office.'],['Prepare your documents','Use the checklist above. Get the Certificate of Indigency early, since barangay halls can be busy near deadlines.'],['Submit to your school’s scholarship coordinator','Your school forwards complete applications to the CHED regional office.'],['Watch for the list of qualified students','CHED posts results on its regional Facebook page and your school’s bulletin board.'],['Sign the payroll when funds arrive','Bring your school ID. Funds are usually released within the semester.']] },
+
+  { id:'tes', name:'Tertiary Education Subsidy (TES)', provider:'UniFAST', type:'Government',
+    amount:'₱20,000 a year', amountNum:20000, opens:-30, closes:18, updated:-1, posted:-30, change:{from:11, at:-1},
+    source:{label:'unifast.gov.ph', url:'https://unifast.gov.ph'}, verified:true,
+    summary:'A grant for students from households listed in 4Ps or the DSWD Listahanan, studying in participating schools.',
+    benefits:['₱20,000 a year for public schools, more for private schools','Extra allowance for students with disabilities'],
+    duration:'Until you finish your first bachelor’s degree, within the normal program length', renewal:'Stays active while you’re enrolled and in good standing.',
+    obligations:'No return service. Report changes in enrollment to your school.',
+    criteria:[K.fourPs()],
+    notes:['Taking your first bachelor’s degree','Enrolled in a TES-participating school'],
+    docs:[['Certificate of Registration (COR)','Registrar’s office'],['4Ps ID or DSWD Listahanan certification','Municipal or city DSWD office'],['PSA birth certificate','PSA outlet or psaserbilis.com.ph'],['Valid school ID','Your own ID']],
+    steps:[['Check that your school participates','Your scholarship office has the list of TES schools.'],['Submit your documents to the school','Your school encodes your application in the UniFAST portal.'],['Wait for the billing list','UniFAST releases the list of grantees per semester.'],['Claim your grant','Through your school’s cashier or a bank card.']] },
+
+  { id:'jlss', name:'DOST-SEI Junior Level Science Scholarship', provider:'DOST Science Education Institute', type:'Government',
+    amount:'Full tuition and ₱7,000 a month', amountNum:124000, opens:12, closes:45, updated:-4, posted:-4,
+    source:{label:'sei.dost.gov.ph', url:'https://www.sei.dost.gov.ph'}, verified:true,
+    summary:'For students moving into 3rd year of a priority science or technology course who did well in their first two years.',
+    benefits:['Tuition paid directly to your school','₱7,000 monthly living allowance','Book and clothing allowance each year'],
+    duration:'Until graduation (remaining years of the program)', renewal:'Keep a passing GWA and carry a full load each semester.',
+    obligations:'Serve in the Philippines for as many years as you received the scholarship, right after you graduate.',
+    criteria:[K.field(STEM), K.year([2,3]), K.gwa(2.0)],
+    notes:['Pass the JLSS qualifying exam','Enrolled in a priority course at a recognized school'],
+    docs:[['Transcript of Records or certified grades','Registrar’s office (request 1 to 2 weeks ahead)'],['Certificate of good moral character','Guidance office'],['Two 2x2 ID photos','Any photo studio'],['Exam permit','Printed from the DOST-SEI portal after you register']],
+    steps:[['Register on the DOST-SEI portal','Create an account when applications open.'],['Upload your documents','Scans must be clear and complete.'],['Take the qualifying exam','Bring your printed exam permit and a valid ID.'],['Check the results','Posted on the DOST-SEI website and Facebook page.'],['Sign the scholarship agreement','Includes the return service agreement.']] },
+
+  { id:'odsp', name:'OFW Dependents Scholarship Program', provider:'Overseas Workers Welfare Administration (OWWA)', type:'Government',
+    amount:'₱20,000 a year', amountNum:20000, opens:-14, closes:9, updated:-3, posted:-14,
+    source:{label:'owwa.gov.ph', url:'https://owwa.gov.ph'}, verified:true,
+    summary:'For children of OWWA-member OFWs with modest monthly earnings.',
+    benefits:['₱20,000 a year, released per semester'],
+    duration:'Until you finish your degree', renewal:'Submit grades every semester and stay enrolled.',
+    obligations:'No return service.',
+    criteria:[K.ofw()],
+    notes:['Your OFW parent earns US$600 a month or less','Parent’s OWWA membership is active'],
+    docs:[['Proof of active OWWA membership','OWWA regional office or the OWWA mobile app'],['Parent’s employment contract or OEC','Your OFW parent or the DMW office'],['PSA birth certificate','PSA outlet or psaserbilis.com.ph'],['Certificate of Registration (COR)','Registrar’s office'],['Certificate of Grades','Registrar’s office']],
+    steps:[['Ask your OFW parent for their OWWA details','You’ll need their membership record and contract.'],['Fill out the form at the OWWA regional office','Some offices accept online submission.'],['Submit documents','Bring originals and photocopies.'],['Wait for the list of grantees','OWWA contacts qualified students by text or email.']] },
+
+  { id:'cmsp', name:'CHED Merit Scholarship Program', provider:'Commission on Higher Education (CHED)', type:'Government',
+    amount:'Up to ₱120,000 a year', amountNum:120000, opens:40, closes:75, updated:-6, posted:-6,
+    source:{label:'ched.gov.ph', url:'https://ched.gov.ph'}, verified:true,
+    summary:'A merit scholarship for incoming and current 1st year students with high grades and limited family income.',
+    benefits:['Full merit: up to ₱120,000 a year','Half merit: up to ₱60,000 a year'],
+    duration:'Until graduation', renewal:'Keep the required GWA each semester.',
+    obligations:'No return service.',
+    criteria:[K.year([1]), K.gwa(1.75), K.income(400000)],
+    notes:['Taking a CHED priority course'],
+    docs:[['Senior high school report card (Form 138)','Your senior high school'],['Proof of income','BIR, employer or barangay hall'],['PSA birth certificate','PSA outlet or psaserbilis.com.ph']],
+    steps:[['Apply online when the period opens','CHED regional offices post the link.'],['Submit documents','Upload clear scans.'],['Wait for ranking results','Posted by the CHED regional office.']] },
+
+  { id:'bayani', name:'Bayani Foundation Engineering Grant', provider:'Bayani Foundation (sample private sponsor)', type:'Private',
+    amount:'₱30,000 a year', amountNum:30000, opens:-5, closes:26, updated:-2, posted:-2,
+    source:{label:'Foundation website (sample)', url:'#'}, verified:true,
+    summary:'A private grant for engineering and IT students in Luzon who keep good grades.',
+    benefits:['₱30,000 a year','Summer internship with partner companies'],
+    duration:'One year, renewable', renewal:'Keep a GWA of 2.25 or better.',
+    obligations:'Attend two foundation events a year.',
+    criteria:[K.field(['Engineering','IT & Computer Science']), K.gwa(2.25), K.income(400000), K.region(['NCR','Region III – Central Luzon','Region IV-A – CALABARZON'])],
+    notes:[],
+    docs:[['Certificate of Grades','Registrar’s office'],['Essay: why you chose engineering (500 words)','Write your own'],['Recommendation letter from a professor','Ask at least 2 weeks ahead']],
+    steps:[['Fill out the online form','On the foundation’s website.'],['Upload your essay and documents',''],['Attend a short interview','Online or at the foundation office.']] },
+
+  { id:'lgu', name:'City Educational Assistance', provider:'City Scholarship Office (sample LGU)', type:'Local government',
+    amount:'₱5,000 a semester', amountNum:10000, opens:-7, closes:2, updated:-3, posted:-3,
+    source:{label:'Shared on a community Facebook page', url:'#'}, verified:false,
+    summary:'Cash assistance for college students who are residents of the city.',
+    benefits:['₱5,000 per semester'],
+    duration:'One semester', renewal:'Re-apply every semester.',
+    obligations:'None stated.',
+    criteria:[K.region(['Region III – Central Luzon'])],
+    notes:['Resident of the city for at least 2 years','Registered voter, or a parent is a registered voter'],
+    docs:[['Barangay certificate of residency','Your barangay hall'],['Certificate of Registration (COR)','Registrar’s office'],['Voter’s certification','COMELEC city office']],
+    steps:[['Confirm the details with the City Scholarship Office','This listing hasn’t been verified yet.'],['Submit documents at city hall','']] },
+
+  { id:'health', name:'Provincial Allied Health Grant', provider:'Provincial Government (sample)', type:'Local government',
+    amount:'₱25,000 a year', amountNum:25000, opens:-1, closes:33, updated:-1, posted:-1,
+    source:{label:'Provincial Capitol announcement (sample)', url:'#'}, verified:true,
+    summary:'For nursing and allied health students who will work in the province after graduating.',
+    benefits:['₱25,000 a year','Board exam review support'],
+    duration:'Until graduation', renewal:'Passing grades in all subjects.',
+    obligations:'Work in a provincial hospital or health center for 2 years after passing the board exam.',
+    criteria:[K.field(['Health Sciences']), K.gwa(2.5), K.income(400000)],
+    notes:['Resident of the province'],
+    docs:[['Certificate of Grades','Registrar’s office'],['Barangay certificate of residency','Your barangay hall'],['Proof of income','BIR, employer or barangay hall']],
+    steps:[['Get the form from the Provincial Capitol','Or your school’s scholarship office.'],['Submit documents',''],['Attend orientation','Includes signing the return service agreement.']] },
+
+  { id:'pres', name:'President’s Academic Award', provider:'Your university', type:'School',
+    amount:'50% to 100% tuition discount', amountNum:40000, opens:-40, closes:-10, updated:-10, posted:-40,
+    source:{label:'University scholarship office', url:'#'}, verified:true,
+    summary:'A tuition discount for students with the highest grades in each college.',
+    benefits:['100% tuition discount for a GWA of 1.25 or better','50% discount for a GWA of 1.50 or better'],
+    duration:'One semester', renewal:'Automatic each semester if you keep the GWA.',
+    obligations:'None.',
+    criteria:[K.gwa(1.5), K.year([2,3,4,5])],
+    notes:['No failing or incomplete grades'],
+    docs:[['Certificate of Grades','Registrar’s office']],
+    steps:[['Your college nominates qualified students',''],['Confirm your slot at the scholarship office','']] },
+];
+
+
+
+/* Provider logos and locations (sample) */
+const META = {
+  tdp:{abbr:'CHED', c:'#1D3E8A', loc:'Nationwide'},
+  tes:{abbr:'UF', c:'#6A2C91', loc:'Nationwide'},
+  jlss:{abbr:'DOST', c:'#0B6E8A', loc:'Nationwide'},
+  odsp:{abbr:'OWWA', c:'#B4410C', loc:'Nationwide'},
+  cmsp:{abbr:'CHED', c:'#1D3E8A', loc:'Nationwide'},
+  bayani:{abbr:'BF', c:'#0F766E', loc:'NCR, Central Luzon, CALABARZON'},
+  lgu:{abbr:'LGU', c:'#4D7C0F', loc:'Central Luzon (city residents)'},
+  health:{abbr:'PG', c:'#9F1239', loc:'Province residents'},
+  pres:{abbr:'UNI', c:'#334155', loc:'Your university'},
+};
+const plogo = (s, size = '') => `<span class="plogo ${size} ${META[s.id].abbr.length > 3 ? 'long' : ''}" style="--c:${META[s.id].c}" aria-hidden="true">${META[s.id].abbr}</span>`;
+const shortProv = s => s.provider.replace(/ \(.*\)/, '');
+
+/* ---------- State ---------- */
+const KEY = 'iskolar-proto-v2';
+const defaults = () => ({
+  profile:null, tracker:{}, read:[], edits:{}, changes:[],
+  announcements:[
+    {id:1, title:'TDP forms available at the registrar', body:'Pick up printed Tulong Dunong forms at the Registrar, window 3, weekdays 8 AM to 4 PM.', at:Date.now() - DAY},
+    {id:2, title:'Scholarship orientation on Friday', body:'Join the online orientation on government scholarships this Friday at 3 PM. The link will be posted here.', at:Date.now() - 3 * DAY},
+  ],
+  prefs:{email:true, emailAddr:'', sms:false, phone:'', site:true, lead:7, newMatches:true, changes:true},
+  inquiries:[
+    {id:1, from:'BSEd, 2nd year', q:'Can I apply for TDP if I already get the city allowance?', at:-1, reply:null},
+    {id:2, from:'BS Biology, 3rd year', q:'Is the DOST JLSS exam online this year?', at:-2, reply:null},
+  ],
+});
+let S = load();
+function load(){ try { const raw = localStorage.getItem(KEY); if (raw) return Object.assign(defaults(), JSON.parse(raw)); } catch(e){} return defaults(); }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+
+function all(){
+  return BASE.map(b => {
+    const e = S.edits[b.id] || {};
+    const s = Object.assign({}, b, META[b.id]);
+    s.openDate = e.opens ? fromIso(e.opens) : addDays(b.opens);
+    s.closeDate = e.closes ? fromIso(e.closes) : addDays(b.closes);
+    s.verified = e.verified ?? b.verified;
+    s.updatedDate = e.updated ? fromIso(e.updated) : addDays(b.updated);
+    s.status = TODAY < s.openDate ? 'upcoming' : TODAY > s.closeDate ? 'closed' : 'open';
+    s.daysLeft = diffDays(s.closeDate);
+    s.daysToOpen = diffDays(s.openDate);
+    return s;
+  });
+}
+const get = id => all().find(s => s.id === id);
+function evaluate(s, p = S.profile){
+  if (!p) return {verdict:'none', items:[]};
+  const items = s.criteria.map(c => ({c, ok:c.test(p), have:c.have(p)}));
+  const no = items.filter(i => i.ok === false).length, unk = items.filter(i => i.ok === null).length;
+  return {verdict: no ? 'no' : unk ? 'maybe' : 'yes', items, no, unk, met:items.filter(i => i.ok).length};
+}
+function sortByDeadline(list){
+  const rank = s => s.status === 'open' ? s.daysLeft : s.status === 'upcoming' ? 1000 + s.daysToOpen : 5000 - s.daysLeft;
+  return list.slice().sort((a,b) => rank(a) - rank(b));
+}
+function matchPill(ev){
+  if (ev.verdict === 'yes') return `<span class="pill ok">${icon('yes')}You qualify</span>`;
+  if (ev.verdict === 'maybe') return `<span class="pill warn">${icon('q')}Might qualify</span>`;
+  if (ev.verdict === 'no') return `<span class="pill danger">${icon('no')}Not eligible</span>`;
+  return '';
+}
+function dueText(s){
+  if (s.status === 'open'){
+    const cls = s.daysLeft <= 3 ? 'urgent' : s.daysLeft <= 7 ? 'soon' : '';
+    return `<span class="due-t ${cls}">${s.daysLeft === 0 ? 'Closes today' : `Closes in ${plural(s.daysLeft,'day')}`}</span>`;
+  }
+  if (s.status === 'upcoming') return `<span class="due-t">Opens ${fmt(s.openDate)}</span>`;
+  return `<span class="due-t">Closed ${fmt(s.closeDate)}</span>`;
+}
+const stageOf = id => S.tracker[id] ? S.tracker[id].stage : null;
+function scard(s, opts = {}){
+  const ev = evaluate(s), saved = !!S.tracker[s.id];
+  const href = opts.href || (wide() && opts.split ? `#/explore/${s.id}` : `#/s/${s.id}`);
+  let reason = '';
+  if (opts.reason && ev.verdict === 'no'){ const f = ev.items.find(i => i.ok === false); reason = `<p class="reason">${icon('info')}<span>Requires ${esc(lc(f.c.label))}. ${esc(f.have)}.</span></p>`; }
+  if (opts.reason && ev.verdict === 'maybe'){ const f = ev.items.find(i => i.ok === null); reason = `<p class="reason">${icon('info')}<span>Missing answer: ${esc(lc(f.c.label))}.</span></p>`; }
+  return `<article class="scard ${opts.sel ? 'sel' : ''}">
+    ${plogo(s, opts.small ? 'sm' : '')}
+    <div>
+      <h3><a href="${href}">${esc(s.name)}</a></h3>
+      <p class="prov">${esc(shortProv(s))}</p>
+      ${opts.small ? '' : `<p class="loc">${icon('pin')}${esc(s.loc)}</p>`}
+      <div class="pills"><span class="pill strong">${esc(s.amount)}</span>${opts.small ? '' : `<span class="pill">${esc(s.type)}</span>`}${matchPill(ev)}${s.verified ? '' : `<span class="pill warn">${icon('warn')}Unverified</span>`}</div>
+      <div class="foot">${dueText(s)}${opts.small ? '' : `<span class="tiny">Posted ${ago(addDays(s.posted))}</span>`}</div>
+      ${reason}
+    </div>
+    <button class="save-btn" data-action="togglesave" data-id="${s.id}" aria-pressed="${saved}" aria-label="${saved ? 'Saved: ' : 'Save '}${esc(s.name)}" title="${saved ? 'In your applications' : 'Save'}">${icon('bookmark')}</button>
+  </article>`;
+}
+
+/* ---------- Notifications ---------- */
+function notifications(){
+  const out = [], list = all();
+  S.announcements.forEach(a => out.push({id:'a'+a.id, kind:'announce', icon:'mega', title:a.title, body:a.body, date:new Date(a.at), href:null}));
+  if (S.prefs.changes){
+    list.forEach(s => { if (s.change) out.push({id:'c-'+s.id, kind:'change', icon:'cal', title:`${s.name}: deadline moved`, body:`New deadline is ${fmt(s.closeDate)} (was ${fmt(addDays(s.change.from))}).`, date:addDays(s.change.at), href:'#/s/'+s.id}); });
+    S.changes.forEach(c => { const s = list.find(x => x.id === c.id); if (s) out.push({id:'c2-'+c.id+c.at, kind:'change', icon:'cal', title:`${s.name}: deadline moved`, body:`New deadline is ${fmt(fromIso(c.to))} (was ${fmt(fromIso(c.from))}).`, date:new Date(c.at), href:'#/s/'+s.id}); });
+  }
+  Object.entries(S.tracker).forEach(([id, t]) => {
+    const s = list.find(x => x.id === id);
+    if (!s || s.status !== 'open' || !['saved','preparing'].includes(t.stage) || s.daysLeft > S.prefs.lead) return;
+    const left = s.docs.length - (t.docs || []).length;
+    out.push({id:`d-${id}-${s.daysLeft}`, kind:'deadline', icon:'clock', title:`${s.name} closes ${s.daysLeft === 0 ? 'today' : 'in ' + plural(s.daysLeft,'day')}`, body: left > 0 ? `${plural(left,'document')} still to prepare.` : 'All documents ready. Submit before the deadline.', date:TODAY, href:'#/s/'+id});
+  });
+  if (S.prefs.newMatches){
+    list.forEach(s => { if (diffDays(addDays(s.posted)) >= -5 && s.status !== 'closed'){ const ev = evaluate(s); if (ev.verdict !== 'no') out.push({id:'n-'+s.id, kind:'new', icon:'spark', title:`New scholarship: ${s.name}`, body: ev.verdict === 'yes' ? 'Matches your profile.' : `${s.amount}. Check if you qualify.`, date:addDays(s.posted), href:'#/s/'+s.id}); } });
+  }
+  return out.sort((a,b) => b.date - a.date);
+}
+const unread = () => notifications().filter(n => !S.read.includes(n.id)).length;
+
+/* ---------- Header / nav ---------- */
+const initials = p => (p && p.name ? p.name.trim()[0] : 'S').toUpperCase();
+function renderChrome(view){
+  const u = unread(), p = S.profile;
+  const navv = view === 's' ? 'explore' : view;
+  const cur = v => v === navv ? ' aria-current="page"' : '';
+  const nav = [['home', p ? 'Dashboard' : 'Home'], ['explore','Find scholarships'], ['applications','My applications'], ['check','Eligibility check']];
+  $('#hdr').innerHTML = `
+    <a class="logo-link" href="#/home" aria-label="Iskolar home">${LOGO}Iskolar</a>
+    <nav class="mainnav" aria-label="Main">${nav.map(([v,l]) => `<a href="#/${v}"${cur(v)}>${l}</a>`).join('')}</nav>
+    <div class="hdr-right">
+      <button type="button" class="icon-btn" data-action="theme" aria-label="Switch to ${theme() === 'dark' ? 'light' : 'dark'} mode" title="Switch to ${theme() === 'dark' ? 'light' : 'dark'} mode">${icon(theme() === 'dark' ? 'sun' : 'moon')}</button>
+      <a class="icon-btn desk" href="#/help" aria-label="Help" title="Help">${icon('help')}</a>
+      <a class="icon-btn" href="#/alerts" aria-label="Alerts${u ? `, ${u} unread` : ''}" title="Alerts"${cur('alerts')}>${icon('bell')}${u ? `<span class="badge-n">${u}</span>` : ''}</a>
+      ${p ? `<details class="menu"><summary aria-label="Account menu"><span class="avatar">${esc(initials(p))}</span></summary>
+        <div class="menu-pop"><div class="who"><b>${esc(p.name || 'Student')}</b><span>${esc([p.program || p.field, p.year ? ord(p.year) + ' year' : ''].filter(Boolean).join(', '))}</span></div>
+          <a href="#/check/1">${icon('edit')}Edit eligibility answers</a>
+          <a href="#/alerts">${icon('settings')}Reminder settings</a>
+          <a href="#/help">${icon('help')}Help and FAQ</a><hr>
+          <a href="#/admin">${icon('shield')}Scholarship office view</a>
+          <button type="button" data-action="reset">${icon('back')}Reset demo data</button>
+        </div></details>`
+      : `<a class="btn btn-primary btn-sm desk" href="#/check" style="margin-left:6px">Check eligibility</a>`}
+    </div>`;
+  const tabs = [['home', p ? 'Dashboard' : 'Home', p ? 'grid' : 'home'], ['explore','Search','search'], ['check','Eligibility','check'], ['applications','Applications','brief'], ['help','Help','help']];
+  $('#tabbar').innerHTML = tabs.map(([v,l,i]) => `<a href="#/${v}"${cur(v)}>${icon(i)}<span>${l}</span></a>`).join('');
+  $('#adminbar').innerHTML = view === 'admin' ? `<div class="admin-bar"><div class="container">${icon('shield')}<span>Scholarship office view</span><a href="#/home">Back to student view</a></div></div>` : '';
+}
+
+/* ---------- Landing (signed out) ---------- */
+function viewLanding(){
+  const list = all();
+  const open = list.filter(s => s.status === 'open').length;
+  const types = [['Government','National agencies like CHED, DOST and OWWA'],['Local government','City and provincial programs'],['Private','Foundations and companies'],['School','Awards from your own university']];
+  const provs = [...new Map(list.map(s => [META[s.id].abbr, s])).values()];
+  return `<section class="band"><div class="container">
+      <h1>Find scholarships for college students in the Philippines</h1>
+      <p class="sub">Government, private and school scholarships in one place, with clear requirements and deadline reminders.</p>
+      <form class="searchbar" data-form="landsearch" role="search">
+        <label class="inp">${icon('search')}<span class="sr">Keyword</span><input name="q" placeholder="Scholarship name or provider"></label>
+        <label class="inp">${icon('doc')}<span class="sr">Course area</span><select name="field"><option value="all">Any course</option>${FIELDS.map(f => `<option>${esc(f)}</option>`).join('')}</select></label>
+        <button class="btn btn-primary" type="submit">Find scholarships</button>
+      </form>
+      <p class="popular">Popular searches: ${['TES','DOST','OWWA','CHED'].map(k => `<a href="#/explore" data-action="quick" data-q="${k}">${k}</a>`).join('')}</p>
+      <div class="band-stats"><div><b>${open}</b><span>open now</span></div><div><b>${list.filter(s => s.status === 'upcoming').length}</b><span>opening soon</span></div><div><b>${list.filter(s => s.verified).length} of ${list.length}</b><span>verified with official sources</span></div></div>
+    </div></section>
+    <div class="container">
+      <section class="sec card callout">
+        <span class="ic">${icon('check')}</span>
+        <div class="t"><h2>Not sure what you qualify for?</h2><p>Answer a few questions about your course, grades and family. We’ll show which scholarships fit you and explain why. Takes about 2 minutes.</p></div>
+        <a class="btn btn-primary" href="#/check">Check my eligibility</a>
+      </section>
+      <section class="sec"><div class="sec-h"><h2>Closing soon</h2><a href="#/explore">View all scholarships</a></div>
+        <div class="grid3">${sortByDeadline(list.filter(s => s.status === 'open')).slice(0,6).map(s => scard(s)).join('')}</div></section>
+      <section class="sec"><div class="sec-h"><h2>Browse by provider type</h2></div>
+        <div class="grid4">${types.map(([t,d]) => `<a class="card type-tile" href="#/explore" data-action="quicktype" data-t="${t}"><b>${t}</b><span>${d}</span><span>${list.filter(s => s.type === t && s.status !== 'closed').length} open or upcoming</span></a>`).join('')}</div></section>
+      <section class="sec"><div class="sec-h"><h2>Providers on Iskolar</h2></div>
+        <div class="card provider-row">${provs.map(s => `<span class="p">${plogo(s,'sm')}${esc(shortProv(s))}</span>`).join('')}</div></section>
+    </div>`;
+}
+
+/* ---------- Dashboard (signed in) ---------- */
+function viewDashboard(){
+  const p = S.profile, list = all();
+  const evs = list.map(s => [s, evaluate(s)]);
+  const qualify = evs.filter(([s,e]) => e.verdict === 'yes' && s.status !== 'closed').map(x => x[0]);
+  const maybe = evs.filter(([s,e]) => e.verdict === 'maybe' && s.status !== 'closed').map(x => x[0]);
+  const tracked = list.filter(s => S.tracker[s.id]);
+  const inProg = tracked.filter(s => ['saved','preparing'].includes(S.tracker[s.id].stage));
+  const week = inProg.filter(s => s.status === 'open' && s.daysLeft <= 7);
+  const docTotal = inProg.reduce((a,s) => a + s.docs.length, 0), docDone = inProg.reduce((a,s) => a + (S.tracker[s.id].docs || []).length, 0);
+  const hr = new Date().getHours(), greet = hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
+
+  // To-do list generated from data
+  const tasks = [];
+  inProg.forEach(s => {
+    const t = S.tracker[s.id]; if (s.status === 'closed') return;
+    const missing = s.docs.map((d,i) => [d,i]).filter(([d,i]) => !(t.docs || []).includes(i));
+    const urg = s.status === 'open' && s.daysLeft <= 3 ? 'urgent' : s.status === 'open' && s.daysLeft <= 7 ? 'warn' : 'info';
+    if (t.stage === 'saved') tasks.push({u:s.daysLeft, cls:urg, ic:'brief', t:`Start preparing ${s.name}`, d:`Saved but not started. ${s.status === 'open' ? 'Closes in ' + plural(s.daysLeft,'day') : 'Opens ' + fmt(s.openDate)}.`, a:`<button class="btn btn-outline btn-sm" data-action="prepare" data-id="${s.id}">Start preparing</button>`});
+    else if (missing.length) tasks.push({u:s.daysLeft, cls:urg, ic:'doc', t:`Get your ${lc(missing[0][0][0].split(':')[0])}`, d:`For ${s.name}. ${plural(missing.length,'document')} left, closes in ${plural(s.daysLeft,'day')}.`, a:`<a class="btn btn-outline btn-sm" href="#/s/${s.id}">View checklist</a>`});
+    else tasks.push({u:s.daysLeft, cls:urg, ic:'yes', t:`Submit ${s.name}`, d:'All documents are ready.', a:`<button class="btn btn-primary btn-sm" data-action="submit" data-id="${s.id}">Mark as submitted</button>`});
+  });
+  maybe.forEach(s => { const ev = evaluate(s), f = ev.items.find(i => i.ok === null); tasks.push({u:50, cls:'info', ic:'q', t:`Answer 1 question to check ${s.name}`, d:esc(f.c.label) + '.', a:`<a class="btn btn-outline btn-sm" href="#/check/${f.c.q}">Answer</a>`}); });
+  qualify.filter(s => !s.verified).forEach(s => tasks.push({u:s.daysLeft, cls:'warn', ic:'warn', t:`Confirm ${s.name} with the provider`, d:'This listing isn’t verified yet.', a:`<a class="btn btn-outline btn-sm" href="#/s/${s.id}">View</a>`}));
+  tasks.sort((a,b) => a.u - b.u);
+
+  const upcoming = sortByDeadline(list.filter(s => s.status !== 'closed' && (S.tracker[s.id] && S.tracker[s.id].stage !== 'submitted' || evaluate(s).verdict === 'yes'))).slice(0,6);
+  const recs = sortByDeadline([...qualify, ...maybe].filter(s => !S.tracker[s.id])).slice(0,3);
+  const fields = [['field','Course area',1],['year','Year level',1],['gwa','GWA',2],['income','Household income',3],['fourPs','4Ps or Listahanan',3],['ofw','OFW parent',3],['region','Home region',4]];
+  const missingF = fields.filter(([k]) => p[k] == null || p[k] === '');
+  const pct = Math.round((fields.length - missingF.length) / fields.length * 100);
+  const notes = notifications().filter(n => n.kind !== 'announce').slice(0,4);
+  const stage = id => ({saved:'<span class="pill">Saved</span>', preparing:'<span class="pill info">Preparing</span>', submitted:'<span class="pill ok">Submitted</span>'}[stageOf(id)] || '<span class="pill">Not started</span>');
+
+  return `<div class="container page"><div class="dash">
+    <aside class="left">
+      <section class="card">
+        <div class="profile-card"><span class="avatar lg">${esc(initials(p))}</span><h2>${esc(p.name || 'Student')}</h2><p>${esc(p.program || p.field || '')}</p><p>${p.year ? ord(p.year) + ' year' : ''}${p.region ? ', ' + esc(p.region.split(' – ').pop()) : ''}</p></div>
+        <div class="strength"><div class="top"><span>Profile completeness</span><span>${pct}%</span></div><div class="meter ${pct === 100 ? 'done' : ''}"><i style="width:${pct}%"></i></div>
+          ${missingF.length ? `<ul>${missingF.slice(0,3).map(([k,l,q]) => `<li><a href="#/check/${q}">Add ${lc(l)}</a></li>`).join('')}</ul><p class="tiny" style="margin-top:6px">More answers mean more accurate matches.</p>` : `<p class="tiny" style="margin-top:8px">All set. <a href="#/check/1">Edit answers</a></p>`}
+        </div>
+      </section>
+      <nav class="card" aria-label="Shortcuts"><ul class="linklist">
+        <li><a href="#/applications">${icon('brief')}My applications<span class="c">${tracked.length}</span></a></li>
+        <li><a href="#/check/results">${icon('check')}Eligibility results<span class="c">${qualify.length}</span></a></li>
+        <li><a href="#/alerts">${icon('bell')}Alerts<span class="c">${unread()}</span></a></li>
+        <li><a href="#/alerts">${icon('settings')}Reminder settings</a></li>
+        <li><a href="#/help">${icon('help')}Ask the scholarship office</a></li>
+      </ul></nav>
+    </aside>
+
+    <div class="mid">
+      <div class="greet"><h1>${greet}${p.name ? ', ' + esc(p.name) : ''}</h1><p>${TODAY.toLocaleDateString('en-US',{weekday:'long', month:'long', day:'numeric', year:'numeric'})}</p></div>
+      <div class="stats">
+        <a class="card stat" href="#/check/results"><span class="lbl">You qualify for</span><span class="val">${qualify.length}</span><span class="ft">${maybe.length ? `+${maybe.length} need more info` : 'open or upcoming'}</span></a>
+        <a class="card stat" href="#/applications"><span class="lbl">In progress</span><span class="val">${inProg.length}</span><span class="ft">${tracked.filter(s => S.tracker[s.id].stage === 'submitted').length} submitted</span></a>
+        <a class="card stat" href="#/applications"><span class="lbl">Due in 7 days</span><span class="val">${week.length}</span><span class="ft ${week.length ? 'alert' : ''}">${week.length ? 'Next: ' + fmt(week.sort((a,b) => a.daysLeft - b.daysLeft)[0].closeDate) : 'Nothing urgent'}</span></a>
+        <a class="card stat" href="#/applications"><span class="lbl">Documents ready</span><span class="val">${docDone}<small> / ${docTotal}</small></span><span class="ft">across your applications</span></a>
+      </div>
+
+      <section class="card"><div class="card-h"><h2>To do</h2><span class="tiny">${plural(tasks.length,'item')}</span></div>
+        ${tasks.length ? `<ul class="tasks">${tasks.slice(0,5).map(t => `<li><span class="ti ${t.cls}">${icon(t.ic)}</span><div><b>${esc(t.t)}</b><span>${t.d}</span></div>${t.a}</li>`).join('')}</ul>` : `<div class="empty"><h3>You’re all caught up</h3><p>Save a scholarship to get a checklist and reminders.</p><a class="btn btn-outline" href="#/explore">Find scholarships</a></div>`}
+      </section>
+
+      <section class="card"><div class="card-h"><h2>Upcoming deadlines</h2><a href="#/applications">My applications</a></div>
+        ${upcoming.length ? `<ul class="dl">${upcoming.map(s => { const d = s.status === 'upcoming' ? s.openDate : s.closeDate; const urg = s.status === 'open' && s.daysLeft <= 3; return `<li><span class="datechip ${urg ? 'urgent' : ''}"><span>${fmt(d,{month:'short'})}</span><b>${d.getDate()}</b></span>
+          <div><a class="n" href="#/s/${s.id}">${esc(s.name)}</a><div class="sub"><span>${esc(shortProv(s))}</span>${stage(s.id)}</div></div>
+          <div class="r">${dueText(s)}${S.tracker[s.id] && S.tracker[s.id].stage === 'preparing' ? `<div class="tiny">${(S.tracker[s.id].docs || []).length} of ${s.docs.length} documents</div>` : ''}</div></li>`; }).join('')}</ul>` : `<div class="empty"><p>No upcoming deadlines.</p></div>`}
+      </section>
+
+      ${recs.length ? `<section class="card"><div class="card-h"><h2>Recommended for you</h2><a href="#/explore">See all</a></div><div class="rec">${recs.map(s => scard(s, {small:true})).join('')}</div></section>` : ''}
+    </div>
+
+    <aside class="right">
+      <section class="card"><div class="card-h"><h2>Announcements</h2></div>
+        ${S.announcements.slice(0,3).map(a => `<div class="feed-item"><span class="plogo sm" style="--c:#334155" aria-hidden="true">${icon('mega')}</span><div><b>${esc(a.title)}</b><p>${esc(a.body)}</p><span class="tiny">Scholarship Office, ${ago(new Date(new Date(a.at).setHours(0,0,0,0)))}</span></div></div>`).join('')}
+      </section>
+      <section class="card"><div class="card-h"><h2>Recent alerts</h2><a href="#/alerts">View all</a></div>
+        ${notes.map(n => `<div class="feed-item"><div><b><a href="${n.href || '#/alerts'}" data-read="${n.id}" style="color:inherit">${esc(n.title)}</a></b><p>${esc(n.body)}</p></div></div>`).join('') || '<div class="card-b muted small">No alerts yet.</div>'}
+      </section>
+    </aside>
+  </div></div>`;
+}
+
+/* ---------- Explore (split view) ---------- */
+let F = {q:'', status:'all', type:'all', field:'all', mine:false, sort:'deadline'};
+function filtered(){
+  let list = all();
+  const q = F.q.trim().toLowerCase();
+  if (q) list = list.filter(s => (s.name + ' ' + s.provider + ' ' + s.summary + ' ' + META[s.id].abbr).toLowerCase().includes(q));
+  if (F.status !== 'all') list = list.filter(s => s.status === F.status);
+  if (F.type !== 'all') list = list.filter(s => s.type === F.type);
+  if (F.field !== 'all') list = list.filter(s => { const c = s.criteria.find(c => c.label.startsWith('Taking')); return !c || c.test({field:F.field}) !== false; });
+  if (F.mine && S.profile) list = list.filter(s => evaluate(s).verdict !== 'no');
+  if (F.sort === 'deadline') list = sortByDeadline(list);
+  if (F.sort === 'amount') list.sort((a,b) => b.amountNum - a.amountNum);
+  if (F.sort === 'new') list.sort((a,b) => b.posted - a.posted);
+  return list;
+}
+let selId = null;
+function viewExplore(arg){
+  if (arg) selId = arg;
+  const types = [...new Set(BASE.map(s => s.type))];
+  return `<div class="container page">
+    <div class="searchrow" role="search">
+      <label class="inp"><span class="sr">Search scholarships</span>${icon('search')}<input class="input" id="q" type="search" placeholder="Scholarship name, provider or keyword" value="${esc(F.q)}" autocomplete="off"></label>
+      <label><span class="sr">Course area</span><select class="input" id="ffield"><option value="all">Any course</option>${FIELDS.map(f => `<option ${F.field === f ? 'selected' : ''}>${esc(f)}</option>`).join('')}</select></label>
+      <button class="btn btn-primary" type="button" data-action="noop" style="height:44px">Search</button>
+    </div>
+    <div class="filterrow">
+      <label><span class="sr">Status</span><select class="fsel ${F.status !== 'all' ? 'on' : ''}" id="fstatus"><option value="all">Any status</option><option value="open" ${F.status === 'open' ? 'selected' : ''}>Open now</option><option value="upcoming" ${F.status === 'upcoming' ? 'selected' : ''}>Opening soon</option><option value="closed" ${F.status === 'closed' ? 'selected' : ''}>Closed</option></select></label>
+      <label><span class="sr">Provider type</span><select class="fsel ${F.type !== 'all' ? 'on' : ''}" id="ftype"><option value="all">Any provider</option>${types.map(t => `<option ${F.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+      ${S.profile ? `<button class="fbtn" data-action="fmine" aria-pressed="${F.mine}">${icon('check')}Only ones I qualify for</button>` : `<a class="fbtn" href="#/check">${icon('check')}Check what I qualify for</a>`}
+      <div class="right"><label for="fsort">Sort by</label><select class="fsel" id="fsort"><option value="deadline" ${F.sort === 'deadline' ? 'selected' : ''}>Closing soonest</option><option value="amount" ${F.sort === 'amount' ? 'selected' : ''}>Highest amount</option><option value="new" ${F.sort === 'new' ? 'selected' : ''}>Newest</option></select></div>
+    </div>
+    <div id="results"></div>
+  </div>`;
+}
+function renderResults(){
+  const el = $('#results'); if (!el) return;
+  const list = filtered();
+  if (!list.find(s => s.id === selId)) selId = list[0] ? list[0].id : null;
+  const any = F.q || F.status !== 'all' || F.type !== 'all' || F.field !== 'all' || F.mine;
+  if (!list.length){ el.innerHTML = `<div class="card empty"><h3>No scholarships match your search</h3><p>Try a different keyword, or remove some filters.</p><button class="btn btn-outline" data-action="clearf">Clear all filters</button></div>`; return; }
+  el.innerHTML = `<div class="split">
+    <div><p class="small muted" style="margin-bottom:10px">${plural(list.length,'scholarship')}${any ? ` <button class="btn-text btn" style="padding:0 4px;font-size:13.5px" data-action="clearf">Clear filters</button>` : ''}</p>
+      <div class="list">${list.map(s => scard(s, {split:true, sel: wide() && s.id === selId})).join('')}</div></div>
+    <div class="card dpanel" aria-live="polite">${selId ? detailBody(get(selId), true) : ''}</div>
+  </div>`;
+}
+
+/* ---------- Detail ---------- */
+function detailBody(s, compact){
+  const ev = evaluate(s), t = S.tracker[s.id], done = t ? (t.docs || []) : [];
+  const H = compact ? 'h2' : 'h1';
+  let actions;
+  if (!t) actions = s.status === 'closed' ? `<button class="btn btn-outline" data-action="save" data-id="${s.id}">${icon('bookmark')}Save for next cycle</button>` : `<button class="btn btn-primary" data-action="prepare" data-id="${s.id}">Start preparing</button><button class="btn btn-outline" data-action="save" data-id="${s.id}">${icon('bookmark')}Save</button>`;
+  else if (t.stage === 'saved') actions = `<button class="btn btn-primary" data-action="prepare" data-id="${s.id}">Start preparing</button><button class="btn btn-outline" aria-pressed="true" data-action="untrack" data-id="${s.id}">${icon('bookmark')}Saved</button>`;
+  else if (t.stage === 'preparing') actions = `<button class="btn btn-primary" data-action="submit" data-id="${s.id}">Mark as submitted</button><a class="btn btn-outline" href="#/applications">View in my applications</a>`;
+  else actions = `<span class="pill ok">${icon('yes')}Submitted</span><a class="btn btn-text" href="#/applications">Update result</a>`;
+  if (s.source.url !== '#') actions += `<a class="btn btn-text" href="${s.source.url}" target="_blank" rel="noopener">Official page ${icon('ext')}<span class="sr">(opens in a new tab)</span></a>`;
+  const left = s.status === 'open' ? (s.daysLeft === 0 ? 'Today' : plural(s.daysLeft,'day')) : s.status === 'upcoming' ? `Opens in ${plural(s.daysToOpen,'day')}` : 'Closed';
+
+  let qual;
+  if (ev.verdict === 'none'){
+    qual = `<div class="notice" style="margin-bottom:12px">${icon('info')}<span>Answer a few questions to see which requirements you meet. <a href="#/check">Check my eligibility</a></span></div>
+      <ul class="crit">${s.criteria.map(c => `<li class="self"><span class="m">${icon('doc')}</span><div><b>${esc(c.label)}</b></div><span></span></li>`).join('')}</ul>`;
+  } else {
+    const vt = ev.verdict === 'yes' ? `You meet all ${plural(ev.items.length,'requirement')} we can check` : ev.verdict === 'maybe' ? `You meet ${ev.met} of ${ev.items.length}. ${ev.unk === 1 ? 'One answer is' : ev.unk + ' answers are'} missing.` : `You don’t meet ${ev.no === 1 ? '1 requirement' : ev.no + ' requirements'}`;
+    qual = `<div class="verdict ${ev.verdict}">${icon(ev.verdict === 'yes' ? 'yes' : ev.verdict === 'no' ? 'no' : 'q')}<span>${vt}</span>${ev.unk ? `<a class="btn btn-outline btn-sm" href="#/check/${ev.items.find(i => i.ok === null).c.q}">Answer now</a>` : ''}</div>
+      <ul class="crit">${ev.items.map(i => { const k = i.ok === true ? 'ok' : i.ok === false ? 'bad' : 'unk'; return `<li class="${k}"><span class="m">${icon(k === 'ok' ? 'yes' : k === 'bad' ? 'no' : 'q')}</span><div><b>${esc(i.c.label)}</b><span class="h">${esc(i.have)}</span></div><span class="st">${k === 'ok' ? 'Met' : k === 'bad' ? 'Not met' : 'Unknown'}</span></li>`; }).join('')}</ul>`;
+  }
+  if (s.notes.length) qual += `<p class="small muted" style="margin:14px 0 8px;font-weight:600">Also required (confirm these yourself)</p><ul class="crit">${s.notes.map(n => `<li class="self"><span class="m">${icon('doc')}</span><div><b>${esc(n)}</b></div><span class="st">Self-check</span></li>`).join('')}</ul>`;
+  qual += `<p class="tiny" style="margin-top:12px">This is a preliminary check based on your answers, not an official decision. ${esc(shortProv(s))} makes the final call.</p>`;
+
+  return `<div class="d-head">
+      ${s.verified ? '' : `<div class="notice warn" style="margin-bottom:14px">${icon('warn')}<span><b>Not yet verified.</b> Source: ${esc(s.source.label)}. Confirm with ${esc(shortProv(s))} before spending on documents.</span></div>`}
+      <div class="row1">${plogo(s,'lg')}<div><${H} class="title">${compact ? `<a href="#/s/${s.id}" style="color:inherit">${esc(s.name)}</a>` : esc(s.name)}</${H}><p class="prov">${esc(s.provider)}</p><p class="loc">${icon('pin')}${esc(s.loc)}</p></div></div>
+      <div class="pills"><span class="pill strong">${icon('peso')}${esc(s.amount)}</span><span class="pill">${icon('building')}${esc(s.type)}</span>${matchPill(ev)}${s.verified ? `<span class="pill">${icon('shield')}Verified ${fmt(s.updatedDate)}</span>` : ''}</div>
+      <div class="d-actions">${actions}</div>
+      <div class="d-dates"><div><span>Applications open</span><b>${fmtY(s.openDate)}</b></div><div><span>Deadline</span><b>${fmtY(s.closeDate)}</b></div><div><span>Time left</span><b class="${s.status === 'open' && s.daysLeft <= 3 ? 'urgent' : ''}">${left}</b></div></div>
+    </div>
+    <section class="d-sec"><h${compact ? 3 : 2} class="h">Do you qualify?</h${compact ? 3 : 2}>${qual}</section>
+    <section class="d-sec"><h${compact ? 3 : 2} class="h">About this scholarship</h${compact ? 3 : 2}>
+      <p>${esc(s.summary)}</p>
+      <dl class="kv"><dt>What you get</dt><dd><ul class="plain">${s.benefits.map(b => `<li>${esc(b)}</li>`).join('')}</ul></dd><dt>Duration</dt><dd>${esc(s.duration)}</dd><dt>To keep it</dt><dd>${esc(s.renewal)}</dd><dt>Obligations</dt><dd>${esc(s.obligations)}</dd></dl>
+    </section>
+    <section class="d-sec"><h${compact ? 3 : 2} class="h">Documents to prepare</h${compact ? 3 : 2}>
+      <div class="docs-top"><div class="meter ${done.length === s.docs.length ? 'done' : ''}"><i id="docbar-${s.id}" style="width:${Math.round(done.length / s.docs.length * 100)}%"></i></div><span id="doccount-${s.id}">${done.length} of ${s.docs.length} ready</span></div>
+      <ul class="docs">${s.docs.map(([n,w], i) => `<li><label><input type="checkbox" id="doc-${s.id}-${i}" data-doc="${s.id}" data-i="${i}" ${done.includes(i) ? 'checked' : ''}><div><b>${esc(n)}</b><span>Where to get it: ${esc(w)}</span></div></label></li>`).join('')}</ul>
+      ${t ? '' : '<p class="tiny" style="margin-top:8px">Ticking a document adds this scholarship to My applications.</p>'}
+    </section>
+    <section class="d-sec"><h${compact ? 3 : 2} class="h">How to apply</h${compact ? 3 : 2}>
+      <ol class="steps">${s.steps.map(([a,b]) => `<li><div><b>${esc(a)}</b>${b ? `<span>${esc(b)}</span>` : ''}</div></li>`).join('')}</ol>
+    </section>
+    <section class="d-sec small muted">Source: ${s.source.url !== '#' ? `<a href="${s.source.url}" target="_blank" rel="noopener">${esc(s.source.label)}</a>` : esc(s.source.label)}. Last checked ${fmtY(s.updatedDate)}. Questions? <a href="#/help">Ask the scholarship office</a>.</section>`;
+}
+function viewDetail(id){
+  const s = get(id);
+  if (!s) return `<div class="container page"><div class="card empty"><h3>This scholarship isn’t listed anymore</h3><p>It may have been removed by the scholarship office.</p><a class="btn btn-outline" href="#/explore">Browse scholarships</a></div></div>`;
+  const similar = sortByDeadline(all().filter(x => x.id !== id && x.status !== 'closed' && evaluate(x).verdict !== 'no')).slice(0,4);
+  return `<div class="container page">
+    <a class="backlink" href="#/explore">${icon('back')}Back to search results</a>
+    <div class="full-detail">
+      <article class="card">${detailBody(s, false)}</article>
+      <aside>
+        <section class="card"><div class="card-h"><h2>Reminders</h2></div><div class="card-b small">
+          ${S.tracker[s.id] && s.status === 'open' ? `We’ll remind you ${plural(S.prefs.lead,'day')} before the deadline by ${[S.prefs.email && 'email', S.prefs.sms && 'SMS', S.prefs.site && 'on-site alert'].filter(Boolean).join(', ') || 'on-site alert'}.` : 'Save this scholarship to get deadline reminders.'}
+          <p style="margin-top:8px"><a href="#/alerts">Change reminder settings</a></p></div></section>
+        ${similar.length ? `<section class="card"><div class="card-h"><h2>Similar scholarships</h2></div><div class="card-b">${similar.map(x => `<a class="mini" href="#/s/${x.id}">${plogo(x,'sm')}<div><b>${esc(x.name)}</b><span>${esc(x.amount)}</span><br>${dueText(x)}</div></a>`).join('')}</div></section>` : ''}
+      </aside>
+    </div></div>`;
+}
+
+/* ---------- Eligibility wizard ---------- */
+let W = null;
+const WSTEPS = ['Studies','Grades','Family','Location'];
+const radio = (name, val, label, cur) => `<label class="choice"><input type="radio" name="${name}" value="${esc(val)}" ${String(cur) === String(val) ? 'checked' : ''}><span>${esc(label)}</span></label>`;
+function viewCheck(arg){
+  if (arg === 'results') return viewResults();
+  if (!W || arg) W = {step: Number(arg) || 1, d: Object.assign({}, S.profile || {}), err:''};
+  const d = W.d, st = W.step;
+  let body = '';
+  if (st === 1) body = `<h2>Your studies</h2><p class="lead">Some scholarships are only for certain courses or year levels.</p>
+    <div class="q"><label class="ql" for="w-name">First name <span class="muted" style="font-weight:400">(optional)</span></label><input class="input" type="text" id="w-name" name="name" value="${esc(d.name || '')}" autocomplete="given-name"></div>
+    <div class="q"><label class="ql" for="w-field">Course area</label><select class="input" name="field" id="w-field"><option value="">Select your course area</option>${FIELDS.map(f => `<option ${d.field === f ? 'selected' : ''}>${esc(f)}</option>`).join('')}</select></div>
+    <div class="q"><label class="ql" for="w-prog">Program <span class="muted" style="font-weight:400">(optional)</span></label><input class="input" type="text" id="w-prog" name="program" placeholder="e.g. BS Biology" value="${esc(d.program || '')}"></div>
+    <fieldset class="q"><legend>Year level</legend><div class="choices">${[1,2,3,4,5].map(y => radio('year', y, ord(y) + ' year', d.year)).join('')}</div></fieldset>`;
+  if (st === 2) body = `<h2>Your grades</h2><p class="lead">Many scholarships require a minimum general weighted average (GWA).</p>
+    <div class="q"><label class="ql" for="w-gwa">GWA last semester</label><p class="hint">Most schools use 1.00 as the highest grade. If yours uses percentages, ask the registrar for the equivalent.</p><input class="input" type="number" id="w-gwa" name="gwa" min="1" max="5" step="0.01" inputmode="decimal" placeholder="e.g. 1.85" value="${d.gwa ?? ''}" ${d.gwaUnknown ? 'disabled' : ''} style="max-width:200px"></div>
+    <label class="check" style="margin-bottom:20px"><input type="checkbox" name="gwaUnknown" ${d.gwaUnknown ? 'checked' : ''}> I don’t know my GWA yet</label>`;
+  if (st === 3) body = `<h2>Your family</h2><p class="lead">Government scholarships often depend on household income. Your answers stay on this device.</p>
+    <fieldset class="q"><legend>Combined yearly household income</legend><p class="hint">Add up the yearly income of everyone who supports you. An estimate is fine.</p><div class="choices stack">${INCOME.map(([v,l]) => radio('income', v, l, d.income)).join('')}${radio('income', '', 'I’m not sure', d.income == null && d.answered3 ? '' : 'x')}</div></fieldset>
+    <fieldset class="q"><legend>Is your household in 4Ps or the DSWD Listahanan?</legend><div class="choices">${radio('fourPs','yes','Yes',d.fourPs)}${radio('fourPs','no','No',d.fourPs)}${radio('fourPs','','Not sure',d.fourPs == null && d.answered3 ? '' : 'x')}</div></fieldset>
+    <fieldset class="q"><legend>Is one of your parents an OFW?</legend><div class="choices">${radio('ofw','yes','Yes',d.ofw)}${radio('ofw','no','No',d.ofw)}</div></fieldset>`;
+  if (st === 4) body = `<h2>Where you live</h2><p class="lead">Local government and some private scholarships are only for certain regions.</p>
+    <div class="q"><label class="ql" for="w-region">Home region</label><select class="input" id="w-region" name="region"><option value="">Select your region</option>${REGIONS.map(r => `<option ${d.region === r ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select></div>`;
+  return `<div class="container page"><div class="wiz">
+    <div class="page-title"><div><h1>Eligibility check</h1><p>4 short steps. Skip anything you’re not sure about.</p></div>${S.profile ? '' : `<button class="btn btn-outline btn-sm" data-action="sample">Use a sample student</button>`}</div>
+    <ol class="wsteps">${WSTEPS.map((l,i) => `<li class="${i + 1 < st ? 'done' : ''}" ${i + 1 === st ? 'aria-current="step"' : ''}>Step ${i + 1}<span> of 4: ${l}</span></li>`).join('')}</ol>
+    <form class="card wcard" data-form="wizard" novalidate>${body}
+      ${W.err ? `<p class="err" role="alert">${esc(W.err)}</p>` : ''}
+      <div class="wnav">${st > 1 ? `<button type="button" class="btn btn-outline" data-action="wback">Back</button>` : '<span></span>'}<button type="submit" class="btn btn-primary">${st < 4 ? 'Next' : 'See my results'}</button></div>
+    </form></div></div>`;
+}
+function readWizard(form){
+  const d = W.d, f = new FormData(form), st = W.step;
+  if (st === 1){ d.name = (f.get('name') || '').trim(); d.field = f.get('field') || null; d.program = (f.get('program') || '').trim(); d.year = f.get('year') ? Number(f.get('year')) : null;
+    if (!d.field) return 'Select your course area so we can match course-specific scholarships.';
+    if (!d.year) return 'Select your year level to continue.'; }
+  if (st === 2){ d.gwaUnknown = !!f.get('gwaUnknown'); const g = f.get('gwa');
+    if (d.gwaUnknown) d.gwa = null;
+    else if (g === null || g === '') return 'Enter your GWA, or tick “I don’t know my GWA yet”.';
+    else { const n = Number(g); if (!(n >= 1 && n <= 5)) return 'Enter a GWA between 1.00 and 5.00.'; d.gwa = n; } }
+  if (st === 3){ const inc = f.get('income'); d.income = inc ? Number(inc) : null; d.fourPs = f.get('fourPs') || null; d.ofw = f.get('ofw') || null; d.answered3 = true; }
+  if (st === 4) d.region = f.get('region') || null;
+  return '';
+}
+function viewResults(){
+  if (!S.profile) return viewCheck('1');
+  const list = all().map(s => [s, evaluate(s)]);
+  const g = v => sortByDeadline(list.filter(([s,e]) => e.verdict === v).map(x => x[0]));
+  const yes = g('yes'), maybe = g('maybe'), no = g('no'), p = S.profile;
+  return `<div class="container page">
+    <div class="page-title"><div><h1>Your eligibility results</h1><p>Based on ${esc([p.program || p.field, p.year ? ord(p.year) + ' year' : null, p.gwa ? 'GWA ' + p.gwa.toFixed(2) : null, p.region].filter(Boolean).join(', '))}</p></div><a class="btn btn-outline" href="#/check/1">${icon('edit')}Edit answers</a></div>
+    <div class="notice">${icon('info')}<span>This is a preliminary check, not an official decision. Providers make the final call and may have requirements we can’t check here.</span></div>
+    ${yes.length ? `<section class="res-group"><h2><span class="pill ok">${yes.length}</span>You qualify</h2><div class="list">${yes.map(s => scard(s)).join('')}</div></section>` : ''}
+    ${maybe.length ? `<section class="res-group"><h2><span class="pill warn">${maybe.length}</span>Might qualify, more answers needed</h2><div class="list">${maybe.map(s => scard(s, {reason:true})).join('')}</div></section>` : ''}
+    ${no.length ? `<section class="res-group"><h2><span class="pill danger">${no.length}</span>Not eligible right now</h2><div class="list">${no.map(s => scard(s, {reason:true})).join('')}</div></section>` : ''}
+  </div>`;
+}
+
+/* ---------- My applications ---------- */
+let appTab = null;
+const TABS = [['saved','Saved'],['preparing','Preparing'],['submitted','Submitted'],['results','Results']];
+function inTab(t, k){ return k === 'results' ? t.stage === 'submitted' && t.result !== 'pending' : k === 'submitted' ? t.stage === 'submitted' && t.result === 'pending' : t.stage === k; }
+function viewApplications(){
+  const list = all().filter(s => S.tracker[s.id]);
+  const counts = Object.fromEntries(TABS.map(([k]) => [k, list.filter(s => inTab(S.tracker[s.id], k)).length]));
+  if (!appTab) appTab = (TABS.find(([k]) => counts[k] && k !== 'saved') || TABS.find(([k]) => counts[k]) || TABS[0])[0];
+  const items = list.filter(s => inTab(S.tracker[s.id], appTab)).sort((a,b) => a.closeDate - b.closeDate);
+  const emptyMsg = {saved:['No saved scholarships','Tap the bookmark on any scholarship to save it here.'], preparing:['Nothing in preparation','Choose “Start preparing” on a scholarship to get its document checklist.'], submitted:['No submitted applications','After you send an application, mark it as submitted to track the result.'], results:['No results yet','When you hear back, record the result here.']}[appTab];
+  return `<div class="container page">
+    <div class="page-title"><div><h1>My applications</h1><p>Track what you’ve saved, what you’re preparing, and what you’ve sent.</p></div><a class="btn btn-outline" href="#/explore">${icon('search')}Find more</a></div>
+    <div class="tabs" role="tablist">${TABS.map(([k,l]) => `<button role="tab" data-action="apptab" data-v="${k}" aria-selected="${appTab === k}">${l}<span class="cnt">${counts[k]}</span></button>`).join('')}</div>
+    <div class="card" role="tabpanel">${items.length ? items.map(appRow).join('') : `<div class="empty"><h3>${emptyMsg[0]}</h3><p>${emptyMsg[1]}</p><a class="btn btn-primary" href="#/explore">Find scholarships</a></div>`}</div>
+  </div>`;
+}
+function appRow(s){
+  const t = S.tracker[s.id], done = (t.docs || []).length, pct = Math.round(done / s.docs.length * 100);
+  return `<div class="app-row">
+    ${plogo(s)}
+    <div><a class="n" href="#/s/${s.id}">${esc(s.name)}</a><div class="sub">${esc(shortProv(s))}</div><div>${dueText(s)}</div></div>
+    <div class="prog">${t.stage === 'submitted' ? `<span class="small">Submitted. ${t.result === 'approved' ? 'Approved.' : t.result === 'rejected' ? 'Not approved.' : 'Waiting for results.'}</span>` : `<div class="meter ${pct === 100 ? 'done' : ''}"><i style="width:${pct}%"></i></div>${done} of ${s.docs.length} documents ready`}</div>
+    <div class="ctl"><label class="sr" for="stage-${s.id}">Status of ${esc(s.name)}</label>
+      ${t.stage === 'submitted' ? `<select id="res-${s.id}" data-result="${s.id}"><option value="pending" ${t.result === 'pending' ? 'selected' : ''}>Waiting for results</option><option value="approved" ${t.result === 'approved' ? 'selected' : ''}>Approved</option><option value="rejected" ${t.result === 'rejected' ? 'selected' : ''}>Not approved</option><option value="__back">Move back to Preparing</option></select>`
+      : `<select id="stage-${s.id}" data-stage="${s.id}"><option value="saved" ${t.stage === 'saved' ? 'selected' : ''}>Saved</option><option value="preparing" ${t.stage === 'preparing' ? 'selected' : ''}>Preparing</option><option value="submitted">Submitted</option><option value="__remove">Remove</option></select>`}</div>
+    ${t.result === 'approved' ? `<p class="renew">To keep it: ${esc(s.renewal)} We’ll remind you when renewal opens.</p>` : ''}
+  </div>`;
+}
+
+/* ---------- Alerts ---------- */
+let alertFilter = 'all';
+function noteItem(n){
+  const un = !S.read.includes(n.id);
+  return `<div class="note ${n.kind} ${un ? 'unread' : ''}"><span class="ic">${icon(n.icon)}</span>
+    <div><b>${n.href ? `<a class="cover" href="${n.href}" data-read="${n.id}">${esc(n.title)}</a>` : esc(n.title)}</b><p>${esc(n.body)}</p></div>
+    <time datetime="${iso(n.date)}">${ago(new Date(new Date(n.date).setHours(0,0,0,0)))}</time></div>`;
+}
+function viewAlerts(){
+  const ns = notifications(), shown = alertFilter === 'unread' ? ns.filter(n => !S.read.includes(n.id)) : ns, P = S.prefs;
+  return `<div class="container page">
+    <div class="page-title"><div><h1>Alerts</h1><p>Deadlines, schedule changes, new scholarships and announcements.</p></div></div>
+    <div class="two">
+      <section class="card" aria-label="Alerts list">
+        <div class="card-h"><div style="display:flex;gap:6px">${[['all','All'],['unread',`Unread (${unread()})`]].map(([v,l]) => `<button class="fbtn" data-action="afilter" data-v="${v}" aria-pressed="${alertFilter === v}">${l}</button>`).join('')}</div>${unread() ? `<button class="btn btn-text" data-action="readall">Mark all as read</button>` : ''}</div>
+        ${shown.map(noteItem).join('') || `<div class="empty"><h3>You’re all caught up</h3><p>New alerts will show up here.</p></div>`}
+      </section>
+      <section class="card prefs"><div class="card-h"><h2>Reminder settings</h2></div>
+        <form class="card-b" data-form="prefs">
+          <fieldset><legend>Send alerts by</legend>
+            <label class="check"><input type="checkbox" name="email" ${P.email ? 'checked' : ''}> Email</label>
+            <div class="sub-in"><label class="sr" for="p-email">Email address</label><input class="input" id="p-email" type="email" name="emailAddr" placeholder="you@school.edu.ph" value="${esc(P.emailAddr)}"></div>
+            <label class="check"><input type="checkbox" name="sms" ${P.sms ? 'checked' : ''}> Text message (SMS)</label>
+            <div class="sub-in"><label class="sr" for="p-phone">Mobile number</label><input class="input" id="p-phone" type="tel" name="phone" placeholder="09XX XXX XXXX" value="${esc(P.phone)}"></div>
+            <label class="check"><input type="checkbox" name="site" ${P.site ? 'checked' : ''}> On-site alerts</label>
+          </fieldset>
+          <fieldset><legend><label for="p-lead">Remind me before deadlines</label></legend><select class="input" id="p-lead" name="lead">${[1,3,7,14].map(n => `<option value="${n}" ${P.lead === n ? 'selected' : ''}>${plural(n,'day')} before</option>`).join('')}</select></fieldset>
+          <fieldset><legend>Also notify me about</legend>
+            <label class="check"><input type="checkbox" name="newMatches" ${P.newMatches ? 'checked' : ''}> New scholarships that match me</label>
+            <label class="check"><input type="checkbox" name="changes" ${P.changes ? 'checked' : ''}> Deadline or requirement changes</label>
+          </fieldset>
+          <button class="btn btn-primary btn-block" type="submit">Save settings</button>
+        </form></section>
+    </div></div>`;
+}
+
+/* ---------- Help ---------- */
+const FAQ = [
+  ['Is the eligibility check an official decision?','No. It compares your answers with the requirements on file and shows which ones you meet. The provider always makes the final decision, and some requirements, like exams or interviews, can only be checked by them.'],
+  ['How do I know a listing is accurate?','Each listing shows its official source and when the scholarship office last checked it. Listings marked “Unverified” came from unofficial posts, so confirm them with the provider before preparing documents.'],
+  ['What is GWA and where do I find mine?','GWA (general weighted average) is your grades averaged by units. It’s on your Certificate of Grades or student portal. Most schools use 1.00 as the highest grade.'],
+  ['Where do I get a Certificate of Indigency?','At your barangay hall. Bring a valid ID and proof of residency. It’s usually free and released the same day, but lines get long near deadlines.'],
+  ['Can I receive more than one scholarship?','Sometimes. Many government programs don’t allow two government grants at once, while private and school awards often do. Check “Obligations” on each listing or ask the provider.'],
+  ['How do reminders work?','Save a scholarship or start preparing it, and we’ll remind you before it closes. Choose email, SMS or on-site alerts and how many days ahead in Alerts.'],
+];
+function viewHelp(){
+  const mine = S.inquiries.filter(q => q.from === 'You');
+  return `<div class="container page">
+    <div class="page-title"><div><h1>Help and FAQ</h1><p>Common questions, or ask the scholarship office directly.</p></div></div>
+    <div class="two">
+      <section class="card"><div class="card-h"><h2>Frequently asked questions</h2></div><div class="faq">${FAQ.map(([q,a]) => `<details><summary>${esc(q)}</summary><div>${esc(a)}</div></details>`).join('')}</div></section>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <section class="card"><div class="card-h"><h2>Ask a question</h2></div>
+          <form class="card-b" data-form="ask" style="display:flex;flex-direction:column;gap:12px">
+            <label class="field">Topic<select name="about"><option value="">General question</option>${BASE.map(s => `<option>${esc(s.name)}</option>`).join('')}</select></label>
+            <label class="field">Your question<textarea name="q" required placeholder="e.g. Can I apply if my COR isn’t released yet?"></textarea></label>
+            <button class="btn btn-primary" type="submit">Send question</button>
+            <p class="tiny">The scholarship office usually replies within 2 school days.</p>
+          </form></section>
+        ${mine.length ? `<section class="card"><div class="card-h"><h2>Your questions</h2></div><div class="card-b">${mine.map(q => `<div class="qa"><b>${esc(q.q)}</b>${q.reply ? `<div class="reply"><b>Scholarship office:</b> ${esc(q.reply)}</div>` : `<p class="tiny">Waiting for a reply</p>`}</div>`).join('')}</div></section>` : ''}
+      </div>
+    </div></div>`;
+}
+
+/* ---------- Admin ---------- */
+function viewAdmin(){
+  const list = all(), unv = list.filter(s => !s.verified).length, week = list.filter(s => s.status === 'open' && s.daysLeft <= 7).length, openQ = S.inquiries.filter(q => !q.reply).length;
+  const pill = st => ({open:'<span class="pill ok">Open</span>', upcoming:'<span class="pill info">Upcoming</span>', closed:'<span class="pill">Closed</span>'}[st]);
+  return `<div class="container page">
+    <div class="page-title"><div><h1>Manage listings</h1><p>Keep deadlines current and verify each listing against its official source.</p></div></div>
+    <div class="stats" style="margin-bottom:16px">
+      <div class="card stat"><span class="lbl">Listings</span><span class="val">${list.length}</span><span class="ft">${list.filter(s => s.status === 'open').length} open now</span></div>
+      <div class="card stat"><span class="lbl">Need verification</span><span class="val">${unv}</span><span class="ft ${unv ? 'alert' : ''}">${unv ? 'Students see a warning' : 'All verified'}</span></div>
+      <div class="card stat"><span class="lbl">Closing in 7 days</span><span class="val">${week}</span><span class="ft">Consider an announcement</span></div>
+      <div class="card stat"><span class="lbl">Unanswered questions</span><span class="val">${openQ}</span><span class="ft">Reply within 2 school days</span></div>
+    </div>
+    <section class="card"><div class="card-h"><h2>Scholarship listings</h2></div>
+      <div class="table-wrap"><table aria-label="Scholarship listings"><thead><tr><th scope="col">Scholarship</th><th scope="col">Status</th><th scope="col">Deadline</th><th scope="col">Verification</th><th scope="col">Last checked</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
+      <tbody>${sortByDeadline(list).map(s => `<tr><td><div class="tcell">${plogo(s,'sm')}<div><b>${esc(s.name)}</b><div class="tiny">${esc(shortProv(s))}</div></div></div></td><td>${pill(s.status)}</td><td>${fmtY(s.closeDate)}</td><td>${s.verified ? `<span class="pill ok">${icon('shield')}Verified</span>` : `<span class="pill warn">${icon('warn')}Unverified</span>`}</td><td>${ago(s.updatedDate)}</td>
+        <td style="white-space:nowrap;text-align:right"><button class="btn btn-outline btn-sm" data-action="edit" data-id="${s.id}">Edit</button>${s.verified ? '' : ` <button class="btn btn-primary btn-sm" data-action="verify" data-id="${s.id}">Verify</button>`}</td></tr>`).join('')}</tbody></table></div>
+    </section>
+    <div class="two" style="margin-top:16px">
+      <section class="card"><div class="card-h"><h2>Student questions</h2></div><div class="card-b">${S.inquiries.map(q => `<div class="qa"><p class="tiny">${esc(q.from)}, ${ago(addDays(q.at))}</p><b>${esc(q.q)}</b>
+        ${q.reply ? `<div class="reply">${esc(q.reply)}</div>` : `<form data-form="reply" data-id="${q.id}" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><label class="sr" for="r-${q.id}">Reply</label><input class="input" id="r-${q.id}" name="r" required placeholder="Write a reply" style="flex:1 1 200px;width:auto"><button class="btn btn-outline" type="submit">Send reply</button></form>`}</div>`).join('')}</div></section>
+      <section class="card"><div class="card-h"><h2>Post an announcement</h2></div>
+        <form class="card-b" data-form="announce" style="display:flex;flex-direction:column;gap:12px">
+          <label class="field">Title<input name="title" required placeholder="e.g. TDP forms now at the registrar"></label>
+          <label class="field">Message<textarea name="body" required></textarea></label>
+          <button class="btn btn-primary" type="submit">Post announcement</button>
+          <p class="tiny">Students see it on their dashboard and in Alerts.</p>
+        </form></section>
+    </div></div>`;
+}
+function openEdit(id){
+  const s = get(id), d = $('#dlg');
+  d.innerHTML = `<form data-form="edit" data-id="${id}"><h2 id="dlgTitle">Edit listing</h2><p class="muted small" style="margin-top:-8px">${esc(s.name)}</p>
+    <label class="field">Applications open<input type="date" name="opens" value="${iso(s.openDate)}" required></label>
+    <label class="field">Deadline<input type="date" name="closes" value="${iso(s.closeDate)}" required></label>
+    <label class="check"><input type="checkbox" name="verified" ${s.verified ? 'checked' : ''}> Checked against the official source</label>
+    <p class="tiny">Changing the deadline notifies students who are tracking this scholarship.</p>
+    <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-outline" data-action="closedlg">Cancel</button><button type="submit" class="btn btn-primary">Save changes</button></div></form>`;
+  d.showModal();
+}
+
+/* ---------- Router ---------- */
+const TITLES = {home:'Home', explore:'Find scholarships', check:'Eligibility check', applications:'My applications', alerts:'Alerts', help:'Help', admin:'Manage listings'};
+function route(keep){
+  const h = location.hash.replace(/^#\/?/, '') || 'home';
+  let [view, arg] = h.split('/');
+  if (view === 'tracker') view = 'applications';
+  if (view === 'explore' && arg && !wide()){ location.replace('#/s/' + arg); return; }
+  const focusId = keep && document.activeElement && document.activeElement.id;
+  const y = window.scrollY;
+  const views = {home:() => S.profile ? viewDashboard() : viewLanding(), explore:() => viewExplore(arg), s:() => viewDetail(arg), check:() => viewCheck(keep ? undefined : arg), applications:viewApplications, alerts:viewAlerts, help:viewHelp, admin:viewAdmin};
+  if (!views[view]) view = 'home';
+  $('#main').innerHTML = views[view]();
+  if (view === 'explore') renderResults();
+  renderChrome(view);
+  const s = view === 's' ? get(arg) : null;
+  document.title = (s ? s.name : view === 'home' && S.profile ? 'Dashboard' : TITLES[view]) + ' | Iskolar';
+  if (keep){ window.scrollTo(0, y); const el = focusId && document.getElementById(focusId); if (el) el.focus({preventScroll:true}); }
+  else if (!(view === 'explore' && arg)){ window.scrollTo(0, 0); const h1 = $('#main h1'); if (h1 && route.started){ h1.setAttribute('tabindex','-1'); h1.focus({preventScroll:true}); } }
+  route.started = true;
+}
+const rerender = () => route(true);
+window.addEventListener('hashchange', () => route(false));
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (location.hash.startsWith('#/explore')) renderResults(); }, 200); });
+
+/* ---------- Toast ---------- */
+let toastT;
+function toast(msg){ const t = $('#toast'); t.innerHTML = icon('yes') + '<span>' + esc(msg) + '</span>'; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2800); }
+
+/* ---------- Actions ---------- */
+function track(id, stage){ S.tracker[id] = Object.assign({docs:[], result:'pending'}, S.tracker[id] || {}, {stage}); save(); }
+function refresh(){ if (location.hash.startsWith('#/explore')){ renderResults(); renderChrome('explore'); } else rerender(); }
+const A = {
+  save: el => { track(el.dataset.id, 'saved'); toast('Saved to My applications'); refresh(); },
+  togglesave: el => { const id = el.dataset.id; if (S.tracker[id]){ if (S.tracker[id].stage === 'saved'){ delete S.tracker[id]; save(); toast('Removed from saved'); } else { toast('Already in My applications'); return; } } else { track(id, 'saved'); toast('Saved to My applications'); } refresh(); },
+  prepare: el => { track(el.dataset.id, 'preparing'); toast('Moved to Preparing'); refresh(); },
+  submit: el => { track(el.dataset.id, 'submitted'); toast('Marked as submitted'); refresh(); },
+  untrack: el => { delete S.tracker[el.dataset.id]; save(); toast('Removed from saved'); refresh(); },
+  clearf: () => { F = {q:'', status:'all', type:'all', field:'all', mine:false, sort:F.sort}; rerender(); },
+  fmine: el => { F.mine = !F.mine; el.setAttribute('aria-pressed', F.mine); renderResults(); },
+  quick: el => { F = {q:el.dataset.q, status:'all', type:'all', field:'all', mine:false, sort:'deadline'}; location.hash = '#/explore'; },
+  quicktype: el => { F = {q:'', status:'all', type:el.dataset.t, field:'all', mine:false, sort:'deadline'}; location.hash = '#/explore'; },
+  noop: () => { renderResults(); },
+  theme: () => { const next = theme() === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = next; try { localStorage.setItem(THEME_KEY, next); } catch(e){} renderChrome(currentView()); toast(next === 'dark' ? 'Dark mode on' : 'Light mode on'); const b = document.querySelector('[data-action="theme"]'); if (b) b.focus(); },
+  wback: () => { readWizard($('form[data-form="wizard"]')); W.err = ''; W.step--; rerender(); window.scrollTo(0,0); },
+  sample: () => {
+    S.profile = {name:'Ana', field:'Science & Math', program:'BS Biology', year:2, gwa:1.85, gwaUnknown:false, income:250000, fourPs:null, ofw:'yes', region:'Region III – Central Luzon', answered3:true};
+    S.tracker = {tdp:{stage:'preparing', docs:[0,1], result:'pending'}, odsp:{stage:'saved', docs:[], result:'pending'}};
+    save(); W = null; toast('Sample student loaded'); location.hash = '#/home';
+  },
+  apptab: el => { appTab = el.dataset.v; rerender(); },
+  afilter: el => { alertFilter = el.dataset.v; rerender(); },
+  readall: () => { S.read = [...new Set([...S.read, ...notifications().map(n => n.id)])]; save(); toast('All alerts marked as read'); rerender(); },
+  edit: el => openEdit(el.dataset.id),
+  verify: el => { const id = el.dataset.id; S.edits[id] = Object.assign({}, S.edits[id], {verified:true, updated:iso(TODAY)}); save(); toast('Listing verified'); rerender(); },
+  closedlg: () => $('#dlg').close(),
+  reset: () => { if (confirm('Reset all demo data? Your answers, applications and settings will be cleared.')){ try { localStorage.removeItem(KEY); } catch(e){} S = defaults(); W = null; F = {q:'', status:'all', type:'all', field:'all', mine:false, sort:'deadline'}; toast('Demo data reset'); location.hash = '#/home'; route(false); } },
+};
+document.addEventListener('click', e => {
+  const r = e.target.closest('[data-read]'); if (r && !S.read.includes(r.dataset.read)){ S.read.push(r.dataset.read); save(); }
+  const m = document.querySelector('details.menu[open]'); if (m && !m.contains(e.target)) m.open = false;
+  if (e.target.closest('.menu-pop a')) { const d = e.target.closest('details'); if (d) d.open = false; }
+  const sel = e.target.closest('.split .scard h3 a');
+  if (sel && wide()){ const id = sel.getAttribute('href').split('/').pop(); e.preventDefault(); selId = id; history.replaceState(null, '', '#/explore/' + id); renderResults(); $('.dpanel').scrollTop = 0; return; }
+  const el = e.target.closest('[data-action]'); if (el && A[el.dataset.action]){ e.preventDefault(); A[el.dataset.action](el, e); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ const m = document.querySelector('details.menu[open]'); if (m){ m.open = false; m.querySelector('summary').focus(); } } });
+document.addEventListener('input', e => { if (e.target.id === 'q'){ F.q = e.target.value; renderResults(); } });
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'ftype'){ F.type = t.value; t.classList.toggle('on', t.value !== 'all'); renderResults(); }
+  if (t.id === 'fstatus'){ F.status = t.value; t.classList.toggle('on', t.value !== 'all'); renderResults(); }
+  if (t.id === 'ffield'){ F.field = t.value; renderResults(); }
+  if (t.id === 'fsort'){ F.sort = t.value; renderResults(); }
+  if (t.name === 'gwaUnknown'){ const g = $('#w-gwa'); if (g){ g.disabled = t.checked; if (t.checked) g.value = ''; } }
+  if (t.dataset.doc){
+    const id = t.dataset.doc, i = Number(t.dataset.i), s = get(id); let added = false;
+    if (!S.tracker[id] || S.tracker[id].stage === 'saved'){ added = true; track(id, 'preparing'); }
+    const docs = new Set(S.tracker[id].docs || []); t.checked ? docs.add(i) : docs.delete(i);
+    S.tracker[id].docs = [...docs]; save();
+    if (added){ toast('Added to My applications under Preparing'); const fid = t.id; refresh(); const n = document.getElementById(fid); if (n) n.focus({preventScroll:true}); }
+    else { const n = docs.size; $('#doccount-' + id).textContent = `${n} of ${s.docs.length} ready`; const bar = $('#docbar-' + id); bar.style.width = Math.round(n / s.docs.length * 100) + '%'; bar.parentElement.classList.toggle('done', n === s.docs.length); if (n === s.docs.length) toast('All documents ready. You can submit now.'); renderChrome(location.hash.split('/')[1] || 'home'); }
+  }
+  if (t.dataset.stage){
+    const id = t.dataset.stage;
+    if (t.value === '__remove'){ delete S.tracker[id]; save(); toast('Removed from My applications'); }
+    else { S.tracker[id].stage = t.value; S.tracker[id].result = 'pending'; save(); toast(`Moved to ${t.value[0].toUpperCase() + t.value.slice(1)}`); }
+    rerender();
+  }
+  if (t.dataset.result){
+    const id = t.dataset.result;
+    if (t.value === '__back'){ S.tracker[id].stage = 'preparing'; toast('Moved back to Preparing'); }
+    else { S.tracker[id].result = t.value; toast(t.value === 'pending' ? 'Result cleared' : 'Result saved'); }
+    save(); rerender();
+  }
+});
+document.addEventListener('submit', e => {
+  const f = e.target; e.preventDefault();
+  const kind = f.dataset.form, fd = new FormData(f);
+  if (kind === 'landsearch'){ F = {q:fd.get('q') || '', status:'all', type:'all', field:fd.get('field') || 'all', mine:false, sort:'deadline'}; location.hash = '#/explore'; }
+  if (kind === 'wizard'){
+    const err = readWizard(f); W.err = err;
+    if (err){ rerender(); return; }
+    if (W.step < 4){ W.step++; rerender(); window.scrollTo(0,0); const first = $('form[data-form="wizard"] input, form[data-form="wizard"] select'); if (first) first.focus({preventScroll:true}); return; }
+    S.profile = Object.assign({}, W.d); save(); W = null; toast('Answers saved'); location.hash = '#/check/results';
+  }
+  if (kind === 'prefs'){
+    const P = S.prefs; P.email = !!fd.get('email'); P.emailAddr = fd.get('emailAddr').trim(); P.sms = !!fd.get('sms'); P.phone = fd.get('phone').trim(); P.site = !!fd.get('site'); P.lead = Number(fd.get('lead')); P.newMatches = !!fd.get('newMatches'); P.changes = !!fd.get('changes');
+    if (P.email && P.emailAddr && !/^\S+@\S+\.\S+$/.test(P.emailAddr)){ toast('Enter an email like name@school.edu.ph'); return; }
+    if (P.sms && !P.phone){ toast('Add a mobile number to get SMS alerts'); return; }
+    save(); toast('Settings saved'); rerender();
+  }
+  if (kind === 'ask'){ const q = fd.get('q').trim(); if (!q) return; S.inquiries.push({id:Date.now(), from:'You', q:(fd.get('about') ? fd.get('about') + ': ' : '') + q, at:0, reply:null}); save(); toast('Question sent'); rerender(); }
+  if (kind === 'reply'){ const q = S.inquiries.find(x => x.id == f.dataset.id); q.reply = fd.get('r').trim(); save(); toast('Reply sent'); rerender(); }
+  if (kind === 'announce'){ S.announcements.unshift({id:Date.now(), title:fd.get('title').trim(), body:fd.get('body').trim(), at:Date.now()}); save(); toast('Announcement posted'); rerender(); }
+  if (kind === 'edit'){
+    const id = f.dataset.id, s = get(id), closes = fd.get('closes'), opens = fd.get('opens');
+    if (fromIso(closes) < fromIso(opens)){ toast('The deadline must be after the opening date'); return; }
+    if (closes !== iso(s.closeDate)) S.changes.push({id, from:iso(s.closeDate), to:closes, at:Date.now()});
+    S.edits[id] = Object.assign({}, S.edits[id], {opens, closes, verified:!!fd.get('verified'), updated:iso(TODAY)});
+    save(); $('#dlg').close(); toast('Changes saved'); rerender();
+  }
+});
+
+/* ---------- Theme ---------- */
+const THEME_KEY = 'iskolar-theme';
+function theme(){ return document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+function currentView(){ const v = (location.hash.replace(/^#\/?/, '') || 'home').split('/')[0]; return v === 'tracker' ? 'applications' : v; }
+try { const t = localStorage.getItem(THEME_KEY); document.documentElement.dataset.theme = t === 'dark' ? 'dark' : 'light'; } catch(e){ document.documentElement.dataset.theme = 'light'; }
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => renderChrome(currentView()));
+
+route(false);
+</script>
+</body>
+</html>
+

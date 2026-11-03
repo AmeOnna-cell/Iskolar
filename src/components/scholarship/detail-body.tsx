@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { Notice } from "@/components/ui/notice";
 import type { ScholarshipDetail } from "@/lib/data/scholarships";
-import type { Evaluation } from "@/lib/eligibility";
+import { criteriaItems, type Evaluation } from "@/lib/eligibility";
 import { formatDate, plural, shortProvider, urgency } from "@/lib/format";
 import { providerTypeLabel } from "@/lib/reference";
 import { MatchPill, Pill, ProviderMark } from "./bits";
@@ -115,6 +115,7 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
       <Section title="Do you qualify?" compact={compact} id={sid("qualify")}>
         <CriteriaList
           evaluation={evaluation}
+          requirements={criteriaItems(s.criteria)}
           notes={s.notes.map((n) => n.text)}
           providerName={shortProvider(provider.name)}
           signedIn={viewer.signedIn}

@@ -3,6 +3,10 @@
 import { adminClient } from "./support";
 
 export default async function globalSetup() {
-  const { error } = await adminClient().from("rate_limits").delete().neq("key", "");
+  const admin = adminClient();
+  const { error } = await admin.from("rate_limits").delete().neq("key", "");
   if (error) throw new Error(`Could not reset rate limits: ${error.message}`);
+  // Listings created by staff specs (slug prefix "e2e-"): removed so student-side counts stay exact.
+  const { error: e2 } = await admin.from("scholarships").delete().like("slug", "e2e-%");
+  if (e2) throw new Error(`Could not remove e2e listings: ${e2.message}`);
 }

@@ -1092,6 +1092,8 @@ export type Database = {
       other_active_admin_exists: { Args: { p_user: string }; Returns: boolean };
       request_header: { Args: { p_name: string }; Returns: string };
       request_ip: { Args: Record<PropertyKey, never>; Returns: unknown };
+      revoke_user_sessions: { Args: { p_user: string }; Returns: number };
+      save_scholarship: { Args: { p: Json }; Returns: string };
       scholarship_search_doc: {
         Args: { p_name: string; p_provider_id: string; p_summary: string };
         Returns: unknown;
@@ -1142,6 +1144,7 @@ export type Database = {
           verification: Database["public"]["Enums"]["verification_status"];
         }[];
       };
+      staff_overview: { Args: Record<PropertyKey, never>; Returns: Json };
       to_prefix_tsquery: { Args: { q: string }; Returns: unknown };
       today_ph: { Args: Record<PropertyKey, never>; Returns: string };
       write_audit: {

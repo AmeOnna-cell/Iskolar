@@ -145,6 +145,7 @@ const DETAIL_SELECT = `
   id, slug, name, summary, amount_text, opens_on, closes_on, location_label, source_label, source_url,
   duration, renewal, obligations, verification, last_verified_at, updated_at, published_at, is_sample,
   provider:providers ( name, short_name, abbr, color, type ),
+  criteria:scholarship_criteria ( fields, year_levels, gwa_max, income_max, requires_four_ps, requires_ofw, regions ),
   benefits:scholarship_benefits ( position, text ),
   documents:scholarship_documents ( id, position, name, where_to_get ),
   steps:scholarship_steps ( position, title, detail ),

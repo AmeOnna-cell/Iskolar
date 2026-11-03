@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Icon, type IconName } from "@/components/icons";
 import { Notice } from "@/components/ui/notice";
-import { DISCLAIMER, haveText, requirementLabel, stepFor, verdictSentence, type Evaluation } from "@/lib/eligibility";
+import { DISCLAIMER, haveText, requirementLabel, stepFor, verdictSentence, type EligibilityItem, type Evaluation } from "@/lib/eligibility";
 
 const ROW: Record<string, { disc: string; icon: IconName; word: string; wordTone: string; haveTone: string }> = {
   met: { disc: "bg-ok text-white", icon: "yes", word: "Met", wordTone: "text-ok", haveTone: "text-ink-secondary" },
@@ -21,17 +21,20 @@ function Disc({ cls, icon }: { cls: string; icon: IconName }) {
 /** The explainable eligibility check: verdict banner, one row per requirement, self-checks, disclaimer. */
 export function CriteriaList({
   evaluation,
+  requirements,
   notes,
   providerName,
   signedIn,
 }: {
   evaluation: Evaluation | null;
+  /** The listing's requirements, shown when there's no evaluation to explain them against. */
+  requirements: EligibilityItem[];
   notes: string[];
   providerName: string;
   signedIn: boolean;
 }) {
   const answered = evaluation && evaluation.verdict !== "none";
-  const items = evaluation?.items ?? [];
+  const items = answered ? evaluation.items : requirements;
   const firstUnknown = items.find((i) => i.status === "unknown");
 
   return (

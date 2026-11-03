@@ -112,4 +112,31 @@ export function reasonLine(gap: EligibilityItem | null | undefined): string | nu
   return null;
 }
 
+type Criteria = {
+  fields: CourseField[] | null;
+  year_levels: number[] | null;
+  gwa_max: number | null;
+  income_max: number | null;
+  requires_four_ps: boolean;
+  requires_ofw: boolean;
+  regions: Region[] | null;
+} | null;
+
+/**
+ * The requirements as a list, for people without answers (visitors, staff, students who haven't
+ * done the check): same order and wording as the evaluated list, every status "unknown".
+ */
+export function criteriaItems(c: Criteria): EligibilityItem[] {
+  if (!c) return [];
+  const out: EligibilityItem[] = [];
+  if (c.fields?.length) out.push({ kind: "field", status: "unknown", required: c.fields, have: null });
+  if (c.year_levels?.length) out.push({ kind: "year", status: "unknown", required: c.year_levels, have: null });
+  if (c.gwa_max != null) out.push({ kind: "gwa", status: "unknown", required: Number(c.gwa_max), have: null });
+  if (c.income_max != null) out.push({ kind: "income", status: "unknown", required: c.income_max, have: null });
+  if (c.requires_four_ps) out.push({ kind: "four_ps", status: "unknown", required: true, have: null });
+  if (c.requires_ofw) out.push({ kind: "ofw", status: "unknown", required: true, have: null });
+  if (c.regions?.length) out.push({ kind: "region", status: "unknown", required: c.regions, have: null });
+  return out;
+}
+
 export const DISCLAIMER = "This is a preliminary check based on your answers, not an official decision.";

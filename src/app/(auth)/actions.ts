@@ -16,6 +16,8 @@ import {
 } from "@/lib/validation/auth";
 
 const DEACTIVATED = "This account has been deactivated. Contact the scholarship office if you think this is a mistake.";
+// Per-IP limits are generous because many students share one IP (campus Wi-Fi, carrier NAT);
+// the per-email limits are what stop password guessing.
 const TOO_MANY = "Too many attempts. Wait 15 minutes, then try again.";
 const UNAVAILABLE = "Something went wrong on our side. Try again in a minute.";
 
@@ -37,7 +39,7 @@ export async function signIn(_prev: FormState, fd: FormData): Promise<FormState>
   const { email, password, next } = parsed.data;
 
   const ip = await ipKey();
-  if (!(await rateLimitAll([[`login:ip:${ip}`, 30, 900], [`login:email:${email}`, 10, 900]]))) {
+  if (!(await rateLimitAll([[`login:ip:${ip}`, 100, 900], [`login:email:${email}`, 10, 900]]))) {
     return { status: "error", message: TOO_MANY, values };
   }
 
@@ -54,6 +56,9 @@ export async function signIn(_prev: FormState, fd: FormData): Promise<FormState>
     }
     if (error.code === "user_banned" || /deactivated/i.test(error.message)) {
       return { status: "error", code: "deactivated", message: DEACTIVATED, values };
+    }
+    if (error.code === "over_request_rate_limit" || error.status === 429) {
+      return { status: "error", message: TOO_MANY, values };
     }
     if (error.code === "invalid_credentials") {
       return { status: "error", message: "That email and password don't match an account. Check both and try again.", values };
@@ -82,7 +87,7 @@ export async function signUp(_prev: FormState, fd: FormData): Promise<FormState>
   const { fullName, email, password } = parsed.data;
 
   const ip = await ipKey();
-  if (!(await rateLimitAll([[`signup:ip:${ip}`, 10, 3600], [`signup:email:${email}`, 3, 3600]]))) {
+  if (!(await rateLimitAll([[`signup:ip:${ip}`, 30, 3600], [`signup:email:${email}`, 3, 3600]]))) {
     return { status: "error", message: TOO_MANY, values };
   }
 

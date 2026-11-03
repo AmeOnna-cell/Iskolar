@@ -58,6 +58,12 @@ export async function signIn(page: Page, email: string, password = PASSWORD, pat
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
+  // Wait for the outcome (left /login, or the form shows an error) so a following page.goto()
+  // can't cancel the sign-in before its session cookie is set.
+  await Promise.race([
+    page.waitForURL((u) => !u.pathname.startsWith("/login"), { timeout: 15_000 }),
+    formAlert(page).filter({ hasText: /\S/ }).first().waitFor({ timeout: 15_000 }),
+  ]);
 }
 
 type MailSummary = { ID: string; Subject: string; Created: string };

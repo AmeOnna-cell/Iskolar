@@ -81,6 +81,9 @@ test("onboarding → results → checklist → dashboard → tracker", async ({ 
 test("signed-out visitors can browse but must sign in to track", async ({ page }) => {
   await page.goto("/s/tulong-dunong-program");
   await expect(page.getByRole("heading", { level: 1, name: "Tulong Dunong Program" })).toBeVisible();
+  // Requirements are listed for everyone, even without answers.
+  await expect(page.getByText("GWA of 3.00 or better")).toBeVisible();
+  await expect(page.getByText("Household income of ₱400,000 a year or less")).toBeVisible();
   await expect(page.getByRole("link", { name: "Sign in to save and track" })).toHaveAttribute("href", "/login?next=/s/tulong-dunong-program");
   await expect(page.getByLabel(/Certificate of Registration/)).toBeDisabled();
 });

@@ -13,7 +13,8 @@
     "test:e2e": "playwright test",
     "db:reset": "supabase db reset",
     "format": "prettier --write .",
-    "email:test": "node --conditions=react-server --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/email-test.ts"
+    "email:test": "node --conditions=react-server --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/email-test.ts",
+    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.4.1",

@@ -8,7 +8,7 @@ The manual steps to run Iskolar locally and on Supabase cloud. Secrets go in `.e
 2. `npm install`
 3. `npx supabase start` starts the local stack (Postgres, Auth, Mailpit at <http://127.0.0.1:54324>). `npx supabase status` prints the local URL and keys.
 4. Copy `.env.example` to `.env.local` and fill in:
-   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` from `npx supabase status`.
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` from `npx supabase status` (the legacy names `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` also work).
    - `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `EMAIL_FROM_NAME`, `APP_URL=http://localhost:3000` (see `docs/setup-smtp.md`). The server won't start without them.
 5. `npm run db:reset` applies every migration in `supabase/migrations/` plus `supabase/seed.sql`.
 6. `npm run seed:admin -- you@example.com "Your Name"` creates the first admin and prints a one-time password.
@@ -57,7 +57,7 @@ Follow `docs/setup-smtp.md`: App Password, **Authentication → Emails → SMTP 
 
 ### 5. First admin
 
-With `.env.local` pointing at the cloud project (its URL and service-role key), run:
+With `.env.local` pointing at the cloud project (`NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SECRET_KEY`), run:
 
 ```bash
 npm run seed:admin -- you@example.com "Your Name"

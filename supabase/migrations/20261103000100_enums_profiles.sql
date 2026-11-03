@@ -9,6 +9,7 @@
 --   statement, cached by wrapping helpers in (select ...). The JWT claim (custom access token hook,
 --   migration 9) is for middleware routing only.
 
+-- Same schema as 20261103054534_enable_extensions (already applied on the cloud project): a no-op there.
 create extension if not exists pg_trgm with schema extensions;
 
 create type public.app_role as enum ('student', 'coordinator', 'admin');

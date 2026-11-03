@@ -12,7 +12,7 @@ const [outDir = "docs/screenshots/latest", ...routes] = process.argv.slice(2);
 mkdirSync(outDir, { recursive: true });
 
 async function signedInContext(browser: Browser, role: string, theme: string): Promise<BrowserContext> {
-  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, (process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY)!, {
     auth: { persistSession: false },
   });
   const email = `screens-${role}-${Date.now()}@iskolar.test`;

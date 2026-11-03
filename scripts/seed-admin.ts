@@ -1,6 +1,6 @@
 // Creates the first admin, or promotes an existing account to admin.
 // Usage: npm run seed:admin -- admin@example.com ["Full Name"]
-// Uses SUPABASE_SERVICE_ROLE_KEY and NEXT_PUBLIC_SUPABASE_URL from .env.local (server-only secrets).
+// Uses SUPABASE_SECRET_KEY (or legacy SUPABASE_SERVICE_ROLE_KEY) and NEXT_PUBLIC_SUPABASE_URL from .env.local (server-only secrets).
 import { randomBytes } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
@@ -10,9 +10,9 @@ if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
   process.exit(2);
 }
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const key = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!url || !key) {
-  console.error("Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local first.");
+  console.error("Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY in .env.local first.");
   process.exit(2);
 }
 

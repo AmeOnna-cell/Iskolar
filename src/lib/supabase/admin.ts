@@ -1,7 +1,7 @@
 import "server-only";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
-import { supabaseConfig } from "./config";
+import { supabaseConfig, supabaseSecretKey } from "./config";
 
 let admin: ReturnType<typeof createSupabaseClient<Database>> | null = null;
 
@@ -13,8 +13,8 @@ let admin: ReturnType<typeof createSupabaseClient<Database>> | null = null;
  */
 export function createAdminClient() {
   if (!admin) {
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!key) throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set (server only, see .env.example).");
+    const key = supabaseSecretKey();
+    if (!key) throw new Error("SUPABASE_SECRET_KEY is not set (server only, see .env.example).");
     admin = createSupabaseClient<Database>(supabaseConfig().url, key, {
       auth: { persistSession: false, autoRefreshToken: false },
     });

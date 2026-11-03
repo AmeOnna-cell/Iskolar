@@ -81,6 +81,8 @@ type LayoutInput = {
   status?: { tone: Tone; text: string };
   cta?: { label: string; path: string };
   footnote?: string;
+  /** "alerts" (default): preferences link. "account": security email, no preferences link. */
+  footer?: "alerts" | "account";
 };
 
 function statusColors(tone: Tone) {
@@ -107,7 +109,11 @@ function renderHtml(input: LayoutInput): string {
   const footnote = input.footnote
     ? `<p style="margin:0;font-family:${FONT};font-size:13px;line-height:1.45;color:${C.ink2};">${escapeHtml(input.footnote)}</p>`
     : "";
-  const prefs = escapeHtml(appLink(input.appUrl, PREFERENCES_PATH));
+  const footer =
+    input.footer === "account"
+      ? `<p style="margin:0 0 8px;">You're getting this email because this address was used with an Iskolar account. If that wasn't you, you can ignore it: nothing changes until the link is opened.</p>`
+      : `<p style="margin:0 0 8px;">You're getting this email because email alerts are turned on in your Iskolar account.</p>
+      <p style="margin:0 0 8px;"><a href="${escapeHtml(appLink(input.appUrl, PREFERENCES_PATH))}" style="color:${C.primary};text-decoration:underline;">Manage email preferences</a></p>`;
 
   return `<!doctype html>
 <html lang="en">
@@ -132,8 +138,7 @@ function renderHtml(input: LayoutInput): string {
       ${footnote}
     </td></tr>
     <tr><td style="padding:24px;font-family:${FONT};font-size:13px;line-height:1.45;color:${C.hint};">
-      <p style="margin:0 0 8px;">You're getting this email because email alerts are turned on in your Iskolar account.</p>
-      <p style="margin:0 0 8px;"><a href="${prefs}" style="color:${C.primary};text-decoration:underline;">Manage email preferences</a></p>
+      ${footer}
       <p style="margin:0;">Always confirm scholarship details with the official source before you apply.</p>
     </td></tr>
   </table>
@@ -338,6 +343,69 @@ export function announcementEmail(d: AnnouncementData): RenderedEmail {
       heading: subject,
       lines: [...paragraphs.flatMap((para) => [para, ""]), byline],
       cta,
+    }),
+  };
+}
+
+// ---------- 5. Supabase Auth templates (Confirm signup, Reset password, Change email) ----------
+//
+// Supabase sends these itself (Gmail SMTP, docs/setup-smtp.md); they are generated from the same
+// layout so every Iskolar email looks alike. Output contains Go template placeholders that
+// Supabase fills in: {{ .SiteURL }}, {{ .TokenHash }}, {{ .Email }}, {{ .NewEmail }}.
+// Run `npm run email:auth-templates` to regenerate supabase/templates/*.html.
+
+export type AuthTemplateKind = "confirmation" | "recovery" | "email_change";
+
+const SITE = "{{ .SiteURL }}";
+
+export function supabaseAuthTemplate(kind: AuthTemplateKind): { subject: string; html: string } {
+  if (kind === "confirmation") {
+    return {
+      subject: "Confirm your Iskolar account",
+      html: renderHtml({
+        appUrl: SITE,
+        preheader: "One click to finish creating your account.",
+        heading: "Confirm your email",
+        paragraphs: [
+          "Thanks for signing up for Iskolar. Confirm this email address to finish creating your account.",
+          "Next, you'll answer a few questions about your studies so we can show which scholarships you qualify for.",
+        ],
+        cta: { label: "Confirm my email", path: "/auth/confirm?token_hash={{ .TokenHash }}&type=email" },
+        footnote: "This link works once and expires in 1 hour.",
+        footer: "account",
+      }),
+    };
+  }
+  if (kind === "recovery") {
+    return {
+      subject: "Reset your Iskolar password",
+      html: renderHtml({
+        appUrl: SITE,
+        preheader: "Use this link to set a new password.",
+        heading: "Reset your password",
+        paragraphs: [
+          "Someone asked to reset the password for the Iskolar account with this email address.",
+          "If it was you, open the link below and choose a new password. Saving it signs you out on your other devices.",
+        ],
+        cta: { label: "Set a new password", path: "/auth/confirm?token_hash={{ .TokenHash }}&type=recovery" },
+        footnote: "This link works once and expires in 1 hour. If you didn't ask for this, ignore this email: your password stays the same.",
+        footer: "account",
+      }),
+    };
+  }
+  return {
+    subject: "Confirm your new email for Iskolar",
+    html: renderHtml({
+      appUrl: SITE,
+      preheader: "Confirm the change to your account's email address.",
+      heading: "Confirm your new email",
+      paragraphs: [
+        "You asked to change your Iskolar account's email from {{ .Email }} to {{ .NewEmail }}.",
+        "Confirm the change to start getting reminders and sign-in emails at the new address.",
+      ],
+      cta: { label: "Confirm the new email", path: "/auth/confirm?token_hash={{ .TokenHash }}&type=email_change" },
+      footnote: "This link works once and expires in 1 hour. If you didn't ask for this, ignore this email and your email stays the same.",
+      footer: "account",
     }),
   };
 }

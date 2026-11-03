@@ -1,5 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// Test helpers need the local Supabase URL and service-role key; load them like Next.js does.
+try {
+  process.loadEnvFile(".env.local");
+} catch {
+  /* CI writes the variables into the environment instead */
+}
+
 const PORT = Number(process.env.PORT ?? 3000);
 const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`;
 
@@ -13,6 +20,7 @@ export const VIEWPORTS = {
 
 export default defineConfig({
   testDir: "./e2e",
+  globalSetup: "./e2e/global-setup.ts",
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,

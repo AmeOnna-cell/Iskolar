@@ -14,7 +14,10 @@
     "db:reset": "supabase db reset",
     "format": "prettier --write .",
     "email:test": "node --conditions=react-server --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/email-test.ts",
-    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts"
+    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
+    "email:auth-templates": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-auth-templates.ts",
+    "seed:admin": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/seed-admin.ts",
+    "screens": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/screens.ts"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.4.1",

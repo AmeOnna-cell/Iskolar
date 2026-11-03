@@ -70,7 +70,25 @@ Supabase sends sign-up verification and password-reset emails itself. Point it a
 5. Under **Authentication** → **Sign In / Providers** → **Email**, make sure **Confirm email** is on, so new accounts must verify before their first login.
 6. Under **Authentication** → **Rate Limits**, check the email rate limit. With custom SMTP it defaults to about 30 emails an hour, which you can raise, but keep it well under Gmail's daily limit.
 
-The branded Confirm signup, Reset password and Change email templates are added in Phase 3 (auth). They go in **Authentication** → **Emails** → **Templates**.
+### Branded auth templates
+
+The Confirm signup, Reset password and Change email templates are generated from the same layout as every other Iskolar email (`src/lib/email/templates.ts` → `supabaseAuthTemplate`):
+
+```bash
+npm run email:auth-templates   # writes supabase/templates/{confirmation,recovery,email_change}.html
+```
+
+Local Supabase uses them automatically (`supabase/config.toml`). For the cloud project, open **Authentication** → **Emails** → **Templates** and, for each template, set the subject and paste the HTML:
+
+| Dashboard template | Subject | File |
+|---|---|---|
+| Confirm signup | `Confirm your Iskolar account` | `supabase/templates/confirmation.html` |
+| Reset password | `Reset your Iskolar password` | `supabase/templates/recovery.html` |
+| Change email address | `Confirm your new email for Iskolar` | `supabase/templates/email_change.html` |
+
+The links in these templates go to `{{ .SiteURL }}/auth/confirm?token_hash=…`, so set **Authentication** → **URL Configuration**:
+- **Site URL**: your production URL, e.g. `https://iskolar.vercel.app`.
+- **Redirect URLs**: `http://localhost:3000/**` and `https://iskolar.vercel.app/**`.
 
 **Local development:** the local Supabase stack (`npx supabase start`) doesn't use Gmail for auth emails. It catches them in Mailpit at <http://127.0.0.1:54324>, so you can test sign-up and reset flows without sending real email.
 

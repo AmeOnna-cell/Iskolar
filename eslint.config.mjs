@@ -35,8 +35,12 @@ const eslintConfig = [
         {
           paths: [
             { name: "@/lib/supabase/admin", message: "Service-role client is server-only." },
+            { name: "@/lib/email", message: "The mailer holds Gmail credentials and is server-only." },
           ],
-          patterns: [{ group: ["**/supabase/admin"], message: "Service-role client is server-only." }],
+          patterns: [
+            { group: ["**/supabase/admin"], message: "Service-role client is server-only." },
+            { group: ["**/lib/email", "**/lib/email/index*"], message: "The mailer is server-only." },
+          ],
         },
       ],
     },

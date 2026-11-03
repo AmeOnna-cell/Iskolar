@@ -15,7 +15,7 @@ Gmail won't accept your normal password over SMTP. You need an App Password, and
 2. Turn on 2-Step Verification: go to <https://myaccount.google.com/security> → **2-Step Verification** → **Get started**, and follow the steps.
 3. Open <https://myaccount.google.com/apppasswords>. If you can't find it, search "App passwords" in your Google Account settings.
 4. Type a name such as `Iskolar`, then click **Create**.
-5. Copy the 16-character password that appears (shown as `abcd efgh ijkl mnop`). Google shows it only once. Spaces don't matter; Iskolar removes them.
+5. Copy the 16-character password that appears (shown in four groups, like `xxxx xxxx xxxx xxxx`). Google shows it only once. Spaces don't matter; Iskolar removes them.
 
 Notes:
 - Changing the Google account password revokes all App Passwords, so you'll need to create a new one.

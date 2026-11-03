@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { EmailConfigError, fromHeader, gmailTransportOptions, readEmailEnv } from "./env.ts";
 
 const valid = {
-  GMAIL_USER: "iskolar.alerts@gmail.com",
-  GMAIL_APP_PASSWORD: "abcd efgh ijkl mnop",
+  GMAIL_USER: "not-a-real-account@example.com",
+  GMAIL_APP_PASSWORD: "fake fake fake fake", // not a real password
   EMAIL_FROM_NAME: "Iskolar",
   APP_URL: "https://iskolar.example.com/",
 };
@@ -11,8 +11,8 @@ const valid = {
 describe("readEmailEnv", () => {
   it("normalises a valid configuration", () => {
     expect(readEmailEnv(valid)).toEqual({
-      gmailUser: "iskolar.alerts@gmail.com",
-      gmailAppPassword: "abcdefghijklmnop",
+      gmailUser: "not-a-real-account@example.com",
+      gmailAppPassword: "fakefakefakefake",
       fromName: "Iskolar",
       appUrl: "https://iskolar.example.com",
     });
@@ -28,13 +28,13 @@ describe("readEmailEnv", () => {
   it("catches common mistakes without echoing secrets", () => {
     let message = "";
     try {
-      readEmailEnv({ ...valid, GMAIL_APP_PASSWORD: "my-normal-password", APP_URL: "iskolar.ph" });
+      readEmailEnv({ ...valid, GMAIL_APP_PASSWORD: "not-an-app-password-test-value", APP_URL: "iskolar.ph" });
     } catch (err) {
       message = (err as Error).message;
     }
     expect(message).toMatch(/16-character Google App Password/);
     expect(message).toMatch(/APP_URL must be a full http\(s\) URL/);
-    expect(message).not.toContain("my-normal-password");
+    expect(message).not.toContain("not-an-app-password-test-value");
   });
 });
 
@@ -45,9 +45,9 @@ describe("Gmail transport", () => {
       host: "smtp.gmail.com",
       port: 465,
       secure: true,
-      auth: { user: "iskolar.alerts@gmail.com", pass: "abcdefghijklmnop" },
+      auth: { user: "not-a-real-account@example.com", pass: "fakefakefakefake" },
     });
-    expect(fromHeader(env)).toBe('"Iskolar" <iskolar.alerts@gmail.com>');
-    expect(fromHeader({ ...env, fromName: 'Iskolar "Alerts"\r\n' })).toBe('"Iskolar Alerts" <iskolar.alerts@gmail.com>');
+    expect(fromHeader(env)).toBe('"Iskolar" <not-a-real-account@example.com>');
+    expect(fromHeader({ ...env, fromName: 'Iskolar "Alerts"\r\n' })).toBe('"Iskolar Alerts" <not-a-real-account@example.com>');
   });
 });

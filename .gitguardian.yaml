@@ -1,0 +1,9 @@
+# GitGuardian / ggshield configuration.
+# These paths hold only obviously fake, test-only values (local Supabase stack, mocked SMTP).
+# Real secrets live in .env.local (git-ignored) and in Vercel / Supabase settings, never in git.
+version: 2
+secret:
+  ignored_paths:
+    - "e2e/**"
+    - "**/*.test.ts"
+    - ".github/workflows/ci.yml"

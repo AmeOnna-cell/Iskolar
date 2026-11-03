@@ -3,7 +3,7 @@
 import { expect, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-export const PASSWORD = "Iskolar2026test";
+export const PASSWORD = "NotARealPassword1"; // test-only, local stack
 const MAILPIT = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
 
 export function adminClient() {

@@ -12,8 +12,8 @@ jobs:
     # Placeholder email settings so the server's startup check passes. Unit tests mock the
     # transport, and CI never sends real email.
     env:
-      GMAIL_USER: ci@example.com
-      GMAIL_APP_PASSWORD: aaaabbbbccccdddd
+      GMAIL_USER: not-a-real-account@example.com
+      GMAIL_APP_PASSWORD: fakefakefakefake # not a real password
       EMAIL_FROM_NAME: Iskolar
       APP_URL: http://localhost:3000
     steps:
@@ -35,7 +35,7 @@ jobs:
             "NEXT_PUBLIC_SUPABASE_URL=\(.API_URL)",
             "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=\(.ANON_KEY)",
             "SUPABASE_SECRET_KEY=\(.SERVICE_ROLE_KEY)"' > .env.local
-          echo "CRON_SECRET=ci-cron-secret" >> .env.local
+          echo "CRON_SECRET=not-a-real-cron-secret" >> .env.local
       - name: Database tests (RLS, triggers, RPCs)
         run: npm run test:db
 

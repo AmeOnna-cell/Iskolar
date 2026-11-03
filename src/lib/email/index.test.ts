@@ -5,8 +5,8 @@ const createTransport = vi.fn(() => ({ sendMail }));
 vi.mock("nodemailer", () => ({ default: { createTransport } }));
 
 const ENV = {
-  GMAIL_USER: "iskolar.alerts@gmail.com",
-  GMAIL_APP_PASSWORD: "abcdefghijklmnop",
+  GMAIL_USER: "not-a-real-account@example.com",
+  GMAIL_APP_PASSWORD: "fakefakefakefake", // not a real password
   EMAIL_FROM_NAME: "Iskolar",
   APP_URL: "http://localhost:3000",
 };
@@ -31,7 +31,7 @@ describe("server mailer wiring (transport mocked: nothing is sent)", () => {
     expect(createTransport).toHaveBeenCalledWith(
       expect.objectContaining({ host: "smtp.gmail.com", port: 465, secure: true }),
     );
-    expect(sendMail).toHaveBeenCalledWith(expect.objectContaining({ from: '"Iskolar" <iskolar.alerts@gmail.com>' }));
+    expect(sendMail).toHaveBeenCalledWith(expect.objectContaining({ from: '"Iskolar" <not-a-real-account@example.com>' }));
     expect(emailAppUrl()).toBe("http://localhost:3000");
   });
 

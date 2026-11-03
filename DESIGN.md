@@ -303,7 +303,7 @@ Gently squared and steady: an official form with its corners softened just enoug
 - **Large (12px):** dialogs and the top corners of mobile sheets.
 - **Full:** pills and badges, filter chips, avatars, icon buttons, the unread count, step-number discs.
 - Lists of criteria, documents and table bodies are one bordered container with hairline rules between rows (`overflow: hidden` on the container), never separate floating boxes per row.
-- Provider marks are 44px Medium-radius tiles in the provider's own color with a 2–4 letter abbreviation in white (36px in compact lists, 60px on detail).
+- Provider marks are 44px Medium-radius tiles in the provider's own color with a 2–4 letter abbreviation in white (36px in compact lists, 60px on detail). Abbreviations are 12px bold. Four-letter ones (CHED, DOST, OWWA) are 11px with tight tracking so they fit the tile, the only use of 11px and the type floor.
 
 ## Components
 

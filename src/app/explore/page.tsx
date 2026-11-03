@@ -1,0 +1,104 @@
+import Link from "next/link";
+import { ScholarshipCard } from "@/components/scholarship/card";
+import { DetailBody } from "@/components/scholarship/detail-body";
+import { buttonClass } from "@/components/ui/button";
+import { getSessionUser } from "@/lib/auth/session";
+import { loadDetail } from "@/lib/data/detail";
+import { parseSearchParams, searchHref, searchScholarships } from "@/lib/data/scholarships";
+import { getStudentProfile } from "@/lib/data/student";
+import { plural } from "@/lib/format";
+import { createClient } from "@/lib/supabase/server";
+import { ExploreFilters, SplitLinks } from "./filters";
+
+export const metadata = { title: "Find scholarships" };
+
+type SP = Promise<Record<string, string | string[] | undefined>>;
+
+export default async function ExplorePage({ searchParams }: { searchParams: SP }) {
+  const sp = await searchParams;
+  const params = parseSearchParams(sp);
+  const user = await getSessionUser();
+  const isStudent = user?.role === "student";
+
+  const [{ rows, total }, profile, stages] = await Promise.all([
+    searchScholarships(params, user),
+    isStudent ? getStudentProfile(user.id) : null,
+    isStudent
+      ? createClient().then(async (c) => {
+          const { data } = await c.from("applications").select("scholarship_id, stage");
+          return new Map((data ?? []).map((a) => [a.scholarship_id, a.stage]));
+        })
+      : new Map<string, "saved" | "preparing" | "submitted">(),
+  ]);
+
+  const selectedSlug = typeof sp.s === "string" && rows.some((r) => r.slug === sp.s) ? sp.s : rows[0]?.slug;
+  const panel = selectedSlug ? await loadDetail(selectedSlug, user) : null;
+  const from = total === 0 ? 0 : (params.page - 1) * params.pageSize + 1;
+  const to = Math.min(params.page * params.pageSize, total);
+  const pages = Math.max(1, Math.ceil(total / params.pageSize));
+
+  return (
+    <div className="page-container py-6 sm:py-8">
+      <h1 className="mb-4 text-headline-sm font-bold tracking-tight text-ink sm:text-headline">Find scholarships</h1>
+      <ExploreFilters params={params} canFilterMine={isStudent} hasProfile={Boolean(profile)} />
+
+      {rows.length === 0 ? (
+        <div className="mt-6 rounded-md border border-hairline bg-surface px-6 py-10 text-center shadow-rest">
+          <h2 className="text-title-sm font-semibold text-ink">No scholarships match your search</h2>
+          <p className="mx-auto mt-2 max-w-[44ch] text-ink-secondary">
+            Try a different keyword, or remove some filters. Listings open to every course or region always stay in the results.
+          </p>
+          <Link href="/explore" className={buttonClass("outline", "md", "mt-6")}>
+            Clear all filters
+          </Link>
+        </div>
+      ) : (
+        <div className="mt-5 grid items-start gap-6 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)]">
+          <div>
+            <p className="mb-3 text-sm text-ink-secondary" aria-live="polite" data-testid="result-count">
+              {total > params.pageSize ? `Showing ${from}–${to} of ${plural(total, "scholarship")}` : plural(total, "scholarship")}
+            </p>
+            <SplitLinks>
+              <ul className="flex flex-col gap-3">
+                {rows.map((r) => (
+                  <li key={r.id}>
+                    <ScholarshipCard s={r} stage={stages.get(r.id) ?? null} signedIn={Boolean(user)} selected={r.slug === selectedSlug} reason={params.mine} />
+                  </li>
+                ))}
+              </ul>
+            </SplitLinks>
+            {pages > 1 ? (
+              <nav aria-label="Pages" className="mt-6 flex items-center justify-between gap-3">
+                {params.page > 1 ? (
+                  <Link href={searchHref({ ...params, page: params.page - 1 })} className={buttonClass("outline", "md")} scroll={false}>
+                    Previous
+                  </Link>
+                ) : (
+                  <span />
+                )}
+                <span className="text-sm text-ink-secondary">
+                  Page {params.page} of {pages}
+                </span>
+                {params.page < pages ? (
+                  <Link href={searchHref({ ...params, page: params.page + 1 })} className={buttonClass("outline", "md")} scroll={false}>
+                    Next
+                  </Link>
+                ) : (
+                  <span />
+                )}
+              </nav>
+            ) : null}
+          </div>
+          {panel ? (
+            <aside
+              aria-label="Selected scholarship"
+              className="sticky top-20 hidden max-h-[calc(100dvh-6rem)] overflow-auto rounded-md border border-hairline bg-surface shadow-rest lg:block"
+            >
+              <DetailBody {...panel} compact />
+            </aside>
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
+}

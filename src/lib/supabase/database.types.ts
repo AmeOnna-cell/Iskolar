@@ -991,6 +991,14 @@ export type Database = {
         Returns: boolean;
       };
       custom_access_token_hook: { Args: { event: Json }; Returns: Json };
+      eligibility_counts: {
+        Args: { p_student: string };
+        Returns: {
+          maybe: number;
+          no: number;
+          yes: number;
+        }[];
+      };
       eligibility_for_scholarships: {
         Args: { p_student: string };
         Returns: {
@@ -1040,6 +1048,7 @@ export type Database = {
       is_student: { Args: Record<PropertyKey, never>; Returns: boolean };
       jsonb_changed_keys: { Args: { a: Json; b: Json }; Returns: string[] };
       jsonb_pick: { Args: { j: Json; keys: string[] }; Returns: Json };
+      listing_stats: { Args: Record<PropertyKey, never>; Returns: Json };
       log_audit: {
         Args: {
           p_action: string;

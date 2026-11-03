@@ -20,6 +20,23 @@ async function signedInContext(browser: Browser, role: string, theme: string): P
   const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { full_name: "Ana Reyes" } });
   if (error) throw error;
   if (role !== "student") await admin.from("profiles").update({ role }).eq("id", data.user.id);
+  if (role === "student") {
+    // The prototype's sample student, so student screens are reviewed with realistic data.
+    const uid = data.user.id;
+    await admin.from("student_profiles").upsert({
+      user_id: uid, field: "science_math", program: "BS Biology", year_level: 2, gwa: 1.85,
+      income_bracket: "150k_250k", ofw: true, region: "central_luzon", answered_family: true,
+    });
+    const { data: picks } = await admin.from("scholarships").select("id, slug").in("slug", ["tulong-dunong-program", "owwa-ofw-dependents-scholarship"]);
+    for (const s of picks ?? []) {
+      const stage = s.slug === "tulong-dunong-program" ? "preparing" : "saved";
+      const { data: app } = await admin.from("applications").insert({ student_id: uid, scholarship_id: s.id, stage }).select("id").single();
+      if (app && stage === "preparing") {
+        const { data: docs } = await admin.from("scholarship_documents").select("id").eq("scholarship_id", s.id).order("position").limit(2);
+        await admin.from("application_documents").insert((docs ?? []).map((d) => ({ application_id: app.id, document_id: d.id })));
+      }
+    }
+  }
   const ctx = await browser.newContext({ colorScheme: theme as "light" | "dark" });
   const page = await ctx.newPage();
   await page.goto(`${BASE}/login`);

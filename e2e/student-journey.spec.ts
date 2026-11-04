@@ -14,8 +14,13 @@ test("onboarding → results → checklist → dashboard → tracker", async ({ 
 
   // Step 1: validation, then answers (the prototype's sample student "Ana")
   await waitForHydration(page);
+  await page.getByRole("radio", { name: "2nd year" }).check();
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page.getByText("Select your course area so we can match course-specific scholarships.")).toBeVisible();
+  // A failed step keeps the student's picks, announces the problem and focuses the first one.
+  await expect(page.getByRole("radio", { name: "2nd year" })).toBeChecked();
+  await expect(page.getByLabel("Course area")).toBeFocused();
+  await expect(page.locator("main").getByRole("alert")).toHaveText("One answer needs attention.");
   await page.getByLabel("Course area").selectOption({ label: "Science & Math" });
   await page.getByLabel(/Program/).fill("BS Biology");
   await page.getByRole("radio", { name: "2nd year" }).check();
@@ -76,11 +81,19 @@ test("onboarding → results → checklist → dashboard → tracker", async ({ 
   // Tracker: preparing → submitted
   await page.goto("/applications?tab=preparing");
   await waitForHydration(page);
-  await page.getByLabel("Status of Tulong Dunong Program").selectOption("submitted");
+  // The row names what's still missing, and offers one next move.
+  await expect(page.getByTestId("still-need")).toContainText("Still need: Certificate of Grades for last semester, Proof of income +2.");
+  // Remove asks first, because it would clear the ticked documents.
+  await page.getByRole("button", { name: "Remove for Tulong Dunong Program" }).click();
+  await expect(page.getByRole("dialog")).toContainText("The document you ticked will be cleared.");
+  await page.getByRole("button", { name: "Keep it" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.getByRole("button", { name: "Mark as submitted for Tulong Dunong Program" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Marked as submitted" })).toBeVisible();
   await page.goto("/applications?tab=submitted");
   await expect(page.getByRole("link", { name: "Tulong Dunong Program" })).toBeVisible();
-  await expect(page.getByText("Submitted. Waiting for results.")).toBeVisible();
+  await expect(page.getByText("Waiting for results", { exact: true })).toBeVisible();
+
 });
 
 test("signed-out visitors can browse but must sign in to track", async ({ page }) => {

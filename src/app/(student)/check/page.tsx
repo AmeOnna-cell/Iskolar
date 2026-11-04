@@ -21,10 +21,11 @@ export default async function CheckPage({ searchParams }: { searchParams: Promis
           </div>
         ) : null}
         <h1 className="text-headline-sm font-bold tracking-tight text-ink sm:text-headline">Eligibility check</h1>
-        <p className="mt-2 mb-6 text-ink-secondary">4 short steps. Skip anything you&apos;re not sure about.</p>
+        <p className="mt-2 mb-6 text-ink-secondary">4 short steps. Only your course area and year level are needed; skip anything else you&apos;re not sure about.</p>
         <Wizard
           key={step}
           step={step}
+          hasAnswers={Boolean(sp)}
           answers={{
             field: sp?.field ?? null,
             program: sp?.program ?? null,

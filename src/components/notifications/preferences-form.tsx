@@ -38,7 +38,7 @@ async function unsubscribe() {
 
 function Check({ name, label, hint, defaultChecked, disabled }: { name: string; label: string; hint?: string; defaultChecked: boolean; disabled?: boolean }) {
   return (
-    <label className={`flex items-start gap-3 py-1.5 ${disabled ? "opacity-60" : ""}`}>
+    <label className={`flex min-h-11 items-start gap-3 py-2 ${disabled ? "opacity-60" : ""}`}>
       <input type="checkbox" name={name} defaultChecked={defaultChecked} disabled={disabled} className="mt-0.5 size-[18px] shrink-0 accent-[var(--primary)]" />
       <span>
         <span className="block text-base text-ink">{label}</span>
@@ -52,6 +52,7 @@ export function PreferencesForm({ prefs, email }: { prefs: Prefs; email: string 
   const [state, action, saving] = useActionState(savePreferences, idle);
   const [pushError, setPushError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
+  const [channelsOff, setChannelsOff] = useState(!prefs.email && !prefs.push && !prefs.site);
   const formRef = useRef<HTMLFormElement>(null);
   const skipPush = useRef(false);
   const pushSupported = Boolean(VAPID);
@@ -93,7 +94,11 @@ export function PreferencesForm({ prefs, email }: { prefs: Prefs; email: string 
           setWorking(false);
         }
       }}
-      className="flex flex-col gap-5"
+      onChange={(e) => {
+        const f = e.currentTarget;
+        setChannelsOff(!["email", "push", "site"].some((n) => (f.elements.namedItem(n) as HTMLInputElement | null)?.checked));
+      }}
+      className="flex flex-col gap-6"
     >
       <fieldset>
         <legend className="mb-1 text-sm font-semibold text-ink">Send alerts by</legend>
@@ -124,6 +129,11 @@ export function PreferencesForm({ prefs, email }: { prefs: Prefs; email: string 
         <Check name="changes" label="Deadline or requirement changes" defaultChecked={prefs.changes} />
       </fieldset>
 
+      {channelsOff ? (
+        <Notice tone="warn" live>
+          With every channel off you won&apos;t get deadline reminders. Your alerts history stays.
+        </Notice>
+      ) : null}
       {pushError ? <Notice tone="danger" live>{pushError}</Notice> : null}
       {state.status === "error" ? <Notice tone="danger" live>{state.message}</Notice> : null}
       {state.status === "success" ? <Notice tone="ok" live>{state.message}</Notice> : null}

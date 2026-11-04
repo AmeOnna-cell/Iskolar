@@ -54,10 +54,10 @@ export function AccountMenu({ viewer, signOut }: Props) {
           ) : (
             <>
               <Item href="/check" icon="edit">Edit eligibility answers</Item>
-              <Item href="/settings/notifications" icon="settings">Reminder settings</Item>
               <Item href="/alerts" icon="bell">Alerts</Item>
             </>
           )}
+          <Item href="/settings" icon="settings">Settings</Item>
           <Item href="/help" icon="help">Help and FAQ</Item>
           <Menu.Separator className="my-2 h-px bg-hairline" />
           {signOut}

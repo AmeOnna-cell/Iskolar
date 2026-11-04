@@ -66,14 +66,15 @@ test("deadline reminder: once per lead time, emailed with a preferences link, li
   await admin.from("scholarships").update({ closes_on: new Date(Date.now() + 9 * 86_400_000).toISOString().slice(0, 10) }).eq("id", listing.id);
   await expect(page.getByTestId("unread-badge")).toHaveText("2"); // "deadline moved", no reload
 
-  // Alerts: select one → mark read; open the other → it's marked read and goes to the listing
+  // Alerts: opening an alert marks it read and goes where it points
   await page.goto("/alerts?show=unread");
   await waitForHydration(page);
   await expect(page.getByTestId("unread-tab-count")).toHaveText("2");
-  await page.getByRole("checkbox", { name: `Select ${listing.name}: deadline moved` }).check();
-  await page.getByRole("button", { name: "Mark 1 as read" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "1 alert marked as read." })).toBeVisible();
+  await expect(page.getByTestId("prefs-summary")).toHaveText("Email and on-site alerts, 7 days before deadlines.");
+  await page.getByRole("link", { name: new RegExp(`${listing.name}: deadline moved`) }).click();
+  await expect(page).toHaveURL(new RegExp(`/s/${listing.slug}$`));
   await expect(page.getByTestId("unread-badge")).toHaveText("1");
+  await page.goto("/alerts?show=unread");
   await page.getByRole("link", { name: new RegExp(`${listing.name} closes in 2 days`) }).click();
   await expect(page).toHaveURL(new RegExp(`/s/${listing.slug}$`));
   await expect(page.getByTestId("unread-badge")).toHaveCount(0);

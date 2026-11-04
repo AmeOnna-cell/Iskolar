@@ -9,7 +9,8 @@ const base =
 const variants: Record<Variant, string> = {
   primary: "border-transparent bg-primary text-on-primary hover:bg-primary-hover",
   outline: "border-hairline-strong bg-surface text-ink hover:bg-surface-hover",
-  text: "border-transparent bg-transparent px-1 text-primary hover:underline",
+  // Inline actions ("Clear filters", "Mark all as read"): 14px label, 44px touch target until desktop.
+  text: "min-h-11 border-transparent bg-transparent px-1 text-sm text-primary hover:underline nav:min-h-9",
   danger: "border-transparent bg-danger text-white hover:opacity-90",
 };
 const sizes: Record<Size, string> = {

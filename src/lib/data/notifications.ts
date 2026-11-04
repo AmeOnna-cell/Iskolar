@@ -12,7 +12,7 @@ export async function listNotifications(show: "all" | "unread", page: number, pa
   const supabase = await createClient();
   let q = supabase
     .from("notifications")
-    .select("id, kind, title, body, link, read_at, created_at", { count: "exact" })
+    .select("id, kind, title, body, link, read_at, created_at, payload", { count: "exact" })
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1);

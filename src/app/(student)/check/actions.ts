@@ -8,7 +8,15 @@ import { FIELDS, INCOME, REGIONS } from "@/lib/reference";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 
-export type StepState = { status: "idle" | "error"; message?: string; fieldErrors?: Record<string, string> };
+export type StepState = {
+  status: "idle" | "error";
+  message?: string;
+  fieldErrors?: Record<string, string>;
+  /** What the student submitted, so a failed step re-renders with their picks instead of resetting. */
+  values?: Record<string, string | boolean | null>;
+  /** Changes on every failed attempt, so the form remounts with `values` and focus moves to the first error. */
+  attempt?: number;
+};
 
 const fieldValues = FIELDS.map(([v]) => v) as [string, ...string[]];
 const regionValues = REGIONS.map(([v]) => v) as [string, ...string[]];
@@ -58,11 +66,21 @@ export async function saveStep(step: 1 | 2 | 3 | 4, _prev: StepState, fd: FormDa
         : step === 3
           ? { income_bracket: opt(fd, "income_bracket"), four_ps: opt(fd, "four_ps"), ofw: opt(fd, "ofw") }
           : { region: opt(fd, "region") };
+  const back = fd.get("dir") === "back";
   const parsed = schemas[step].safeParse(raw);
   if (!parsed.success) {
+    // Going back never blocks on this step's errors: it just doesn't save them.
+    if (back) redirect(`/check?step=${Math.max(1, step - 1)}`);
     const fieldErrors: Record<string, string> = {};
     for (const i of parsed.error.issues) fieldErrors[String(i.path[0] ?? "form")] ??= i.message;
-    return { status: "error", message: Object.values(fieldErrors)[0], fieldErrors };
+    const n = Object.keys(fieldErrors).length;
+    return {
+      status: "error",
+      message: n === 1 ? "One answer needs attention." : `${n} answers need attention.`,
+      fieldErrors,
+      values: raw as unknown as Record<string, string | boolean | null>,
+      attempt: Date.now(),
+    };
   }
   // Values are validated against the same enums as the table, so this row is a valid insert.
   const row = {
@@ -77,5 +95,5 @@ export async function saveStep(step: 1 | 2 | 3 | 4, _prev: StepState, fd: FormDa
   revalidatePath("/dashboard");
   revalidatePath("/explore");
   revalidatePath("/s/[slug]", "page");
-  redirect(step < 4 ? `/check?step=${step + 1}` : "/check/results");
+  redirect(back ? `/check?step=${Math.max(1, step - 1)}` : step < 4 ? `/check?step=${step + 1}` : "/check/results");
 }

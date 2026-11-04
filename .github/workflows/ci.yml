@@ -16,6 +16,10 @@ jobs:
       GMAIL_APP_PASSWORD: fakefakefakefake # not a real password
       EMAIL_FROM_NAME: Iskolar
       APP_URL: http://localhost:3000
+      # Local test inbox (Mailpit) instead of Gmail; CI never sends real email.
+      EMAIL_DEV_SMTP: 127.0.0.1:54325
+      EMAIL_DAILY_LIMIT: "100000"
+      CRON_SECRET: ci-only-not-a-real-cron-secret-0000 # fake, CI only
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,7 +39,6 @@ jobs:
             "NEXT_PUBLIC_SUPABASE_URL=\(.API_URL)",
             "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=\(.ANON_KEY)",
             "SUPABASE_SECRET_KEY=\(.SERVICE_ROLE_KEY)"' > .env.local
-          echo "CRON_SECRET=not-a-real-cron-secret" >> .env.local
       - name: Database tests (RLS, triggers, RPCs)
         run: npm run test:db
 

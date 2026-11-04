@@ -17,6 +17,7 @@ describe("server mailer wiring (transport mocked: nothing is sent)", () => {
     sendMail.mockReset();
     createTransport.mockClear();
     for (const [k, v] of Object.entries(ENV)) vi.stubEnv(k, v);
+    vi.stubEnv("EMAIL_DEV_SMTP", ""); // a developer's local test-inbox setting must not leak in
   });
   afterEach(() => vi.unstubAllEnvs());
 

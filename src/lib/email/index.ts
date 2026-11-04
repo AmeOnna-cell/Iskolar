@@ -1,6 +1,6 @@
 import "server-only";
 import nodemailer from "nodemailer";
-import { fromHeader, gmailTransportOptions, readEmailEnv } from "./env.ts";
+import { fromHeader, readEmailEnv, transportOptions } from "./env.ts";
 import { createMailer, type EmailMessage, type Mailer, type SendResult } from "./send.ts";
 
 export * from "./templates.ts";
@@ -13,7 +13,7 @@ function getMailer(): Mailer {
   if (!mailer) {
     const env = readEmailEnv(process.env);
     mailer = createMailer({
-      transport: nodemailer.createTransport(gmailTransportOptions(env)),
+      transport: nodemailer.createTransport(transportOptions(env)),
       from: fromHeader(env),
     });
   }

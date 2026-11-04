@@ -2,13 +2,14 @@ import Link from "next/link";
 import { Icon, LogoMark } from "@/components/icons";
 import { homeHref, primaryNav, type Viewer } from "@/lib/nav";
 import { AccountMenu } from "./account-menu";
+import { AlertsBell } from "./alerts-bell";
 import { HeaderNav } from "./nav-links";
 import { ThemeToggle } from "./theme-toggle";
 
-type Props = { viewer: Viewer; unread?: number; signOut?: React.ReactNode };
+type Props = { viewer: Viewer; userId?: string; unread?: number; signOut?: React.ReactNode };
 
 /** Sticky 64px header (56px under 900px). Primary nav moves to the bottom tab bar on small screens. */
-export function Header({ viewer, unread = 0, signOut }: Props) {
+export function Header({ viewer, userId, unread = 0, signOut }: Props) {
   const isStudent = viewer?.role === "student";
   return (
     <>
@@ -42,24 +43,7 @@ export function Header({ viewer, unread = 0, signOut }: Props) {
             >
               <Icon name="help" size={20} />
             </Link>
-            {isStudent ? (
-              <Link
-                href="/alerts"
-                aria-label={unread ? `Alerts, ${unread} unread` : "Alerts"}
-                title="Alerts"
-                className="relative grid size-11 place-items-center rounded-full text-ink-secondary hover:bg-surface-hover hover:text-ink"
-              >
-                <Icon name="bell" size={20} />
-                {unread > 0 ? (
-                  <span
-                    data-testid="unread-badge"
-                    className="tnum absolute top-1 right-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full border-2 border-surface bg-danger px-1 text-tab leading-none font-bold text-white"
-                  >
-                    {unread > 99 ? "99+" : unread}
-                  </span>
-                ) : null}
-              </Link>
-            ) : null}
+            {isStudent && userId ? <AlertsBell userId={userId} initial={unread} /> : null}
             {viewer ? (
               <AccountMenu viewer={viewer} signOut={signOut} />
             ) : (

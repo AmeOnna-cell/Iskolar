@@ -253,6 +253,41 @@ export function deadlineChangedEmail(d: DeadlineChangedData): RenderedEmail {
   };
 }
 
+// ---------- 2b. Requirements changed ----------
+
+export type RequirementsChangedData = {
+  appUrl: string;
+  studentName?: string | null;
+  scholarshipName: string;
+  providerName: string;
+  scholarshipPath: string;
+};
+
+export function requirementsChangedEmail(d: RequirementsChangedData): RenderedEmail {
+  const subject = `Requirements updated: ${d.scholarshipName}`;
+  const change = `${d.providerName} updated the requirements or the document list for ${d.scholarshipName}, which you're tracking.`;
+  const next = "Check that you still qualify and whether your document checklist has anything new.";
+  const cta = { label: "Review the changes", path: d.scholarshipPath };
+
+  return {
+    subject,
+    html: renderHtml({
+      appUrl: d.appUrl,
+      preheader: next,
+      heading: "A scholarship you're tracking changed",
+      status: { tone: "warn", text: "Requirements updated" },
+      paragraphs: [escapeHtml(greeting(d.studentName)), escapeHtml(change), escapeHtml(next)],
+      cta,
+    }),
+    text: renderText({
+      appUrl: d.appUrl,
+      heading: "A scholarship you're tracking changed",
+      lines: [greeting(d.studentName), "", change, "", next],
+      cta,
+    }),
+  };
+}
+
 // ---------- 3. New matching scholarship ----------
 
 export type NewMatchData = {

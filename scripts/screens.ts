@@ -36,6 +36,14 @@ async function signedInContext(browser: Browser, role: string, theme: string): P
         await admin.from("application_documents").insert((docs ?? []).map((d) => ({ application_id: app.id, document_id: d.id })));
       }
     }
+    // Alerts: a real reminder from the daily job, plus one of each other kind (never emailed).
+    await admin.rpc("enqueue_deadline_reminders");
+    const hour = (h: number) => new Date(Date.now() - h * 3_600_000).toISOString();
+    await admin.from("notifications").insert([
+      { user_id: uid, kind: "change", title: "OFW Dependents Scholarship Program: deadline moved", body: "New deadline is Nov 12, 2026 (was Nov 19, 2026).", link: "/s/owwa-ofw-dependents-scholarship", dedupe_key: "screens:change", created_at: hour(20) },
+      { user_id: uid, kind: "new", title: "New scholarship: DOST-SEI Junior Level Science Scholarship", body: "Matches your profile.", link: "/s/dost-sei-junior-level-science-scholarship", dedupe_key: "screens:new", created_at: hour(50), read_at: hour(40) },
+      { user_id: uid, kind: "announce", title: "Scholarship forms at window 3 this week", body: "Bring your COR and a valid ID.", link: "/dashboard", dedupe_key: "screens:announce", created_at: hour(80), read_at: hour(70) },
+    ]);
   }
   const ctx = await browser.newContext({ colorScheme: theme as "light" | "dark" });
   const page = await ctx.newPage();

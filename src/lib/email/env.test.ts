@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EmailConfigError, fromHeader, gmailTransportOptions, readEmailEnv } from "./env.ts";
+import { EmailConfigError, fromHeader, gmailTransportOptions, readEmailEnv, transportOptions } from "./env.ts";
 
 const valid = {
   GMAIL_USER: "not-a-real-account@example.com",
@@ -49,5 +49,14 @@ describe("Gmail transport", () => {
     });
     expect(fromHeader(env)).toBe('"Iskolar" <not-a-real-account@example.com>');
     expect(fromHeader({ ...env, fromName: 'Iskolar "Alerts"\r\n' })).toBe('"Iskolar Alerts" <not-a-real-account@example.com>');
+  });
+});
+
+describe("EMAIL_DEV_SMTP", () => {
+  it("sends to a loopback test inbox only", () => {
+    const env = readEmailEnv({ ...valid, EMAIL_DEV_SMTP: "127.0.0.1:54325" });
+    expect(transportOptions(env)).toEqual({ host: "127.0.0.1", port: 54325, secure: false, ignoreTLS: true });
+    expect(transportOptions(readEmailEnv(valid))).toMatchObject({ host: "smtp.gmail.com", port: 465, secure: true });
+    expect(() => readEmailEnv({ ...valid, EMAIL_DEV_SMTP: "smtp.evil.example:25" })).toThrowError(/EMAIL_DEV_SMTP/);
   });
 });

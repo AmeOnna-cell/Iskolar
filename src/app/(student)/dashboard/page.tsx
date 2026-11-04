@@ -227,7 +227,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             <ul className="overflow-hidden rounded-md border border-hairline bg-surface shadow-rest">
               {alerts.map((n) => (
                 <li key={n.id} className="border-t border-hairline px-4 py-4 first:border-t-0 sm:px-5">
-                  <p className="font-semibold text-ink">{n.link ? <Link href={n.link} className="text-ink">{n.title}</Link> : n.title}</p>
+                  <p className="font-semibold text-ink">
+                    {/* Plain <a>: opening marks the alert read, so it must never be prefetched. */}
+                    <a href={`/alerts/${n.id}`} className="text-ink">{n.title}</a>
+                  </p>
                   {n.body ? <p className="text-sm text-ink-secondary">{n.body}</p> : null}
                   <p className="mt-1 text-caption text-ink-hint">{ago(n.created_at)}</p>
                 </li>

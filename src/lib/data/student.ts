@@ -73,6 +73,8 @@ export async function getRecentNotifications(limit = 4) {
   const { data } = await supabase
     .from("notifications")
     .select("id, kind, title, body, link, read_at, created_at")
+    // Announcements are listed on the dashboard themselves; don't show them twice.
+    .neq("kind", "announce")
     .order("created_at", { ascending: false })
     .limit(limit);
   return data ?? [];

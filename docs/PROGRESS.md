@@ -1,106 +1,52 @@
 # Progress
 
-Phases 1–5 are done and deployed: main `e77d75a`, cloud migrations up to `20261103160000`.
-**Phase 6 (notifications) is in progress on branch `phase-6-wip`. Nothing from it is pushed or deployed.**
+| Phase | Status |
+|---|---|
+| 1 Foundation, 1b Email pipeline, 2 Database, 3 Auth, 4 Student, 5 Staff/admin | Done and deployed |
+| 6 Notifications | Done; see below |
+| 7 Performance | Next |
+| 8 Polish/QA, 9 Tests + docs | To do |
 
-## Phase 6: done
+## Phase 6: notifications (done)
 
-- **Migration `supabase/migrations/20261103170000_notifications.sql`** (local only; NOT pushed to the cloud):
-  - `notifications.payload` (data for the templates) and `claimed_at` (lease for the dispatcher), plus a partial index on rows still waiting to be delivered.
-  - `notifications` added to the `supabase_realtime` publication, for the live unread badge.
-  - `notify()` is the single place that applies preferences:
-    - It skips a kind when that topic is switched off (`new_matches`, `changes`).
-    - With on-site alerts off, the row is stored already read, so it never lights the badge.
-    - It sets `email_status` and `push_status` to pending or skipped.
-    - The dedupe key (unique per user) makes every trigger idempotent.
-  - The four triggers from brief §4.7:
-    - (a) `enqueue_deadline_reminders()`: saved or preparing applications that close within the student's lead time. One reminder per student × listing × deadline × lead time. The body says how many documents are still unchecked.
-    - (b) Changes: a deadline change (from `deadline_changes`, which also sets `notified_at`), or a criteria or document edit on a published listing. At most one requirements alert per listing per day.
-    - (c) New match: a listing becomes published → every active student whose verdict is yes or maybe.
-    - (d) Announcement: posting one notifies every active student.
-  - `claim_notifications(limit)`, service role only. It claims rows most urgent first and uses `skip locked` with a 10-minute lease.
-  - `call_dispatch()`: `pg_net` POSTs to `<app>/api/cron/dispatch` with a Bearer secret. Both values come from **Vault**, never from the migration. It does nothing when no rows are pending or the secrets aren't set.
-  - `pg_cron` jobs:
-    - `iskolar-daily-reminders` at `0 23 * * *` (07:00 Manila): enqueue reminders, then dispatch.
-    - `iskolar-dispatch` every 10 minutes (no-op when idle).
-  - Every new function is revoked from `anon` and `authenticated`.
-- `supabase/config.toml`: Mailpit's SMTP port `54325` exposed (local only), so the app's own emails can be tested locally without Gmail.
+Details and setup are in `docs/notifications.md`.
 
-## Where work stopped (session 2)
-
-- Cloud secrets are done (per the user): Vercel `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`; Supabase Vault `iskolar_app_url` and `iskolar_cron_secret`. **Don't ask for them again.**
-- Installed `web-push@3.6.7` and `@types/web-push` (committed in package.json and the lockfile). No app code uses them yet.
-- **Local secrets:** `.env.local` is deliberately not touched (standing rule: never create, read or edit it; it holds the real Gmail credentials). Local VAPID keys and a local `CRON_SECRET` are passed as environment variables when the dev or test server starts, the same way as the placeholder email values. They were generated into the session scratchpad, which won't survive, so regenerate them:
-  - `npx web-push generate-vapid-keys --json`
-  - `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
-- **Local Vault secrets are not set yet.** Run this in the local DB (`docker exec supabase_db_Iskolar psql -U postgres -c "..."`):
-  `select vault.create_secret('http://host.docker.internal:3000', 'iskolar_app_url'); select vault.create_secret('<local CRON_SECRET>', 'iskolar_cron_secret');`
-- `npm audit --omit=dev` reports 2 issues (1 high, in `postcss`, which comes through Next, not web-push). I haven't checked yet whether they predate this change; review them before deploying.
-- **Next step:** item 1 of the list below (the `EMAIL_DEV_SMTP` override), then go through the rest in order.
-- **Deploy order once Phase 6 is tested** (already approved by the user): merge into main, then `npx supabase db push --remote --yes`, then `git push origin main` right after, so the gap where the cron calls a missing endpoint stays short.
-
-## Phase 6: half-done or not verified
-
-- The migration **applies cleanly locally** (`npx supabase migration up`). Both cron jobs are scheduled, `notifications` is in the Realtime publication, and the existing 201 pgTAP assertions still pass. The triggers themselves are **not exercised by any test yet**.
-- No pgTAP tests yet (planned file `supabase/tests/80_notifications.test.sql`). It should cover:
-  - preferences respected, and on-site off means stored as read;
-  - re-running reminders or a trigger creates no duplicates;
-  - each trigger (a)–(d);
-  - the claim lease;
-  - students can't call `notify`, `claim_notifications` or `enqueue_deadline_reminders`, or insert notifications;
+- **Database** (`supabase/migrations/20261103170000_notifications.sql`):
+  - `notify()` applies preferences, and each alert's dedupe key means a trigger or job can never create it twice.
+  - Triggers create alerts for deadline reminders (daily job), deadline and requirement changes, new matching listings and announcements.
+  - `claim_notifications()` leases rows to the dispatcher for 10 minutes.
+  - `call_dispatch()` uses `pg_net`, with the URL and secret read from Vault.
+  - `pg_cron` runs reminders daily at 07:00 Manila and delivery every 10 minutes.
   - `notifications` is in the Realtime publication.
-- `database.types.ts` not regenerated (`npx supabase gen types typescript --local > src/lib/supabase/database.types.ts`).
+- **Delivery:** `POST /api/cron/dispatch` (Bearer `CRON_SECRET`, compared in constant time) runs `src/lib/notifications/`.
+  - Email goes through `src/lib/email`, with a new requirements-changed template.
+  - Preferences and account status are re-checked at send time.
+  - Each email gets up to 3 attempts, and errors are logged.
+  - Daily budget: `EMAIL_DAILY_LIMIT`, default 450.
+  - Web push uses `web-push`; subscriptions that come back 404 or 410 are removed.
+- **Student UI:**
+  - `/alerts`: All / Unread tabs, select or mark all as read (one RPC transaction), and the reminder-settings form. Opening an alert goes through `/alerts/[id]`, which marks it read and redirects.
+  - `/settings/notifications`: the same form, and the target of every email's preferences link.
+  - Live bell badge: server count, then Realtime.
+  - The dashboard no longer shows announcements twice.
+  - Push permission is asked only after the student turns push on and saves.
+- **Local email:** `EMAIL_DEV_SMTP` (loopback only) sends to Mailpit, so tests never touch Gmail.
+- **Tests:**
+  - pgTAP `80_notifications` (35 assertions; 236 in total).
+  - Vitest for the dispatcher and the dev SMTP setting (46 in total).
+  - E2E `4.7-notifications`: cron endpoint auth; reminder → email in Mailpit with the preferences link → live badge → mark read → open the alert; email-off preference respected.
+  - axe on `/alerts` and `/settings/notifications`.
+  - Full E2E suite: 56 of 56 pass on a production build.
+  - Also verified by hand: Postgres → Vault → `pg_net` → endpoint returned 200 and delivered the queued emails locally.
+- **Not covered by E2E:** real push delivery, because headless Chromium has no push service. The sending logic is unit-tested.
+- **Unexplained:** one pgTAP run failed once and couldn't be reproduced (8 passing runs since). The claim test now ignores other local rows, which removes one possible cause.
 
-## Phase 6: next (in order)
+## Local dev notes
 
-1. **Mailer dev override** in `src/lib/email/env.ts`: optional `EMAIL_DEV_SMTP=127.0.0.1:54325`, accepted only for localhost or 127.0.0.1 (plain SMTP, no auth), so E2E emails land in Mailpit. Everything else keeps using Gmail on port 465. Reuse `src/lib/email`; don't build a second mailer.
-2. **Requirements-changed email template** in `src/lib/email/templates.ts`. Deadline reminder, deadline moved, new match and announcement templates already exist; they're fed from `payload`.
-3. **Dispatcher**: `src/lib/notifications/dispatch.ts` (senders injected so it can be unit-tested) and `src/app/api/cron/dispatch/route.ts`.
-   - The route accepts POST only, compares `Authorization: Bearer ${CRON_SECRET}` in constant time, and returns 503 when CRON_SECRET isn't set.
-   - It re-checks preferences and account status at send time.
-   - Email: up to 3 attempts, logging `email_error`. **Daily budget ≈ 450** to stay under Gmail's ~500/day; the rest wait for the next day.
-   - Push via the `web-push` npm package (needs `npm i web-push @types/web-push`). A 404 or 410 response deletes the dead subscription.
-   - Reminder emails recompute "days left" at send time and are skipped if the listing has already closed.
-4. **Alerts page** (`src/app/(student)/alerts/page.tsx`, currently a placeholder):
-   - All / Unread tabs via `?show=unread`, with server pagination.
-   - Icon per kind, as in the prototype `.note` styles.
-   - Row checkboxes with "Mark selected as read" and "Mark all as read", through the existing `mark_notifications_read` RPC.
-   - Opening an alert goes through `/alerts/[id]`, which marks it read and then redirects. Use a plain `<a>`, not a prefetched Link.
-   - The reminder-settings form sits in the sidebar, as in the prototype.
-5. **Reminder settings** (`/settings/notifications`, currently a placeholder): email, push and on-site switches; lead time 1/3/7/14 days; new matches; changes. Saved through a server action. Every email's preferences link already points here.
-6. **Web push**:
-   - A service worker at `public/sw.js` handles `push` and `notificationclick`.
-   - The permission prompt appears only when the student turns push on in settings and saves, never on page load.
-   - Subscriptions are saved and removed through server actions (zod-validated).
-   - If `NEXT_PUBLIC_VAPID_PUBLIC_KEY` isn't set, the push option is disabled with a short note.
-7. **Live unread badge**:
-   - The root layout fetches the unread count for students. The header currently always gets 0.
-   - A small client component subscribes to Realtime `postgres_changes` on `notifications` (`user_id=eq.<id>`) and re-counts on each change.
-8. **Tests**:
-   - pgTAP (above) and Vitest for the dispatcher (mocked senders, budget, retries, skipped prefs).
-   - E2E `e2e/4.7-notifications.spec.ts`:
-     - Save a listing → run the reminders through the service role → call the dispatch route with the secret → the email appears in Mailpit with a preferences link → the badge counts → Alerts → mark read.
-     - An announcement reaches Alerts.
-     - Turning email off means nothing is sent.
-   - Add `/alerts` and `/settings/notifications` to `a11y.spec.ts`.
-9. Screenshots at 360/768/1280/1440 in both themes. Then `docs/notifications.md` covering setup, Vault commands and the Gmail budget.
-10. Commit, then **ask before** `npx supabase db push --remote --yes` and merging or pushing to main. The migration has to go before the code deploy.
+- `.env.local` is never created, read or edited by the assistant; it holds the real Gmail credentials. Local push keys and `CRON_SECRET` are passed as environment variables when the server starts.
+- Local Vault needs `iskolar_app_url = http://host.docker.internal:3000` and `iskolar_cron_secret` (see `docs/notifications.md`).
+- `npm audit --omit=dev`: 1 high and 1 moderate in the `postcss` bundled inside Next.js. This was already on main and is not from Phase 6. The offered fix needs `--force`; revisit when upgrading Next.
 
-## What I need from you (before Phase 6 is deployed, not before work resumes)
+## Next: Phase 7 (performance)
 
-1. **VAPID key pair for web push.** Generate one with `npx web-push generate-vapid-keys` and add it in Vercel → Settings → Environment Variables:
-   - `NEXT_PUBLIC_VAPID_PUBLIC_KEY` = the public key
-   - `VAPID_PRIVATE_KEY` = the private key (server only)
-
-   The duplicate `VAPID_PUBLIC_KEY` line in `.env.example` will be removed; the server reads the public key from the `NEXT_PUBLIC_` variable.
-2. **`CRON_SECRET`**: a long random string, for example `openssl rand -hex 32`. Put the same value in two places:
-   - Vercel env var `CRON_SECRET`;
-   - Supabase Vault, in the SQL editor of project gfiutwubhsnpgkaflpuh:
-     ```sql
-     select vault.create_secret('https://iskolar-ochre.vercel.app', 'iskolar_app_url');
-     select vault.create_secret('<the same CRON_SECRET>', 'iskolar_cron_secret');
-     ```
-   Until both secrets exist, the cron jobs run but send nothing.
-3. **Still pending from earlier phases:** paste the generated Supabase Auth email templates (`supabase/templates/*.html`) into the cloud project (Authentication → Email Templates).
-
-No new names are needed beyond these. The email settings (`GMAIL_USER`, `GMAIL_APP_PASSWORD`, `EMAIL_FROM_NAME`, `APP_URL`) are reused as they are.
+`scripts/synth.sql` (5k scholarships, 50k notifications), `EXPLAIN ANALYZE` on explore, the dashboard, admin tables, the audit log and the alerts queries, index tuning, and `docs/performance.md`.

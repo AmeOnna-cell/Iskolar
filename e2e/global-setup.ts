@@ -9,4 +9,7 @@ export default async function globalSetup() {
   // Listings created by staff specs (slug prefix "e2e-"): removed so student-side counts stay exact.
   const { error: e2 } = await admin.from("scholarships").delete().like("slug", "e2e-%");
   if (e2) throw new Error(`Could not remove e2e listings: ${e2.message}`);
+  // Alerts left undelivered by earlier runs: don't send them now (keeps dispatch quick in 4.7).
+  await admin.from("notifications").update({ email_status: "skipped" }).eq("email_status", "pending");
+  await admin.from("notifications").update({ push_status: "skipped" }).eq("push_status", "pending");
 }

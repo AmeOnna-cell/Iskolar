@@ -26,6 +26,19 @@ Phases 1–5 are done and deployed: main `e77d75a`, cloud migrations up to `2026
   - Every new function is revoked from `anon` and `authenticated`.
 - `supabase/config.toml`: Mailpit's SMTP port `54325` exposed (local only), so the app's own emails can be tested locally without Gmail.
 
+## Where work stopped (session 2)
+
+- Cloud secrets are done (per the user): Vercel `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`; Supabase Vault `iskolar_app_url` and `iskolar_cron_secret`. **Don't ask for them again.**
+- Installed `web-push@3.6.7` and `@types/web-push` (committed in package.json and the lockfile). No app code uses them yet.
+- **Local secrets:** `.env.local` is deliberately not touched (standing rule: never create, read or edit it; it holds the real Gmail credentials). Local VAPID keys and a local `CRON_SECRET` are passed as environment variables when the dev or test server starts, the same way as the placeholder email values. They were generated into the session scratchpad, which won't survive, so regenerate them:
+  - `npx web-push generate-vapid-keys --json`
+  - `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+- **Local Vault secrets are not set yet.** Run this in the local DB (`docker exec supabase_db_Iskolar psql -U postgres -c "..."`):
+  `select vault.create_secret('http://host.docker.internal:3000', 'iskolar_app_url'); select vault.create_secret('<local CRON_SECRET>', 'iskolar_cron_secret');`
+- `npm audit --omit=dev` reports 2 issues (1 high, in `postcss`, which comes through Next, not web-push). I haven't checked yet whether they predate this change; review them before deploying.
+- **Next step:** item 1 of the list below (the `EMAIL_DEV_SMTP` override), then go through the rest in order.
+- **Deploy order once Phase 6 is tested** (already approved by the user): merge into main, then `npx supabase db push --remote --yes`, then `git push origin main` right after, so the gap where the cron calls a missing endpoint stays short.
+
 ## Phase 6: half-done or not verified
 
 - The migration **applies cleanly locally** (`npx supabase migration up`). Both cron jobs are scheduled, `notifications` is in the Realtime publication, and the existing 201 pgTAP assertions still pass. The triggers themselves are **not exercised by any test yet**.

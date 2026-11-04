@@ -85,4 +85,22 @@ Details are in `docs/performance.md`. The dataset was 5,009 listings, 2,085 stud
      - The results list gets an `h2`; header and footer links meet the touch-target size.
    - Checks: the detector is clean (only the documented 11px exception), there's no horizontal overflow at 360px, and 57 of 57 E2E tests pass.
    - Before/after screenshots: `docs/screenshots/phase8-before/` and `docs/screenshots/phase8-after/`.
-3. **Next, stage 2:** the same pass for the landing page, scholarship detail, eligibility wizard and results, applications, alerts and settings, help, sign-in pages, and staff and admin screens.
+3. **Stage 2, group 1: landing, scholarship detail, help (done).**
+   - Critique scores: landing 22/32, detail 28/40, help 28/40, with 4 P1 issues. The user chose sign-up-first prompts, a verdict preview and a status line on the detail page.
+   - **Landing:**
+     - An example explained verdict, built from the real requirement rows and labelled as an example, replaces the generic strip.
+     - "Create an account to check" replaces the eligibility link that hit sign-in.
+     - The tinted circle is gone, spacing is on the scale, and the chips meet the touch-target size.
+   - **Detail page:**
+     - The verdict pill comes first, the dates sit above the actions, and "Time left" follows the urgency ladder.
+     - While preparing with documents missing, the page shows "N documents left · closes in X" with "See what's missing"; "Mark as submitted" is outline until everything is ticked.
+     - The reminder copy reflects what the 07:00 job will actually do.
+     - Sign-up-first prompts, and "All scholarships" as the back link.
+   - **Help:**
+     - "Ask a scholarship coordinator" jumps to the form, and the form comes first on narrow screens.
+     - The page says who answers questions.
+     - FAQ answers link to settings and the eligibility check, and have ids for deep links.
+     - Visitors are offered sign-up first, and replies are no longer green.
+   - **Shared:** "You meet both requirements", notices capped at 70ch, and four-letter provider marks fit the compact tile.
+   - E2E: 57 of 57 pass. Some runs failed only under heavy memory pressure from other apps on the machine, confirmed by rerunning the same test on the previous commit and on this one.
+4. **Next, stage 2, groups 2–4:** the eligibility wizard and results, applications, alerts and settings; the sign-in pages; the staff and admin screens.

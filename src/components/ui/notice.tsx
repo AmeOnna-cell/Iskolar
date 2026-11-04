@@ -19,7 +19,7 @@ export function Notice({ tone = "info", children, live = false }: { tone?: Tone;
       className={`flex gap-3 rounded-sm px-4 py-3 text-sm text-ink ${t.box}`}
     >
       <Icon name={t.name} size={18} className={`mt-0.5 ${t.icon}`} />
-      <div className="min-w-0">{children}</div>
+      <div className="min-w-0 max-w-[70ch]">{children}</div>
     </div>
   );
 }

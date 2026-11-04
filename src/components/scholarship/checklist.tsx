@@ -79,7 +79,8 @@ export function DocumentChecklist({
       </ul>
       {!canTrack ? (
         <p className="text-caption text-ink-hint">
-          <Link href={`/login?next=/s/${slug}`}>Sign in</Link> to tick off documents and get reminders.
+          <Link href="/signup">Create an account</Link> to tick off documents and get reminders. Already have one?{" "}
+          <Link href={`/login?next=/s/${slug}`}>Sign in</Link>.
         </p>
       ) : !tracked ? (
         <p className="text-caption text-ink-hint">Ticking a document adds this scholarship to My applications.</p>

@@ -5,7 +5,7 @@ import type { ScholarshipDetail } from "@/lib/data/scholarships";
 import { criteriaItems, type Evaluation } from "@/lib/eligibility";
 import { formatDate, plural, shortProvider, urgency } from "@/lib/format";
 import { providerTypeLabel } from "@/lib/reference";
-import { MatchPill, Pill, ProviderMark, SamplePill } from "./bits";
+import { DUE_TONE, MatchPill, Pill, ProviderMark, SamplePill } from "./bits";
 import { DocumentChecklist } from "./checklist";
 import { CriteriaList } from "./criteria";
 import { DetailActions } from "./detail-actions";
@@ -43,7 +43,8 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
       : state.status === "upcoming"
         ? `Opens in ${plural(state.days_to_open ?? 0, "day")}`
         : "Closed";
-  const urgent = urgency(state.status, state.days_left) === "urgent";
+  const docsDone = application ? s.documents.filter((d) => application.checked.includes(d.id)).length : 0;
+  const dueTone = state.status === "open" ? DUE_TONE[urgency(state.status, state.days_left)] : "text-ink";
   const checkedDate = s.last_verified_at ?? s.updated_at;
   const sid = (part: string) => `${compact ? "p-" : ""}${part}-${s.slug}`;
 
@@ -71,25 +72,16 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
+          <MatchPill verdict={evaluation?.verdict} />
           <Pill tone="strong" icon="peso">{s.amount_text}</Pill>
           <Pill icon="building">{providerTypeLabel[provider.type]}</Pill>
-          <MatchPill verdict={evaluation?.verdict} />
           {s.is_sample ? (
             <SamplePill />
           ) : s.verification === "verified" && s.last_verified_at ? (
             <Pill icon="shield">Verified {formatDate(s.last_verified_at.slice(0, 10))}</Pill>
           ) : null}
         </div>
-        <DetailActions
-          scholarshipId={s.id}
-          slug={s.slug}
-          stage={application?.stage ?? null}
-          status={state.status}
-          sourceUrl={s.source_url}
-          signedIn={viewer.signedIn}
-          isStudent={viewer.isStudent}
-        />
-        <dl className="mt-6 grid grid-cols-2 gap-4 border-t border-hairline pt-4 sm:grid-cols-3">
+        <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-hairline pt-4 sm:grid-cols-3">
           <div>
             <dt className="text-caption text-ink-hint">Applications open</dt>
             <dd className="text-sm font-semibold text-ink">{s.opens_on ? formatDate(s.opens_on, true) : "To be announced"}</dd>
@@ -100,9 +92,21 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
           </div>
           <div>
             <dt className="text-caption text-ink-hint">Time left</dt>
-            <dd className={`text-sm font-semibold ${urgent ? "text-danger" : "text-ink"}`}>{left}</dd>
+            <dd className={`text-sm font-semibold ${dueTone}`}>{left}</dd>
           </div>
         </dl>
+        <DetailActions
+          scholarshipId={s.id}
+          slug={s.slug}
+          stage={application?.stage ?? null}
+          status={state.status}
+          sourceUrl={s.source_url}
+          signedIn={viewer.signedIn}
+          isStudent={viewer.isStudent}
+          docsTotal={s.documents.length}
+          docsDone={docsDone}
+          dueText={state.status === "open" ? (state.days_left === 0 ? "closes today" : `closes in ${left}`) : null}
+        />
         {s.is_sample ? (
           <div className="mt-6">
             <Notice>
@@ -206,7 +210,7 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
           s.source_label
         )}
         {s.is_sample ? "" : `. Last checked ${formatDate(checkedDate.slice(0, 10), true)}`}. Questions?{" "}
-        <Link href={`/help?about=${s.id}`}>Ask the scholarship office</Link>.
+        <Link href={`/help?about=${s.id}#ask-h`}>Ask a scholarship coordinator</Link>.
       </p>
     </>
   );

@@ -10,7 +10,7 @@ export function ProviderMark({ abbr, color, size = "md" }: { abbr: string; color
     size === "lg"
       ? "size-15 rounded-md text-sm"
       : size === "sm"
-        ? `size-9 rounded-sm ${long ? "text-[11px]" : "text-tab"}`
+        ? `rounded-sm ${long ? "size-10 text-[11px]" : "size-9 text-tab"}`
         : `size-11 rounded-md ${long ? "text-[11px]" : "text-tab"}`;
   return (
     <span
@@ -59,7 +59,8 @@ export function SamplePill() {
   return <Pill tone="info" icon="info">Sample listing</Pill>;
 }
 
-const DUE_TONE = { urgent: "text-danger", soon: "text-warn", none: "text-ink-secondary" } as const;
+/** The Urgency Ladder: red at ≤3 days, amber at ≤7, neutral otherwise. */
+export const DUE_TONE = { urgent: "text-danger", soon: "text-warn", none: "text-ink-secondary" } as const;
 
 export function DueText({
   s,

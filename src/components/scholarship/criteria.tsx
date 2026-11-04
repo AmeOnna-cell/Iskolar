@@ -18,6 +18,27 @@ function Disc({ cls, icon }: { cls: string; icon: IconName }) {
   );
 }
 
+/** One bordered list of requirements: status disc, label, the student's own value, status word. */
+export function RequirementRows({ items, answered }: { items: EligibilityItem[]; answered: boolean }) {
+  return (
+    <ul className="overflow-hidden rounded-md border border-hairline" aria-label="Requirements we can check">
+      {items.map((item) => {
+        const row = answered ? ROW[item.status]! : null;
+        return (
+          <li key={item.kind} className="grid grid-cols-[22px_minmax(0,1fr)_auto] items-start gap-3 border-t border-hairline px-4 py-3 first:border-t-0">
+            {row ? <Disc cls={row.disc} icon={row.icon} /> : <Disc cls="bg-surface-subtle text-ink-hint ring-1 ring-hairline-strong" icon="doc" />}
+            <div className="min-w-0">
+              <p className="text-base font-semibold text-ink">{requirementLabel(item)}</p>
+              {row ? <p className={`text-sm ${row.haveTone}`}>{haveText(item)}</p> : null}
+            </div>
+            {row ? <span className={`pt-0.5 text-caption font-semibold whitespace-nowrap ${row.wordTone}`}>{row.word}</span> : null}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 /** The explainable eligibility check: verdict banner, one row per requirement, self-checks, disclaimer. */
 export function CriteriaList({
   evaluation,
@@ -53,7 +74,7 @@ export function CriteriaList({
           {firstUnknown ? (
             <Link
               href={`/check?step=${stepFor(firstUnknown)}`}
-              className="inline-flex min-h-9 items-center rounded-sm border border-hairline-strong bg-surface px-3 text-sm text-ink no-underline hover:bg-surface-hover"
+              className="inline-flex min-h-11 items-center rounded-sm border border-hairline-strong bg-surface px-3 text-sm text-ink no-underline hover:bg-surface-hover nav:min-h-9"
             >
               Answer now
             </Link>
@@ -61,23 +82,7 @@ export function CriteriaList({
         </div>
       )}
 
-      {items.length > 0 ? (
-        <ul className="overflow-hidden rounded-md border border-hairline" aria-label="Requirements we can check">
-          {items.map((item) => {
-            const row = answered ? ROW[item.status]! : null;
-            return (
-              <li key={item.kind} className="grid grid-cols-[22px_minmax(0,1fr)_auto] items-start gap-3 border-t border-hairline px-4 py-3 first:border-t-0">
-                {row ? <Disc cls={row.disc} icon={row.icon} /> : <Disc cls="bg-surface-subtle text-ink-hint ring-1 ring-hairline-strong" icon="doc" />}
-                <div className="min-w-0">
-                  <p className="text-base font-semibold text-ink">{requirementLabel(item)}</p>
-                  {row ? <p className={`text-sm ${row.haveTone}`}>{haveText(item)}</p> : null}
-                </div>
-                {row ? <span className={`pt-0.5 text-caption font-semibold whitespace-nowrap ${row.wordTone}`}>{row.word}</span> : null}
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
+      {items.length > 0 ? <RequirementRows items={items} answered={Boolean(answered)} /> : null}
 
       {notes.length > 0 ? (
         <div>

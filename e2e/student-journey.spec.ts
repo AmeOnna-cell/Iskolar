@@ -48,11 +48,17 @@ test("onboarding → results → checklist → dashboard → tracker", async ({ 
   // Detail: explained eligibility, then tick a document (starts preparing)
   await page.goto("/s/tulong-dunong-program");
   await waitForHydration(page);
-  await expect(page.getByText("You meet all 2 requirements we can check")).toBeVisible();
+  await expect(page.getByText("You meet both requirements we can check")).toBeVisible();
   await expect(page.getByText("Your GWA is 1.85")).toBeVisible();
   await page.getByLabel(/Certificate of Registration/).check();
   await expect(page.getByRole("status").filter({ hasText: "Added to My applications under Preparing" })).toBeVisible();
   await expect(page.getByText("1 of 5 ready")).toBeVisible();
+  // While documents are missing, the page leads with what's missing, not "Mark as submitted";
+  // the reminder line says what the 07:00 job will actually do.
+  await page.reload();
+  await expect(page.getByTestId("prep-status")).toHaveText(/^4 documents left · closes in \d+ days?$/);
+  await expect(page.getByRole("link", { name: "See what's missing" })).toHaveAttribute("href", "#documents-tulong-dunong-program");
+  await expect(page.getByTestId("reminder-copy")).toHaveText(/^It closes in \d+ days?\. You'll get a reminder by email and on-site alerts at 7 AM\.$/);
 
   // Dashboard: the greeting's fact is the urgent deadline; sections in the brief's order
   await page.goto("/dashboard");
@@ -83,7 +89,8 @@ test("signed-out visitors can browse but must sign in to track", async ({ page }
   // Requirements are listed for everyone, even without answers.
   await expect(page.getByText("GWA of 3.00 or better")).toBeVisible();
   await expect(page.getByText("Household income of ₱400,000 a year or less")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Sign in to save and track" })).toHaveAttribute("href", "/login?next=/s/tulong-dunong-program");
+  await expect(page.getByRole("link", { name: "Create an account to save" })).toHaveAttribute("href", "/signup");
+  await expect(page.locator("main").getByRole("link", { name: "Sign in", exact: true }).first()).toHaveAttribute("href", "/login?next=/s/tulong-dunong-program");
   await expect(page.getByLabel(/Certificate of Registration/)).toBeDisabled();
 });
 

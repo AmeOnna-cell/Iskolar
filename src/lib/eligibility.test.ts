@@ -34,7 +34,7 @@ describe("eligibility wording (prototype)", () => {
   });
 
   it("builds the verdict banner and reason lines", () => {
-    expect(verdictSentence({ verdict: "yes", met: 2, unknown: 0, not_met: 0, total: 2 })).toBe("You meet all 2 requirements we can check");
+    expect(verdictSentence({ verdict: "yes", met: 2, unknown: 0, not_met: 0, total: 2 })).toBe("You meet both requirements we can check");
     expect(verdictSentence({ verdict: "maybe", met: 0, unknown: 1, not_met: 0, total: 1 })).toBe("You meet 0 of 1. One answer is missing.");
     expect(verdictSentence({ verdict: "no", met: 1, unknown: 0, not_met: 1, total: 2 })).toBe("You don’t meet 1 requirement");
     const gwa: EligibilityItem = { kind: "gwa", status: "not_met", required: 1.5, have: 1.85 };

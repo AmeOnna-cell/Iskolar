@@ -18,6 +18,9 @@ export function DetailActions({
   sourceUrl,
   signedIn,
   isStudent,
+  docsTotal,
+  docsDone,
+  dueText,
 }: {
   scholarshipId: string;
   slug: string;
@@ -26,6 +29,10 @@ export function DetailActions({
   sourceUrl: string | null;
   signedIn: boolean;
   isStudent: boolean;
+  docsTotal: number;
+  docsDone: number;
+  /** "closes in 4 days" / "closes today" while open, otherwise null. */
+  dueText: string | null;
 }) {
   const toast = useToast();
   const [pending, start] = useTransition();
@@ -39,7 +46,7 @@ export function DetailActions({
     });
 
   const official = sourceUrl ? (
-    <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1.5 px-1 text-sm font-semibold">
+    <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1 px-1 text-sm font-semibold">
       Official page <Icon name="ext" size={16} />
       <span className="sr-only">(opens in a new tab)</span>
     </a>
@@ -47,7 +54,14 @@ export function DetailActions({
 
   let main: React.ReactNode;
   if (!signedIn) {
-    main = <ButtonLink href={`/login?next=/s/${slug}`}>Sign in to save and track</ButtonLink>;
+    main = (
+      <>
+        <ButtonLink href="/signup">Create an account to save</ButtonLink>
+        <a href={`/login?next=/s/${slug}`} className="inline-flex min-h-11 items-center px-1 text-sm font-semibold">
+          Sign in
+        </a>
+      </>
+    );
   } else if (!isStudent) {
     main = null;
   } else if (current === null) {
@@ -74,12 +88,24 @@ export function DetailActions({
       </>
     );
   } else if (current === "preparing") {
-    main = (
-      <>
-        <Button loading={pending} onClick={() => go("submitted")}>Mark as submitted</Button>
-        <ButtonLink href="/applications?tab=preparing" variant="outline">View in my applications</ButtonLink>
-      </>
-    );
+    const left = docsTotal - docsDone;
+    // Until every document is ticked, the next step is the checklist, not "submitted".
+    main =
+      left > 0 ? (
+        <>
+          <p className="w-full text-sm font-semibold text-ink" data-testid="prep-status">
+            {left === 1 ? "1 document left" : `${left} documents left`}
+            {dueText ? ` · ${dueText}` : ""}
+          </p>
+          <ButtonLink href={`#documents-${slug}`}>See what&apos;s missing</ButtonLink>
+          <Button variant="outline" loading={pending} onClick={() => go("submitted")}>Mark as submitted</Button>
+        </>
+      ) : (
+        <>
+          <Button loading={pending} onClick={() => go("submitted")}>Mark as submitted</Button>
+          <ButtonLink href="/applications?tab=preparing" variant="outline">View in my applications</ButtonLink>
+        </>
+      );
   } else {
     main = (
       <>

@@ -44,7 +44,7 @@ export function AskForm({ options, about }: { options: Array<{ id: string; name:
         {state.fieldError ? <p id="ask-q-err" className="text-caption font-semibold text-danger">{state.fieldError}</p> : null}
       </div>
       <Button type="submit" loading={pending}>Send question</Button>
-      <p className="text-caption text-ink-hint">The scholarship office usually replies within 2 school days.</p>
+      <p className="text-caption text-ink-hint">A scholarship coordinator usually replies within 2 school days.</p>
     </form>
   );
 }

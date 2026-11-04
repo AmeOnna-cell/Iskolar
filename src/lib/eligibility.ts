@@ -95,7 +95,13 @@ export const VERDICT_LABEL: Record<Exclude<Verdict, "none">, string> = {
 /** The verdict banner sentence (prototype). */
 export function verdictSentence(e: Pick<Evaluation, "verdict" | "met" | "unknown" | "not_met" | "total">): string {
   if (e.verdict === "yes") {
-    return e.total === 0 ? "There are no requirements we can check for this one" : `You meet all ${e.total === 1 ? "1 requirement" : `${e.total} requirements`} we can check`;
+    return e.total === 0
+      ? "There are no requirements we can check for this one"
+      : e.total === 1
+        ? "You meet the 1 requirement we can check"
+        : e.total === 2
+          ? "You meet both requirements we can check"
+          : `You meet all ${e.total} requirements we can check`;
   }
   if (e.verdict === "maybe") {
     return `You meet ${e.met} of ${e.total}. ${e.unknown === 1 ? "One answer is" : `${e.unknown} answers are`} missing.`;

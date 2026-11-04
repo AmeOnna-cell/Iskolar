@@ -4,12 +4,12 @@ import { notFound } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { DueText, ProviderMark } from "@/components/scholarship/bits";
 import { DetailBody } from "@/components/scholarship/detail-body";
-import { ButtonLink } from "@/components/ui/button";
 import { getSessionUser } from "@/lib/auth/session";
 import { loadDetail } from "@/lib/data/detail";
 import { getScholarshipDetail, parseSearchParams, searchScholarships } from "@/lib/data/scholarships";
 import { getPreferences } from "@/lib/data/student";
-import { plural } from "@/lib/format";
+import { formatDate, plural } from "@/lib/format";
+import { createClient } from "@/lib/supabase/server";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -25,47 +25,71 @@ export default async function ScholarshipPage({ params }: Params) {
   if (!data) notFound();
   const { s, state, application } = data;
 
-  const [similar, prefs] = await Promise.all([
+  const isStudent = user?.role === "student";
+  const [similar, prefs, reminded] = await Promise.all([
     searchScholarships(parseSearchParams({ sort: "deadline" }), user).then(({ rows }) =>
       rows.filter((r) => r.id !== s.id && r.status !== "closed" && r.verdict !== "no").slice(0, 4),
     ),
-    user?.role === "student" ? getPreferences(user.id) : null,
+    isStudent ? getPreferences(user.id) : null,
+    // The daily reminder job's record for this deadline, if it has already run (RLS: own alerts only).
+    isStudent && application
+      ? createClient().then(async (c) => {
+          const { data: n } = await c
+            .from("notifications")
+            .select("created_at")
+            .like("dedupe_key", `deadline:${s.id}:${s.closes_on}:%`)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          return n?.created_at ?? null;
+        })
+      : null,
   ]);
-  const channels = prefs ? [prefs.email && "email", prefs.push && "push notification", prefs.site && "on-site alert"].filter(Boolean) : [];
+  const channelList = prefs ? ([prefs.email && "email", prefs.push && "push notifications", prefs.site && "on-site alerts"].filter(Boolean) as string[]) : [];
+  const channels = channelList.length > 1 ? `${channelList.slice(0, -1).join(", ")} and ${channelList.at(-1)}` : channelList[0];
+  // Reminder copy that matches what the 07:00 job will actually do (one reminder per lead time).
+  let reminder: string;
+  if (!isStudent) reminder = "";
+  else if (!application || state.status !== "open" || !prefs) reminder = "Save this scholarship to get deadline reminders.";
+  else if (!channels) reminder = "Your reminders are turned off.";
+  else if (reminded) reminder = `We reminded you on ${formatDate(reminded.slice(0, 10))} by ${channels}.`;
+  else if (state.days_left === 0) reminder = "It closes today.";
+  else if ((state.days_left ?? 99) <= prefs.lead_days) reminder = `It closes in ${plural(state.days_left ?? 0, "day")}. You'll get a reminder by ${channels} at 7 AM.`;
+  else reminder = `We'll remind you ${plural(prefs.lead_days, "day")} before the deadline by ${channels}.`;
 
   return (
     <div className="page-container py-6 sm:py-8">
-      <Link href="/explore" className="mb-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold">
-        <Icon name="back" size={16} /> Back to search results
+      <Link href="/explore" className="mb-4 inline-flex min-h-11 items-center gap-1 text-sm font-semibold">
+        <Icon name="back" size={16} /> All scholarships
       </Link>
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <article className="overflow-hidden rounded-md border border-hairline bg-surface shadow-rest">
           <DetailBody {...data} />
         </article>
         <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
-          <section aria-labelledby="reminders-h" className="rounded-md border border-hairline bg-surface p-5 shadow-rest">
+          <section aria-labelledby="reminders-h" className="rounded-md border border-hairline bg-surface p-4 shadow-rest sm:p-6">
             <h2 id="reminders-h" className="text-base font-semibold text-ink">
               Reminders
             </h2>
-            <p className="mt-2 text-sm text-ink-secondary">
-              {application && state.status === "open" && prefs
-                ? `We'll remind you ${plural(prefs.lead_days, "day")} before the deadline by ${channels.join(", ") || "on-site alert"}.`
-                : user?.role === "student"
-                  ? "Save this scholarship to get deadline reminders."
-                  : "Sign in and save this scholarship to get deadline reminders."}
+            <p className="mt-2 text-sm text-ink-secondary" data-testid="reminder-copy">
+              {isStudent ? (
+                reminder
+              ) : user ? (
+                "Reminders are for student accounts."
+              ) : (
+                <>
+                  <Link href="/signup">Create an account</Link> and save this scholarship to get deadline reminders.
+                </>
+              )}
             </p>
-            {user?.role === "student" ? (
-              <Link href="/settings/notifications" className="mt-3 inline-block text-sm font-semibold">
+            {isStudent ? (
+              <Link href="/settings/notifications" className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold">
                 Change reminder settings
               </Link>
-            ) : !user ? (
-              <ButtonLink href={`/signup`} variant="outline" size="sm" className="mt-3">
-                Create an account
-              </ButtonLink>
             ) : null}
           </section>
           {similar.length ? (
-            <section aria-labelledby="similar-h" className="rounded-md border border-hairline bg-surface p-5 shadow-rest">
+            <section aria-labelledby="similar-h" className="rounded-md border border-hairline bg-surface p-4 shadow-rest sm:p-6">
               <h2 id="similar-h" className="text-base font-semibold text-ink">
                 Similar scholarships
               </h2>

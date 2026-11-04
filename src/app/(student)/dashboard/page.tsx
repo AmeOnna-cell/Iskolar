@@ -87,7 +87,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     .filter((r) => r.verdict === "maybe" && r.first_gap)
     .slice(0, 2)
     .map((r) => ({ slug: r.slug, name: r.name, question: requirementLabel(r.first_gap as EligibilityItem), step: stepFor(r.first_gap as EligibilityItem) }));
-  const unverified = open.filter((r) => r.verdict === "yes" && r.verification !== "verified").map((r) => ({ slug: r.slug, name: r.name, daysLeft: r.days_left }));
+  const unverified = open
+    .filter((r) => r.verdict === "yes" && (r.is_sample || r.verification !== "verified"))
+    .map((r) => ({ slug: r.slug, name: r.name, daysLeft: r.days_left, sample: r.is_sample }));
 
   const urgent = urgentItems(tracked);
   const tasks = nextSteps(tracked, maybe, unverified);

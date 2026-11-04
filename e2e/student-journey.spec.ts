@@ -87,3 +87,19 @@ test("signed-out visitors can browse but must sign in to track", async ({ page }
   await expect(page.getByRole("link", { name: "Sign in to save and track" })).toHaveAttribute("href", "/login?next=/s/tulong-dunong-program");
   await expect(page.getByLabel(/Certificate of Registration/)).toBeDisabled();
 });
+
+test("sample listings are labelled and never shown as verified", async ({ page }) => {
+  await page.goto("/explore");
+  const card = page.getByTestId("scholarship-card").filter({ hasText: "Tulong Dunong Program" });
+  await expect(card.getByText("Sample listing")).toBeVisible();
+  await expect(card.getByText(/^(Verified|Unverified)/)).toHaveCount(0);
+
+  await page.goto("/s/tulong-dunong-program");
+  await expect(page.getByText("Sample listing.", { exact: true })).toBeVisible(); // the notice
+  await expect(page.getByText(/^Verified /)).toHaveCount(0);
+  await expect(page.getByText(/Last checked/)).toHaveCount(0);
+
+  await page.goto("/");
+  await expect(page.getByText("sample listings, for trying Iskolar out")).toBeVisible();
+  await expect(page.getByText("verified with official sources")).toHaveCount(0);
+});

@@ -57,7 +57,9 @@ export default async function LandingPage() {
             {[
               [String(stats.open), "open now"],
               [String(stats.upcoming), "opening soon"],
-              [`${stats.verified} of ${stats.total}`, "verified with official sources"],
+              // Sample listings are never counted as verified.
+              ...(stats.total > stats.sample ? [[`${stats.verified} of ${stats.total - stats.sample}`, "verified with official sources"]] : []),
+              ...(stats.sample ? [[String(stats.sample), stats.sample === 1 ? "sample listing, for trying Iskolar out" : "sample listings, for trying Iskolar out"]] : []),
             ].map(([value, label]) => (
               <div key={label} className="flex flex-col-reverse">
                 <dt className="text-sm text-band-text-soft">{label}</dt>

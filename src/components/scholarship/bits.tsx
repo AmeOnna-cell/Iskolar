@@ -49,13 +49,14 @@ export function MatchPill({ verdict }: { verdict: Verdict | string | null | unde
   return null;
 }
 
+/** Sample (seeded example) rows are never presented as verified, or as unverified real listings. */
 export function TrustPills({ verification, isSample }: { verification: string; isSample: boolean }) {
-  return (
-    <>
-      {verification !== "verified" ? <Pill tone="warn" icon="warn">Unverified</Pill> : null}
-      {isSample ? <Pill>Sample listing</Pill> : null}
-    </>
-  );
+  if (isSample) return <SamplePill />;
+  return verification !== "verified" ? <Pill tone="warn" icon="warn">Unverified</Pill> : null;
+}
+
+export function SamplePill() {
+  return <Pill tone="info" icon="info">Sample listing</Pill>;
 }
 
 const DUE_TONE = { urgent: "text-danger", soon: "text-warn", none: "text-ink-secondary" } as const;

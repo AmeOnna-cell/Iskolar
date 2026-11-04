@@ -48,7 +48,7 @@ const when = (t: TrackedItem) => (t.status === "open" ? `closes in ${plural(t.da
 export function nextSteps(
   items: TrackedItem[],
   maybe: Array<{ slug: string; name: string; question: string; step: number }>,
-  unverifiedMatches: Array<{ slug: string; name: string; daysLeft: number | null }>,
+  unverifiedMatches: Array<{ slug: string; name: string; daysLeft: number | null; sample?: boolean }>,
   max = 5,
 ): Task[] {
   const tasks: Task[] = [];
@@ -103,7 +103,7 @@ export function nextSteps(
       tone: "warn",
       icon: "warn",
       title: `Confirm ${u.name} with the provider`,
-      detail: "This listing isn’t verified yet.",
+      detail: u.sample ? "This is a sample listing, not an official one." : "This listing isn’t verified yet.",
       action: { label: "View", href: `/s/${u.slug}` },
       rank: u.daysLeft ?? 600,
     });

@@ -6,8 +6,8 @@ select set_config('request.jwt.claims', '{"role":"anon"}', true);
 set local role anon;
 select is(
   public.listing_stats(),
-  '{"total": 9, "open": 6, "upcoming": 2, "verified": 8, "by_type": {"government": 5, "local_government": 2, "private": 1}}'::jsonb,
-  'Landing stats match the seed (the closed school award is left out of by_type)'
+  '{"total": 9, "open": 6, "upcoming": 2, "verified": 0, "sample": 9, "by_type": {"government": 5, "local_government": 2, "private": 1}}'::jsonb,
+  'Landing stats match the seed: all 9 are samples, so none counts as verified (the closed school award is left out of by_type)'
 );
 select throws_ok($$ select * from public.eligibility_counts(gen_random_uuid()) $$, '42501', null,
   'Visitors cannot read eligibility counts');

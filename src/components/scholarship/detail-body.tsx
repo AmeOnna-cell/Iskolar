@@ -5,7 +5,7 @@ import type { ScholarshipDetail } from "@/lib/data/scholarships";
 import { criteriaItems, type Evaluation } from "@/lib/eligibility";
 import { formatDate, plural, shortProvider, urgency } from "@/lib/format";
 import { providerTypeLabel } from "@/lib/reference";
-import { MatchPill, Pill, ProviderMark } from "./bits";
+import { MatchPill, Pill, ProviderMark, SamplePill } from "./bits";
 import { DocumentChecklist } from "./checklist";
 import { CriteriaList } from "./criteria";
 import { DetailActions } from "./detail-actions";
@@ -50,7 +50,14 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
   return (
     <>
       <div className="px-5 pt-6 pb-6 sm:px-6">
-        {s.verification !== "verified" ? (
+        {s.is_sample ? (
+          <div className="mb-4">
+            <Notice>
+              <strong>Sample listing.</strong> Example data to show how Iskolar works, modelled on {shortProvider(provider.name)}&apos;s
+              program. Dates and amounts may not be current: check the official source before you apply.
+            </Notice>
+          </div>
+        ) : s.verification !== "verified" ? (
           <div className="mb-4">
             <Notice tone="warn">
               <strong>Not yet verified.</strong> Source: {s.source_label}. Confirm with {shortProvider(provider.name)} before spending on
@@ -82,10 +89,11 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
           <Pill tone="strong" icon="peso">{s.amount_text}</Pill>
           <Pill icon="building">{providerTypeLabel[provider.type]}</Pill>
           <MatchPill verdict={evaluation?.verdict} />
-          {s.verification === "verified" && s.last_verified_at ? (
+          {s.is_sample ? (
+            <SamplePill />
+          ) : s.verification === "verified" && s.last_verified_at ? (
             <Pill icon="shield">Verified {formatDate(s.last_verified_at.slice(0, 10))}</Pill>
           ) : null}
-          {s.is_sample ? <Pill>Sample listing</Pill> : null}
         </div>
         <DetailActions
           scholarshipId={s.id}
@@ -197,7 +205,7 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
         ) : (
           s.source_label
         )}
-        . Last checked {formatDate(checkedDate.slice(0, 10), true)}. Questions?{" "}
+        {s.is_sample ? "" : `. Last checked ${formatDate(checkedDate.slice(0, 10), true)}`}. Questions?{" "}
         <Link href={`/help?about=${s.id}`}>Ask the scholarship office</Link>.
       </p>
     </>

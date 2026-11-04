@@ -102,7 +102,7 @@ export async function searchScholarships(p: SearchParams, user: SessionUser | nu
 
 // ---------- Landing ----------
 
-export type ListingStats = { total: number; open: number; upcoming: number; verified: number; by_type: Partial<Record<ProviderType, number>> };
+export type ListingStats = { total: number; open: number; upcoming: number; verified: number; sample: number; by_type: Partial<Record<ProviderType, number>> };
 
 export const getListingStats = unstable_cache(
   async (): Promise<ListingStats> => {

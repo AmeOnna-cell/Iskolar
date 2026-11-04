@@ -77,6 +77,16 @@ test("delete requires typing the exact email; the account then can't sign in", a
 test("the audit log exports as CSV", async ({ page }) => {
   const admin = await createUser("admin", "csv");
   await signIn(page, admin.email);
+
+  // Keyset paging: "Older entries" continues strictly after the last row of page 1.
+  await page.goto("/admin/audit");
+  const times = (await page.getByTestId("audit-rows").locator("summary > span:first-child").allInnerTexts()).map((t) => Date.parse(t));
+  await page.getByRole("link", { name: "Older entries" }).click();
+  await expect(page).toHaveURL(/before=/);
+  await expect(page.getByRole("link", { name: "Newest" })).toBeVisible();
+  const older = (await page.getByTestId("audit-rows").locator("summary > span:first-child").allInnerTexts()).map((t) => Date.parse(t));
+  expect(older.length).toBeGreaterThan(0);
+  expect(Math.max(...older)).toBeLessThanOrEqual(Math.min(...times));
   const res = await page.request.get("/admin/audit/export");
   expect(res.status()).toBe(200);
   expect(res.headers()["content-type"]).toContain("text/csv");

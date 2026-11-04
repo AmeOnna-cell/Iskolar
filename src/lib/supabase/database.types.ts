@@ -525,6 +525,9 @@ isOneToOne: true
 "days_text":
 { Args: { "p_days": number }; Returns: string
                            },
+"eligibility_codes":
+{ Args: { "c": Omit<Database["public"]['Tables']["scholarship_criteria"]['Row'], Database["public"]['Tables']["scholarship_criteria"]['ComputedFields']>,"sp": Omit<Database["public"]['Tables']["student_profiles"]['Row'], Database["public"]['Tables']["student_profiles"]['ComputedFields']> }; Returns: (number)[]
+                           },
 "eligibility_counts":
 { Args: { "p_student": string }; Returns: {
               "maybe": number,"no": number,"yes": number
@@ -614,6 +617,9 @@ isOneToOne: true
 "notify":
 { Args: { "p_body": string,"p_dedupe": string,"p_kind": Database["public"]['Enums']["notification_kind"],"p_link": string,"p_payload"?: Json,"p_title": string,"p_user": string }; Returns: boolean
                            },
+"notify_many":
+{ Args: { "p_body": string,"p_dedupe": string,"p_kind": Database["public"]['Enums']["notification_kind"],"p_link": string,"p_payload"?: Json,"p_title": string,"p_users": (string)[] }; Returns: number
+                           },
 "other_active_admin_exists":
 { Args: { "p_user": string }; Returns: boolean
                            },
@@ -651,6 +657,9 @@ isOneToOne: true
                            },
 "trackers":
 { Args: { "p_scholarship": string }; Returns: string[]
+                           },
+"verdict_of":
+{ Args: { "codes": (number)[],"has_profile": boolean }; Returns: string
                            },
 "write_audit":
 { Args: { "p_action": string,"p_actor": string,"p_after": Json,"p_before": Json,"p_entity_id": string,"p_entity_type": string }; Returns: undefined

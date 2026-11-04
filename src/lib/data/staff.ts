@@ -206,7 +206,9 @@ export async function listAudit(p: AuditQuery) {
   if (p.entity) q = q.eq("entity_type", p.entity);
   if (p.from) q = q.gte("created_at", `${p.from}T00:00:00+08:00`);
   if (p.to) q = q.lt("created_at", `${p.to}T24:00:00+08:00`);
-  if (p.before) q = q.or(`created_at.lt.${p.before.at},and(created_at.eq.${p.before.at},id.lt.${p.before.id})`);
+  // The redundant `created_at <= cursor` lets Postgres start the index scan at the cursor; the OR
+  // alone made it walk from the newest entry (26 ms → 0.2 ms at 100k entries, docs/performance.md).
+  if (p.before) q = q.lte("created_at", p.before.at).or(`created_at.lt.${p.before.at},and(created_at.eq.${p.before.at},id.lt.${p.before.id})`);
   const { data, error } = await q.order("created_at", { ascending: false }).order("id", { ascending: false }).limit(p.pageSize + 1);
   if (error) throw new Error(`audit failed: ${error.message}`);
   const rows = data ?? [];

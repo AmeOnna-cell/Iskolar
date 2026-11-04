@@ -3,8 +3,8 @@
 | Phase | Status |
 |---|---|
 | 1 Foundation, 1b Email pipeline, 2 Database, 3 Auth, 4 Student, 5 Staff/admin | Done and deployed |
-| 6 Notifications | Done; see below |
-| 7 Performance | Next |
+| 6 Notifications | Done and deployed |
+| 7 Performance | Done locally; migration `20261104000100_performance` not pushed yet |
 | 8 Polish/QA, 9 Tests + docs | To do |
 
 ## Phase 6: notifications (done)
@@ -47,6 +47,21 @@ Details and setup are in `docs/notifications.md`.
 - Local Vault needs `iskolar_app_url = http://host.docker.internal:3000` and `iskolar_cron_secret` (see `docs/notifications.md`).
 - `npm audit --omit=dev`: 1 high and 1 moderate in the `postcss` bundled inside Next.js. This was already on main and is not from Phase 6. The offered fix needs `--force`; revisit when upgrading Next.
 
-## Next: Phase 7 (performance)
+## Phase 9 additions (from the user)
 
-`scripts/synth.sql` (5k scholarships, 50k notifications), `EXPLAIN ANALYZE` on explore, the dashboard, admin tables, the audit log and the alerts queries, index tuning, and `docs/performance.md`.
+- Investigate the one-off pgTAP failure seen during Phase 6 (not reproduced; see above).
+- Upgrade Next.js to clear the `postcss` audit warning from its bundled copy.
+- Phase 6 confirmed on the cloud by the user: both cron jobs active, and the dispatch job runs (skipping the HTTP call when nothing is pending).
+
+## Phase 7: performance (done locally)
+
+Details are in `docs/performance.md`. The dataset was 5,009 listings, 2,085 students, 50,300 alerts and 100,000 audit entries (`scripts/synth.sql`), with plans from `scripts/explain.sql`.
+
+- Explore, the dashboard and eligibility counts went from 0.7–0.9 s to 30–76 ms. A fast inlinable eligibility tally replaces the per-listing explainable items, which are now built only for the page shown.
+- `staff_overview` went from 250 to 13–18 ms and `listing_stats` from 161 to 9–14 ms, because `today_ph` and `scholarship_status` are now inlinable.
+- The deep audit-log page went from 83 to 0.4 ms with a sargable keyset filter in `listAudit`.
+- Announcement fan-out went from 282 to 58–77 ms and new-match alerts from 72 to 5 ms, with a set-based `notify_many`.
+- Trade-off: the daily reminder job went from 121 to about 340 ms (585 reminders) and was kept. See the doc.
+- Tests: pgTAP `90_performance` (the tally matches the explainable items for 40,000+ combinations; a planted bug fails it), 247 assertions in total; a keyset paging check added to E2E 4.5; 56 of 56 E2E pass.
+
+## Next: Phase 8 (polish/QA)

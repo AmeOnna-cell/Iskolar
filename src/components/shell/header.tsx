@@ -27,7 +27,7 @@ export function Header({ viewer, userId, unread = 0, signOut }: Props) {
           <Link
             href={homeHref(viewer)}
             aria-label="Iskolar home"
-            className="flex items-center gap-2 text-title-sm font-bold tracking-tight text-ink no-underline"
+            className="flex min-h-11 items-center gap-2 text-title-sm font-bold tracking-tight text-ink no-underline"
           >
             <LogoMark size={30} />
             Iskolar
@@ -50,13 +50,13 @@ export function Header({ viewer, userId, unread = 0, signOut }: Props) {
               <div className="ml-2 flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="hidden h-9 items-center rounded-sm px-3 text-sm font-semibold text-ink no-underline hover:bg-surface-hover sm:inline-flex"
+                  className="hidden h-11 items-center rounded-sm px-3 text-sm font-semibold text-ink no-underline hover:bg-surface-hover sm:inline-flex nav:h-9"
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/signup"
-                  className="inline-flex h-9 items-center rounded-sm bg-primary px-3 text-sm font-semibold text-on-primary no-underline transition-colors duration-150 hover:bg-primary-hover"
+                  className="inline-flex h-11 items-center rounded-sm bg-primary px-3 text-sm font-semibold text-on-primary no-underline transition-colors duration-150 hover:bg-primary-hover nav:h-9"
                 >
                   Create account
                 </Link>

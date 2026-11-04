@@ -64,4 +64,25 @@ Details are in `docs/performance.md`. The dataset was 5,009 listings, 2,085 stud
 - Trade-off: the daily reminder job went from 121 to about 340 ms (585 reminders) and was kept. See the doc.
 - Tests: pgTAP `90_performance` (the tally matches the explainable items for 40,000+ combinations; a planted bug fails it), 247 assertions in total; a keyset paging check added to E2E 4.5; 56 of 56 E2E pass.
 
-## Next: Phase 8 (polish/QA)
+## Phase 8: polish/QA (in progress)
+
+1. **Sample listings (done; migration `20261104010000_sample_listings` not pushed yet).**
+   - A "Sample listing" badge appears on cards and detail pages, and samples are never shown as verified.
+   - Landing numbers count samples separately.
+2. **Impeccable pass, stage 1: dashboard and Find scholarships (done).**
+   - Critique: two isolated review agents; scores 26/40 and 27/40, with 4 P1 and 5 P2 issues. Snapshots are in `.impeccable/critique/`.
+   - The user chose a "Do this next" list, a scrolling chip row, and all P1 and P2 fixes.
+   - **Dashboard:**
+     - One "Do this next" list, soonest deadline first. It includes unsaved matches that close within 7 days, each with a Save action. The next missing document is shown inline, each scholarship appears only once, and the list shows 3 rows with a "Show N more" disclosure.
+     - An act-now band and an FYI band, separated by a rule; "Recommended" no longer repeats rows from "Do this next".
+     - Tinted icon circles and the stat strip are removed; there is one progress meter per application.
+     - Spacing is on the DESIGN.md scale, section headings are 20px, and touch targets are at least 44px.
+   - **Find scholarships:**
+     - On phones the search field has no button, the filters are one scrolling chip row, and sort sits in the results line.
+     - The "Check what I qualify for" chip is replaced by a sentence link.
+     - Cards put the verdict next to the deadline and give a reason for "Not eligible right now" and "Might qualify". The provider-type badge is gone, and "Posted" shows only when sorting by newest.
+     - The detail panel shows its notice under the dates and has a pinned "Open the full page" footer.
+     - The results list gets an `h2`; header and footer links meet the touch-target size.
+   - Checks: the detector is clean (only the documented 11px exception), there's no horizontal overflow at 360px, and 57 of 57 E2E tests pass.
+   - Before/after screenshots: `docs/screenshots/phase8-before/` and `docs/screenshots/phase8-after/`.
+3. **Next, stage 2:** the same pass for the landing page, scholarship detail, eligibility wizard and results, applications, alerts and settings, help, sign-in pages, and staff and admin screens.

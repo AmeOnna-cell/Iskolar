@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { completeness, headline, nextSteps, urgentItems, type TrackedItem } from "./dashboard";
+import { completeness, doNext, headline, urgentItems, type MatchLite, type TrackedItem } from "./dashboard";
 
 const base: TrackedItem = {
   scholarshipId: "id",
@@ -30,16 +30,24 @@ describe("dashboard priorities", () => {
     expect(urgentItems([tdp, odsp, done, sent]).map((t) => t.slug)).toEqual(["lgu", "tdp"]);
   });
 
-  it("next steps follow the prototype and sort by urgency", () => {
-    const steps = nextSteps([tdp, odsp, done], [{ slug: "tes", name: "TES", question: "Household is in 4Ps", step: 3 }], []);
-    expect(steps.map((s) => s.title)).toEqual([
-      "Submit City Assistance",
-      "Get your proof of income",
-      "Start preparing OFW Dependents",
-      "Answer 1 question to check TES",
+  it("do this next: one row per scholarship, soonest deadline first, next document inline", () => {
+    const match = (p: Partial<MatchLite>): MatchLite => ({
+      id: "m", slug: "m", name: "M", status: "open", daysLeft: 20, opensOn: null, closesOn: "2026-11-30", sample: false, verified: true, ...p,
+    });
+    const cityEd = match({ slug: "city", name: "City Educational Assistance", daysLeft: 1, sample: true });
+    const dost = match({ slug: "dost", name: "DOST-SEI", daysLeft: 40, verified: false });
+    const rows = doNext([tdp, odsp, done], [cityEd, dost, match({ slug: "tdp", name: "Tulong Dunong Program", daysLeft: 4 })], [
+      { slug: "tes", name: "TES", question: "Household is in 4Ps", step: 3 },
     ]);
-    expect(steps[0]!.tone).toBe("urgent");
-    expect(steps[2]!.action).toEqual({ label: "Start preparing", stage: "preparing", scholarshipId: "id" });
+    expect(rows.map((r) => r.key)).toEqual(["save-city", "submit-lgu", "docs-tdp", "start-odsp", "answer-tes", "confirm-dost"]);
+    // A qualifying listing closing soon but not saved yet is a deadline row with a Save action.
+    expect(rows[0]).toMatchObject({ title: "City Educational Assistance", action: { label: "Save", stage: "saved" } });
+    expect(rows[0]!.detail).toBe("You qualify and haven't saved it yet. Sample listing: check the official source first.");
+    // Tracked rows carry their next missing document; the same scholarship is never listed twice.
+    expect(rows[2]).toMatchObject({ title: "Tulong Dunong Program", detail: "Next: get your proof of income. 3 documents missing." });
+    expect(rows.filter((r) => r.title.includes("Tulong Dunong"))).toHaveLength(1);
+    // Checking a source ranks after every deadline and question.
+    expect(rows.at(-1)).toMatchObject({ title: "Confirm DOST-SEI with the provider", action: { label: "Check the source", href: "/s/dost" } });
   });
 
   it("the greeting states the most urgent fact and one action", () => {

@@ -8,7 +8,7 @@ import { parseSearchParams, searchHref, searchScholarships } from "@/lib/data/sc
 import { getStudentProfile } from "@/lib/data/student";
 import { plural } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
-import { ExploreFilters, SplitLinks } from "./filters";
+import { ExploreFilters, SortSelect, SplitLinks } from "./filters";
 
 export const metadata = { title: "Find scholarships" };
 
@@ -53,16 +53,27 @@ export default async function ExplorePage({ searchParams }: { searchParams: SP }
           </Link>
         </div>
       ) : (
-        <div className="mt-5 grid items-start gap-6 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)]">
-          <div>
-            <p className="mb-3 text-sm text-ink-secondary" aria-live="polite" data-testid="result-count">
-              {total > params.pageSize ? `Showing ${from}–${to} of ${plural(total, "scholarship")}` : plural(total, "scholarship")}
-            </p>
+        <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)]">
+          <section aria-labelledby="results-h">
+            <h2 id="results-h" className="sr-only">Results</h2>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <p className="text-sm text-ink-secondary" aria-live="polite" data-testid="result-count">
+                {total > params.pageSize ? `Showing ${from}–${to} of ${plural(total, "scholarship")}` : plural(total, "scholarship")}
+              </p>
+              <SortSelect params={params} canMatch={isStudent && Boolean(profile)} />
+            </div>
             <SplitLinks>
               <ul className="flex flex-col gap-3">
                 {rows.map((r) => (
                   <li key={r.id}>
-                    <ScholarshipCard s={r} stage={stages.get(r.id) ?? null} signedIn={Boolean(user)} selected={r.slug === selectedSlug} reason={params.mine} />
+                    <ScholarshipCard
+                      s={r}
+                      stage={stages.get(r.id) ?? null}
+                      signedIn={Boolean(user)}
+                      selected={r.slug === selectedSlug}
+                      reason={isStudent}
+                      showPosted={params.sort === "newest"}
+                    />
                   </li>
                 ))}
               </ul>
@@ -88,13 +99,19 @@ export default async function ExplorePage({ searchParams }: { searchParams: SP }
                 )}
               </nav>
             ) : null}
-          </div>
+          </section>
           {panel ? (
             <aside
               aria-label="Selected scholarship"
               className="sticky top-20 hidden max-h-[calc(100dvh-6rem)] overflow-auto rounded-md border border-hairline bg-surface shadow-rest lg:block"
             >
               <DetailBody {...panel} compact />
+              {/* Pinned footer: shows the panel continues, and opens the full page. */}
+              <p className="sticky bottom-0 border-t border-hairline bg-surface px-6 py-3 text-sm">
+                <Link href={`/s/${panel.s.slug}`} className="font-semibold">
+                  Open the full page
+                </Link>
+              </p>
             </aside>
           ) : null}
         </div>

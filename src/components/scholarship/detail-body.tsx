@@ -23,7 +23,7 @@ type Props = {
 function Section({ title, compact, id, children }: { title: string; compact?: boolean; id: string; children: React.ReactNode }) {
   const H = compact ? "h3" : "h2";
   return (
-    <section aria-labelledby={id} className="border-t border-hairline px-5 py-6 sm:px-6">
+    <section aria-labelledby={id} className="border-t border-hairline px-4 py-6 sm:px-6">
       <H id={id} className="mb-4 text-title-sm font-[650] text-ink sm:text-title">
         {title}
       </H>
@@ -49,26 +49,11 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
 
   return (
     <>
-      <div className="px-5 pt-6 pb-6 sm:px-6">
-        {s.is_sample ? (
-          <div className="mb-4">
-            <Notice>
-              <strong>Sample listing.</strong> Example data to show how Iskolar works, modelled on {shortProvider(provider.name)}&apos;s
-              program. Dates and amounts may not be current: check the official source before you apply.
-            </Notice>
-          </div>
-        ) : s.verification !== "verified" ? (
-          <div className="mb-4">
-            <Notice tone="warn">
-              <strong>Not yet verified.</strong> Source: {s.source_label}. Confirm with {shortProvider(provider.name)} before spending on
-              documents.
-            </Notice>
-          </div>
-        ) : null}
+      <div className="px-4 py-6 sm:px-6">
         <div className="flex items-start gap-4">
           <ProviderMark abbr={provider.abbr} color={provider.color} size={compact ? "md" : "lg"} />
           <div className="min-w-0">
-            <Title className={`${compact ? "text-title" : "text-headline-sm sm:text-headline"} font-bold tracking-tight text-ink`}>
+            <Title className={`${compact ? "text-title font-[650]" : "text-headline-sm font-bold sm:text-headline"} tracking-tight text-ink`}>
               {compact ? (
                 <Link href={`/s/${s.slug}`} className="text-ink">
                   {s.name}
@@ -79,13 +64,13 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
             </Title>
             <p className="mt-1 text-ink-secondary">{provider.name}</p>
             {s.location_label ? (
-              <p className="mt-0.5 flex items-center gap-1 text-sm text-ink-hint">
+              <p className="mt-1 flex items-center gap-1 text-sm text-ink-hint">
                 <Icon name="pin" size={15} /> {s.location_label}
               </p>
             ) : null}
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap gap-1.5">
+        <div className="mt-4 flex flex-wrap gap-2">
           <Pill tone="strong" icon="peso">{s.amount_text}</Pill>
           <Pill icon="building">{providerTypeLabel[provider.type]}</Pill>
           <MatchPill verdict={evaluation?.verdict} />
@@ -118,6 +103,21 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
             <dd className={`text-sm font-semibold ${urgent ? "text-danger" : "text-ink"}`}>{left}</dd>
           </div>
         </dl>
+        {s.is_sample ? (
+          <div className="mt-6">
+            <Notice>
+              <strong>Sample listing.</strong> Example data to show how Iskolar works, modelled on {shortProvider(provider.name)}&apos;s
+              program. Dates and amounts may not be current: check the official source before you apply.
+            </Notice>
+          </div>
+        ) : s.verification !== "verified" ? (
+          <div className="mt-6">
+            <Notice tone="warn">
+              <strong>Not yet verified.</strong> Source: {s.source_label}. Confirm with {shortProvider(provider.name)} before spending on
+              documents.
+            </Notice>
+          </div>
+        ) : null}
       </div>
 
       <Section title="Do you qualify?" compact={compact} id={sid("qualify")}>
@@ -183,8 +183,8 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
         <Section title="How to apply" compact={compact} id={sid("steps")}>
           <ol className="flex flex-col">
             {s.steps.map((step, i) => (
-              <li key={step.position} className="relative grid grid-cols-[28px_minmax(0,1fr)] gap-3 pb-5 last:pb-0">
-                <span className="grid size-[26px] place-items-center rounded-full bg-primary-wash text-caption font-bold text-primary">{i + 1}</span>
+              <li key={step.position} className="relative grid grid-cols-[28px_minmax(0,1fr)] gap-3 pb-6 last:pb-0">
+                <span className="grid size-[26px] place-items-center rounded-full bg-primary-wash text-caption font-semibold text-primary">{i + 1}</span>
                 {i < s.steps.length - 1 ? <span aria-hidden="true" className="absolute top-8 bottom-1 left-3 w-0.5 bg-hairline" /> : null}
                 <div className="pt-0.5">
                   <p className="font-semibold text-ink">{step.title}</p>
@@ -196,7 +196,7 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
         </Section>
       ) : null}
 
-      <p className="border-t border-hairline px-5 py-5 text-sm text-ink-secondary sm:px-6">
+      <p className="border-t border-hairline px-4 py-4 text-sm text-ink-secondary sm:px-6">
         Source:{" "}
         {s.source_url ? (
           <a href={s.source_url} target="_blank" rel="noopener noreferrer">

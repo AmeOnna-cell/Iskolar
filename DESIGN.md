@@ -246,6 +246,8 @@ Dark mode is a first-class theme, applied with `prefers-color-scheme` unless the
 - **Caption** (500, 13px, 1.45): pills, timestamps, metadata, helper text, the mobile tab bar labels (12px allowed there only).
 - **Stat** (700, 28px, tabular): the few numbers that are the point of their block (staff overview counts). Never a hero metric on the student dashboard.
 
+**Tailwind token names (code):** `text-headline` 28 · `text-headline-sm` 24 · `text-title` 20 · `text-title-sm` 18 · `text-base` 16 · `text-sm` 14 · `text-caption` 13 · `text-tab` 12. The names are one step off the spec's: a section `h2` (Title Large) is `text-title-sm sm:text-title`, and a card title (Title, 16px) is `text-base font-semibold`.
+
 ### Named Rules
 **The Five Sizes Rule.** Inside the app, text uses only 13, 14, 16, 20 and 28px (plus 24/18 as the mobile steps of the last two). The prototype's 11.5/12.5/13.5/14.5/15/17/19/22/26px half-steps are retired.
 
@@ -364,6 +366,7 @@ Toast Ink background, white 14px 500 text, a green check icon, Medium radius, Ov
 - **Do** use only the spacing scale (4 · 8 · 12 · 16 · 24 · 32 · 48 · 64) and keep the gap between groups at least twice the gap within them.
 - **Do** keep exactly one filled Civic Blue button per region. Everything else is outline or text.
 - **Do** show the source, "Last checked {date}" and verification status on every listing, and an amber "Not yet verified" notice before any document checklist on unverified listings.
+- **Do** mark sample (seeded example) listings with the info "Sample listing" pill on cards and detail pages, plus an info notice on the detail page. A sample never shows "Verified", "Unverified" or "Last checked", and never counts as verified in landing numbers.
 - **Do** keep the eligibility wording exactly: "You qualify", "Might qualify", "Not eligible right now", plus the preliminary-check disclaimer.
 - **Do** color deadlines by The Urgency Ladder Rule (≤3 days red, ≤7 days amber).
 - **Do** use tabular numerals for amounts, counts and dates that align.

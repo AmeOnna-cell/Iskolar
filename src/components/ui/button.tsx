@@ -14,7 +14,8 @@ const variants: Record<Variant, string> = {
 };
 const sizes: Record<Size, string> = {
   md: "min-h-11 px-4 text-sm",
-  sm: "min-h-9 px-3 text-sm",
+  // 36px only where a mouse is likely (≥900px); 44px touch targets below that (DESIGN.md).
+  sm: "min-h-11 px-3 text-sm nav:min-h-9",
 };
 
 export function buttonClass(variant: Variant = "primary", size: Size = "md", extra = "") {

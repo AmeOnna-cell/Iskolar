@@ -4,10 +4,10 @@ import { useTransition } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { setApplicationStage } from "@/lib/actions/student";
-import type { Task } from "@/lib/dashboard";
+import type { NextRow } from "@/lib/dashboard";
 
 /** A next-step's action: a link, or a one-tap stage change (start preparing / mark submitted). */
-export function TaskAction({ action }: { action: Task["action"] }) {
+export function TaskAction({ action }: { action: NextRow["action"] }) {
   const toast = useToast();
   const [pending, start] = useTransition();
   if (action.href) {

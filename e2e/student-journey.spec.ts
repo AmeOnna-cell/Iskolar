@@ -57,11 +57,10 @@ test("onboarding → results → checklist → dashboard → tracker", async ({ 
   // Dashboard: the greeting's fact is the urgent deadline; sections in the brief's order
   await page.goto("/dashboard");
   await expect(page.getByTestId("dashboard-fact")).toHaveText(/^Tulong Dunong Program closes in \d+ days? and 4 documents are still missing\.$/);
-  await expect(page.getByTestId("urgent-list")).toContainText("Tulong Dunong Program");
+  await expect(page.getByTestId("do-next-list")).toContainText("Tulong Dunong Program");
   const headings = await page.locator("main h1, main h2").allInnerTexts();
   expect(headings.slice(1)).toEqual([
-    "Closing this week",
-    "Next steps",
+    "Do this next",
     "Recommended for you",
     "My applications",
     "Announcements and alerts",

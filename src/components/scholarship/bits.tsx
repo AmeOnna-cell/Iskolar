@@ -45,7 +45,7 @@ export function Pill({ tone = "neutral", icon, children }: { tone?: Tone; icon?:
 export function MatchPill({ verdict }: { verdict: Verdict | string | null | undefined }) {
   if (verdict === "yes") return <Pill tone="ok" icon="yes">You qualify</Pill>;
   if (verdict === "maybe") return <Pill tone="warn" icon="q">Might qualify</Pill>;
-  if (verdict === "no") return <Pill tone="danger" icon="no">Not eligible</Pill>;
+  if (verdict === "no") return <Pill tone="danger" icon="no">Not eligible right now</Pill>;
   return null;
 }
 

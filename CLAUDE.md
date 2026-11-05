@@ -62,7 +62,7 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
    - Upgrade Next.js to clear the bundled `postcss` audit warning.
 
 ## Open issues
-- **GitHub Actions CI failure on `main`:** not yet investigated. The repo is private and this machine has no GitHub CLI; check the Actions tab or install `gh`.
+- **GitHub Actions CI failure (fixed 2026-11-05):** since Phase 7, the "audit log exports as CSV" E2E test (`e2e/4.5-admin-users.spec.ts`) failed on CI's fresh database, because "Older entries" needs more than 25 audit rows. The test now seeds 26 rows itself. It was verified after `npx supabase db reset` (57 of 57 pass). `ci.yml` is now split into three jobs (static, database, e2e) and uses the Node 24 v7 actions. The user confirms the green run on GitHub. Always verify E2E fixes against a reset DB, because the local DB builds up rows that hide this kind of bug.
 - **The one-off pgTAP failure from Phase 6:** never reproduced.
 - **`npm audit`:** reports `postcss` inside Next.js (high). It needs a Next upgrade.
 

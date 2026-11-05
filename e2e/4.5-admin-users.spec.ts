@@ -1,6 +1,6 @@
 // 4.5 Admin: deactivate / reactivate / delete users, with guards and auditing.
 import { expect, test } from "@playwright/test";
-import { createUser, formAlert, signIn, waitForHydration } from "./support";
+import { adminClient, createUser, formAlert, signIn, waitForHydration } from "./support";
 
 test("deactivate blocks sign-in, reactivate restores it, both are audited", async ({ page, browser }) => {
   const admin = await createUser("admin", "users-admin");
@@ -76,6 +76,10 @@ test("delete requires typing the exact email; the account then can't sign in", a
 
 test("the audit log exports as CSV", async ({ page }) => {
   const admin = await createUser("admin", "csv");
+  // More than one page (25) of entries, so "Older entries" renders even on a fresh database.
+  const seed = Array.from({ length: 26 }, (_, i) => ({ actor_id: admin.id, actor_role: "admin" as const, action: "e2e.seed", entity_type: "e2e", entity_id: String(i) }));
+  const { error } = await adminClient().from("audit_logs").insert(seed);
+  if (error) throw error;
   await signIn(page, admin.email);
 
   // Keyset paging: "Older entries" continues strictly after the last row of page 1.

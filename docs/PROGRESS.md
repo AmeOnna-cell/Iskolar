@@ -134,7 +134,7 @@ Details are in `docs/performance.md`. The dataset was 5,009 listings, 2,085 stud
 
 ## Open issues
 
-- **GitHub Actions CI failure on `main`:** not yet investigated. The repo is private and there's no `gh` CLI on this machine.
+- **GitHub Actions CI failure (fixed 2026-11-05):** the audit CSV/paging E2E test assumed more than one page of audit rows, which a fresh CI database doesn't have. The test now seeds 26 rows. CI is split into static, database and e2e jobs, on the Node 24 v7 actions.
 - **One-off pgTAP failure from Phase 6:** not reproduced. Listed for Phase 9.
 - **`npm audit`:** reports `postcss` bundled in Next.js (high). Needs a Next upgrade, listed for Phase 9.
 - **E2E on this machine:** clear `.next/cache/fetch-cache` before full runs. Tests can time out under memory pressure from other apps, so rerun before treating a failure as real.

@@ -5,24 +5,26 @@ on:
     branches: [main]
   pull_request:
 
+# Placeholder email settings so the server's startup check passes. Unit tests mock the
+# transport, and CI never sends real email.
+env:
+  GMAIL_USER: not-a-real-account@example.com
+  GMAIL_APP_PASSWORD: fakefakefakefake # not a real password
+  EMAIL_FROM_NAME: Iskolar
+  APP_URL: http://localhost:3000
+  # Local test inbox (Mailpit) instead of Gmail; CI never sends real email.
+  EMAIL_DEV_SMTP: 127.0.0.1:54325
+  EMAIL_DAILY_LIMIT: "100000"
+  CRON_SECRET: ci-only-not-a-real-cron-secret-0000 # fake, CI only
+
 jobs:
-  check:
+  static:
+    name: Lint, typecheck, unit tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    # Placeholder email settings so the server's startup check passes. Unit tests mock the
-    # transport, and CI never sends real email.
-    env:
-      GMAIL_USER: not-a-real-account@example.com
-      GMAIL_APP_PASSWORD: fakefakefakefake # not a real password
-      EMAIL_FROM_NAME: Iskolar
-      APP_URL: http://localhost:3000
-      # Local test inbox (Mailpit) instead of Gmail; CI never sends real email.
-      EMAIL_DEV_SMTP: 127.0.0.1:54325
-      EMAIL_DAILY_LIMIT: "100000"
-      CRON_SECRET: ci-only-not-a-real-cron-secret-0000 # fake, CI only
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -31,6 +33,32 @@ jobs:
       - run: npm run typecheck
       - run: npm test
 
+  database:
+    name: Database tests (RLS, triggers, RPCs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Start local Supabase
+        run: npx supabase start -x studio,imgproxy,vector,logflare
+      - run: npm run test:db
+
+  e2e:
+    name: End-to-end (includes axe accessibility checks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - name: Start local Supabase
         run: npx supabase start -x studio,imgproxy,vector,logflare
       - name: Write .env.local from local Supabase
@@ -39,14 +67,10 @@ jobs:
             "NEXT_PUBLIC_SUPABASE_URL=\(.API_URL)",
             "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=\(.ANON_KEY)",
             "SUPABASE_SECRET_KEY=\(.SERVICE_ROLE_KEY)"' > .env.local
-      - name: Database tests (RLS, triggers, RPCs)
-        run: npm run test:db
-
       - run: npx playwright install --with-deps chromium
       - run: npm run build
-      - name: End-to-end (includes axe accessibility checks)
-        run: npm run test:e2e
-      - uses: actions/upload-artifact@v4
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report

@@ -20,24 +20,20 @@ export const signInSchema = z.object({
   next: z.string().max(512).optional(),
 });
 
-export const signUpSchema = z
-  .object({
-    fullName: z
-      .string({ error: "Enter your name." })
-      .trim()
-      .min(1, "Enter your name.")
-      .max(120, "Use 120 characters or fewer."),
-    email,
-    password: newPassword,
-    confirm: z.string({ error: "Type your password again." }),
-  })
-  .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "The passwords don't match." });
+// No "type it again" field: the show-password toggle lets people check what they typed.
+export const signUpSchema = z.object({
+  fullName: z
+    .string({ error: "Enter your name." })
+    .trim()
+    .min(1, "Enter your name.")
+    .max(120, "Use 120 characters or fewer."),
+  email,
+  password: newPassword,
+});
 
 export const emailOnlySchema = z.object({ email });
 
-export const newPasswordSchema = z
-  .object({ password: newPassword, confirm: z.string({ error: "Type your password again." }) })
-  .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "The passwords don't match." });
+export const newPasswordSchema = z.object({ password: newPassword });
 
 /** Form state returned by auth server actions. */
 export type FormState = {

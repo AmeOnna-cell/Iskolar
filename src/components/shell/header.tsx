@@ -3,7 +3,7 @@ import { Icon, LogoMark } from "@/components/icons";
 import { homeHref, primaryNav, type Viewer } from "@/lib/nav";
 import { AccountMenu } from "./account-menu";
 import { AlertsBell } from "./alerts-bell";
-import { HeaderNav } from "./nav-links";
+import { HeaderNav, SignedOutLinks } from "./nav-links";
 import { ThemeToggle } from "./theme-toggle";
 
 type Props = { viewer: Viewer; userId?: string; unread?: number; signOut?: React.ReactNode };
@@ -47,20 +47,7 @@ export function Header({ viewer, userId, unread = 0, signOut }: Props) {
             {viewer ? (
               <AccountMenu viewer={viewer} signOut={signOut} />
             ) : (
-              <div className="ml-2 flex items-center gap-2">
-                <Link
-                  href="/login"
-                  className="hidden h-11 items-center rounded-sm px-3 text-sm font-semibold text-ink no-underline hover:bg-surface-hover sm:inline-flex nav:h-9"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/signup"
-                  className="inline-flex h-11 items-center rounded-sm bg-primary px-3 text-sm font-semibold text-on-primary no-underline transition-colors duration-150 hover:bg-primary-hover nav:h-9"
-                >
-                  Create account
-                </Link>
-              </div>
+              <SignedOutLinks />
             )}
           </div>
         </div>

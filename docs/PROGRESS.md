@@ -5,7 +5,7 @@
 | 1 Foundation, 1b Email pipeline, 2 Database, 3 Auth, 4 Student, 5 Staff/admin | Done and deployed |
 | 6 Notifications | Done and deployed |
 | 7 Performance | Done and deployed |
-| 8 Polish/QA | In progress: stage 1 and stage 2 groups 1–2 live; groups 3–4 next |
+| 8 Polish/QA | In progress: stage 1 and stage 2 groups 1–3 done; group 4 next |
 | 9 Tests + docs | To do |
 
 ## Phase 6: notifications (done)
@@ -130,7 +130,30 @@ Details are in `docs/performance.md`. The dataset was 5,009 listings, 2,085 stud
      - Linked from the account menu. `/settings/notifications` redirects there, so email links still work.
    - **Text buttons:** 14px, with a 44px touch target below 900px.
    - Tests: 57 of 57 E2E pass, including new checks that a failed wizard step keeps picks and focuses the error, that the "Still need" line shows, and that Remove asks first.
-5. **Next: stage 2, group 3 (sign-in pages), then group 4 (staff and admin screens).**
+5. **Stage 2, group 3: sign-in pages (done).**
+   - Critique scores out of 40: login 28, signup 26, forgot password 27, new password 27, status pages 28.
+   - The user chose all P1 and P2 fixes, form first on phones, no confirm-password field, and "Open Gmail" plus a hint on /check-email.
+   - **Every auth form:**
+     - After a failed submit, focus moves to the first invalid field, or else to the result message.
+     - Field errors are summed up in an alert ("2 things to fix below.").
+   - **Phones:** the navy band is hidden below `lg`, so the form opens the page.
+   - **Header:** on /login, /signup, /check-email and /forgot-password, only the other page's link shows, as a quiet text link.
+   - **Signup and new password:** the "type it again" field is removed, since the show-password toggle covers it.
+   - **Signup:** the lead says the next step is confirming the email.
+   - **/check-email:**
+     - An "Open Gmail" button opens a subject search in a new tab, with a subject hint.
+     - The address no longer breaks mid-word.
+   - **Forgot password:** after sending, the form becomes a check-your-email state with a 60-second cooldown, so there are no accidental duplicate sends.
+   - **New password:**
+     - "Cancel, keep my password" link.
+     - "Signed in as …" lead.
+     - The "password updated" notice now also shows on /staff.
+   - **/403:**
+     - Copy per role; students are told staff accounts are set up by Iskolar.
+     - Signed-out visitors get a Sign in button.
+   - Tests: 57 of 57 E2E pass on a reset DB, with new checks for focus and the error summary, the Gmail link and the reset cooldown. The detector is clean.
+   - Screenshots: `docs/screenshots/phase8-g3-before/` and `docs/screenshots/phase8-g3-after/`.
+6. **Next: stage 2, group 4 (staff and admin screens).**
 
 ## Open issues
 

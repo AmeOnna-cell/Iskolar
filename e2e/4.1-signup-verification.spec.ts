@@ -2,13 +2,12 @@
 import { expect, test } from "@playwright/test";
 import { PASSWORD, confirmLink, signIn, uniqueEmail, waitForEmail, formAlert, waitForHydration } from "./support";
 
-async function fillSignup(page: import("@playwright/test").Page, email: string, password = PASSWORD, confirm = password) {
+async function fillSignup(page: import("@playwright/test").Page, email: string, password = PASSWORD) {
   await page.goto("/signup");
   await waitForHydration(page);
   await page.getByLabel("Full name").fill("Ana Reyes");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByLabel("Type the password again").fill(confirm);
   await page.getByRole("button", { name: "Create account" }).click();
 }
 
@@ -22,6 +21,7 @@ test("sign up, confirm by email, land on onboarding", async ({ page }) => {
   await expect(page.getByText(email)).toBeVisible();
   // The resend button starts on a cooldown.
   await expect(page.getByRole("button", { name: /Send a new link in \d+s/ })).toBeDisabled();
+  await expect(page.getByRole("link", { name: /Open Gmail/ })).toHaveAttribute("href", /mail\.google\.com/);
 
   const mail = await waitForEmail(email, "Confirm your Iskolar account", started);
   expect(mail.html).toContain("Confirm my email");
@@ -45,10 +45,12 @@ test("sign up, confirm by email, land on onboarding", async ({ page }) => {
 });
 
 test("form validation names the problem and keeps what was typed", async ({ page }) => {
-  await fillSignup(page, "not-an-email", "short", "different");
+  await fillSignup(page, "not-an-email", "short");
   await expect(page.getByText("Enter an email like name@school.edu.ph.")).toBeVisible();
   await expect(page.getByText(/Your password needs at least 8 characters/)).toBeVisible();
-  await expect(page.getByText("The passwords don't match.")).toBeVisible();
+  // Announced, and focus moves to the first field to fix instead of falling back to <body>.
+  await expect(formAlert(page)).toHaveText("2 things to fix below.");
+  await expect(page.getByLabel("Email")).toBeFocused();
   await expect(page.getByLabel("Full name")).toHaveValue("Ana Reyes");
 });
 

@@ -7,18 +7,18 @@ const FACTS: Array<[IconName, string]> = [
 ];
 
 /**
- * Sign-in pages: the navy band (what Iskolar is) beside the form on desktop; on phones a short
- * band strip sits above the form so the form stays in the first screen.
+ * Sign-in pages: the navy band (what Iskolar is) beside the form on desktop. Below lg the band is
+ * hidden so the form opens the page.
  */
 export function AuthShell({ title, lead, children }: { title: string; lead?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="page-container py-6 sm:py-8 lg:py-16">
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-16">
-        <aside className="rounded-md bg-band px-5 py-4 text-white lg:sticky lg:top-24 lg:px-10 lg:py-12">
-          <p className="text-base font-semibold lg:max-w-[22ch] lg:text-headline lg:leading-tight lg:font-bold lg:tracking-tight">
+      <div className="grid items-start gap-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)]">
+        <aside className="sticky top-24 hidden rounded-md bg-band px-10 py-12 text-white lg:block">
+          <p className="max-w-[22ch] text-headline leading-tight font-bold tracking-tight">
             One place for scholarships, with the requirements explained.
           </p>
-          <ul className="mt-8 hidden flex-col gap-6 lg:flex">
+          <ul className="mt-8 flex flex-col gap-6">
             {FACTS.map(([icon, text]) => (
               <li key={icon} className="flex gap-4 text-base text-band-text-soft">
                 <Icon name={icon} size={22} className="mt-0.5 text-white" />

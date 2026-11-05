@@ -62,3 +62,34 @@ export function TabBar({ items, unread = 0 }: { items: NavItem[]; unread?: numbe
     </nav>
   );
 }
+
+const quiet = "h-11 items-center rounded-sm px-3 text-sm font-semibold text-ink no-underline hover:bg-surface-hover nav:h-9";
+
+const AUTH_PAGES = ["/login", "/signup", "/check-email", "/forgot-password"];
+
+/** Signed-out header links. On the sign-in pages only the counterpart shows, as a quiet link, so it
+ * doesn't compete with the page's own button. */
+export function SignedOutLinks() {
+  const pathname = usePathname();
+  if (AUTH_PAGES.includes(pathname)) {
+    const [href, label] = pathname === "/login" ? ["/signup", "Create account"] : ["/login", "Sign in"];
+    return (
+      <Link href={href} className={`ml-2 inline-flex ${quiet}`}>
+        {label}
+      </Link>
+    );
+  }
+  return (
+    <div className="ml-2 flex items-center gap-2">
+      <Link href="/login" className={`hidden sm:inline-flex ${quiet}`}>
+        Sign in
+      </Link>
+      <Link
+        href="/signup"
+        className="inline-flex h-11 items-center rounded-sm bg-primary px-3 text-sm font-semibold text-on-primary no-underline transition-colors duration-150 hover:bg-primary-hover nav:h-9"
+      >
+        Create account
+      </Link>
+    </div>
+  );
+}

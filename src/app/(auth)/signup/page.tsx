@@ -7,7 +7,7 @@ export default function SignupPage() {
   return (
     <AuthShell
       title="Create your account"
-      lead="Free for every college student. Next, a few questions about your studies show what you qualify for."
+      lead="Free for every college student. Next, confirm your email, then answer a few questions about your studies to see what you qualify for."
     >
       <SignupForm />
     </AuthShell>

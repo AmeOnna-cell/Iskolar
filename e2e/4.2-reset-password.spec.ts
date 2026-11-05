@@ -14,6 +14,9 @@ test("the reset form gives the same answer whether or not the account exists", a
     const status = formStatus(page);
     await expect(status).toContainText("If there's an Iskolar account for");
     messages.push((await status.innerText()).replace(email, "<email>"));
+    // The form gives way to "check your email"; sending again waits out a cooldown.
+    await expect(page.getByRole("button", { name: /Send a new link in \d+s/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Send reset link" })).toHaveCount(0);
   }
   expect(messages[0]).toBe(messages[1]);
 });
@@ -38,12 +41,10 @@ test("reset link → new password → signed in; old password and other sessions
   await expect(page).toHaveURL(/\/auth\/update-password/);
 
   await page.getByLabel("New password", { exact: true }).fill("weak");
-  await page.getByLabel("Type the new password again").fill("weak");
   await page.getByRole("button", { name: "Save new password" }).click();
   await expect(page.getByText(/Your password needs/)).toBeVisible();
 
   await page.getByLabel("New password", { exact: true }).fill(NEW_PASSWORD);
-  await page.getByLabel("Type the new password again").fill(NEW_PASSWORD);
   await page.getByRole("button", { name: "Save new password" }).click();
   await expect(page).toHaveURL(/\/dashboard\?password=updated/);
   await expect(page.getByText("Your password is updated")).toBeVisible();

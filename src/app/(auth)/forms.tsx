@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
 import { Notice } from "@/components/ui/notice";
@@ -9,12 +9,49 @@ import { PasswordField } from "@/components/ui/password-field";
 import { idle, type FormState } from "@/lib/validation/auth";
 import { requestPasswordReset, resendConfirmation, signIn, signUp, updatePassword } from "./actions";
 
+/** The form's result: the server's message, or a count of field errors when there is no message. */
 function FormMessage({ state }: { state: FormState }) {
-  if (!state.message) return null;
+  const fieldCount = Object.keys(state.fieldErrors ?? {}).length;
+  const text = state.message ?? (fieldCount ? `${fieldCount} ${fieldCount === 1 ? "thing" : "things"} to fix below.` : null);
+  if (!text) return null;
   return (
-    <Notice tone={state.status === "success" ? "ok" : "danger"} live>
-      {state.message}
-    </Notice>
+    <div data-form-message tabIndex={-1} className="outline-none">
+      <Notice tone={state.status === "success" ? "ok" : "danger"} live>
+        {text}
+      </Notice>
+    </div>
+  );
+}
+
+/**
+ * After each submit, move focus to the first invalid field, else to the result message, so a
+ * keyboard or screen-reader user isn't left on <body> once the submit button re-enables.
+ */
+function useFocusResult<T extends HTMLElement>(state: FormState) {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    if (state.status === "idle") return;
+    const root = ref.current;
+    (root?.querySelector<HTMLElement>('[aria-invalid="true"]') ?? root?.querySelector<HTMLElement>("[data-form-message]"))?.focus();
+  }, [state]);
+  return ref;
+}
+
+/** What to do while waiting for an email: open Gmail at the message, or search for its subject. */
+export function InboxHelp({ subject }: { subject: string }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <ButtonLink
+        href={`https://mail.google.com/mail/u/0/#search/${encodeURIComponent(`subject:"${subject}"`)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open Gmail<span className="sr-only"> (opens in a new tab)</span>
+      </ButtonLink>
+      <p className="text-sm text-ink-secondary">
+        Look for the subject &ldquo;{subject}&rdquo;. Not there after a few minutes? Check your spam or promotions folder.
+      </p>
+    </div>
   );
 }
 
@@ -22,9 +59,10 @@ function FormMessage({ state }: { state: FormState }) {
 
 export function LoginForm({ next, notice }: { next?: string; notice?: React.ReactNode }) {
   const [state, action, pending] = useActionState(signIn, idle);
+  const ref = useFocusResult<HTMLFormElement>(state);
   const email = state.values?.email ?? "";
   return (
-    <form action={action} noValidate className="flex flex-col gap-6">
+    <form ref={ref} action={action} noValidate className="flex flex-col gap-6">
       {notice && !state.message ? notice : null}
       <FormMessage state={state} />
       {state.code === "unconfirmed" ? (
@@ -63,8 +101,9 @@ export function LoginForm({ next, notice }: { next?: string; notice?: React.Reac
 
 export function SignupForm() {
   const [state, action, pending] = useActionState(signUp, idle);
+  const ref = useFocusResult<HTMLFormElement>(state);
   return (
-    <form action={action} noValidate className="flex flex-col gap-6">
+    <form ref={ref} action={action} noValidate className="flex flex-col gap-6">
       <FormMessage state={state} />
       <TextField
         label="Full name"
@@ -87,7 +126,6 @@ export function SignupForm() {
         error={state.fieldErrors?.email}
       />
       <PasswordField label="Password" name="password" autoComplete="new-password" rules error={state.fieldErrors?.password} />
-      <PasswordField label="Type the password again" name="confirm" autoComplete="new-password" error={state.fieldErrors?.confirm} />
       <Button type="submit" loading={pending} block>
         Create account
       </Button>
@@ -98,12 +136,24 @@ export function SignupForm() {
   );
 }
 
-// ---------- Resend confirmation (60-second cooldown) ----------
+// ---------- Send the email again (60-second cooldown) ----------
 
 const COOLDOWN = 60;
 
-export function ResendForm({ email, askEmail = false, startCooling = false }: { email?: string; askEmail?: boolean; startCooling?: boolean }) {
-  const [state, action, pending] = useActionState(resendConfirmation, idle);
+export function ResendForm({
+  email,
+  askEmail = false,
+  startCooling = false,
+  send = resendConfirmation,
+}: {
+  email?: string;
+  askEmail?: boolean;
+  startCooling?: boolean;
+  /** The action that sends the email: the confirmation link by default, or the reset link. */
+  send?: typeof resendConfirmation;
+}) {
+  const [state, action, pending] = useActionState(send, idle);
+  const ref = useFocusResult<HTMLFormElement>(state);
   const [left, setLeft] = useState(startCooling ? COOLDOWN : 0);
 
   useEffect(() => {
@@ -116,7 +166,7 @@ export function ResendForm({ email, askEmail = false, startCooling = false }: { 
   }, [left]);
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-4">
+    <form ref={ref} action={action} noValidate className="flex flex-col gap-4">
       <FormMessage state={state} />
       {askEmail ? (
         <TextField label="Email" name="email" type="email" autoComplete="email" required defaultValue={email} error={state.fieldErrors?.email} />
@@ -134,42 +184,62 @@ export function ResendForm({ email, askEmail = false, startCooling = false }: { 
 
 export function ForgotForm() {
   const [state, action, pending] = useActionState(requestPasswordReset, idle);
+  const ref = useFocusResult<HTMLDivElement>(state);
+  // Once sent, the form gives way to "check your email": each new link cancels the last one, so
+  // sending again waits out the same cooldown as the confirmation email.
+  if (state.status === "success") {
+    return (
+      <div ref={ref} className="flex flex-col gap-6">
+        <FormMessage state={state} />
+        <InboxHelp subject="Reset your Iskolar password" />
+        <ResendForm email={state.values?.email} startCooling send={requestPasswordReset} />
+        <p className="text-sm text-ink-secondary">
+          Remembered it? <Link href="/login" className="font-semibold">Back to sign in</Link>
+        </p>
+      </div>
+    );
+  }
   return (
-    <form action={action} noValidate className="flex flex-col gap-6">
-      <FormMessage state={state} />
-      <TextField
-        label="Email"
-        name="email"
-        type="email"
-        autoComplete="email"
-        inputMode="email"
-        required
-        defaultValue={state.values?.email}
-        error={state.fieldErrors?.email}
-      />
-      <Button type="submit" loading={pending} block>
-        {state.status === "success" ? "Send another link" : "Send reset link"}
-      </Button>
-      <p className="text-sm text-ink-secondary">
-        Remembered it? <Link href="/login" className="font-semibold">Sign in</Link>
-      </p>
-    </form>
+    <div ref={ref}>
+      <form action={action} noValidate className="flex flex-col gap-6">
+        <FormMessage state={state} />
+        <TextField
+          label="Email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          inputMode="email"
+          required
+          defaultValue={state.values?.email}
+          error={state.fieldErrors?.email}
+        />
+        <Button type="submit" loading={pending} block>
+          Send reset link
+        </Button>
+        <p className="text-sm text-ink-secondary">
+          Remembered it? <Link href="/login" className="font-semibold">Sign in</Link>
+        </p>
+      </form>
+    </div>
   );
 }
 
 // ---------- New password ----------
 
-export function NewPasswordForm() {
+export function NewPasswordForm({ cancelHref }: { cancelHref: string }) {
   const [state, action, pending] = useActionState(updatePassword, idle);
+  const ref = useFocusResult<HTMLFormElement>(state);
   return (
-    <form action={action} noValidate className="flex flex-col gap-6">
+    <form ref={ref} action={action} noValidate className="flex flex-col gap-6">
       <FormMessage state={state} />
       <PasswordField label="New password" name="password" autoComplete="new-password" rules error={state.fieldErrors?.password} />
-      <PasswordField label="Type the new password again" name="confirm" autoComplete="new-password" error={state.fieldErrors?.confirm} />
       <Button type="submit" loading={pending} block>
         Save new password
       </Button>
       <p className="text-caption text-ink-hint">Saving signs you out on your other devices.</p>
+      <Link href={cancelHref} className="self-start text-sm font-semibold">
+        Cancel, keep my password
+      </Link>
     </form>
   );
 }

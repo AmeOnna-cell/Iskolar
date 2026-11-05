@@ -49,13 +49,13 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
   - Stage 1, dashboard and Find scholarships: live (`7bad2d3`).
   - Stage 2, group 1 (landing, scholarship detail, help): done and pushed (`ee3de05`).
   - Stage 2, group 2 (eligibility check, results, My applications, alerts, settings hub): done and pushed (`90c0ff1`). 57 of 57 E2E pass.
-  - Stage 2, groups 3 and 4: not started.
+  - Stage 2, group 3 (sign-in pages): done and committed (2026-11-05). 57 of 57 E2E pass on a reset DB.
+  - Stage 2, group 4: not started.
 - **Branch:** `main`. No work-in-progress branch.
 
 ## Remaining work, in order
-1. **Phase 8 stage 2, group 3, sign-in pages:** /login, /signup, /forgot-password, /check-email, /auth/update-password, /auth/error, /403.
-2. **Phase 8 stage 2, group 4, staff and admin screens:** /staff overview, listings table, listing editor, questions, announcements, /admin/users, /admin/audit.
-3. **Phase 9:**
+1. **Phase 8 stage 2, group 4, staff and admin screens:** /staff overview, listings table, listing editor, questions, announcements, /admin/users, /admin/audit.
+2. **Phase 9:**
    - The remaining E2E specs from the brief (4.1–4.13 coverage review).
    - README, SETUP checklist, final report.
    - Investigate the one-off pgTAP failure seen in Phase 6.
@@ -67,8 +67,8 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
 - **`npm audit`:** reports `postcss` inside Next.js (high). It needs a Next upgrade.
 
 ## First step next session
-Read `docs/PROGRESS.md`, then continue Phase 8 stage 2 group 3 (sign-in pages):
-1. Done: before-screenshots in `docs/screenshots/phase8-g3-before/`.
-2. In progress (2026-11-05): the two-agent critique. If no `.impeccable/critique/*login*` snapshot exists yet, rerun it.
+Read `docs/PROGRESS.md`. Group 3 is committed; push it if the user hasn't yet (ask first). Then start Phase 8 stage 2 group 4 (staff and admin screens):
+1. Take before-screenshots.
+2. Run the two-agent critique.
 3. Ask the user.
-4. Fix, test, then commit and push.
+4. Fix, test against a reset DB, then commit and push.

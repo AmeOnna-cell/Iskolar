@@ -82,7 +82,7 @@ export async function signIn(_prev: FormState, fd: FormData): Promise<FormState>
 
 export async function signUp(_prev: FormState, fd: FormData): Promise<FormState> {
   const values = { fullName: str(fd, "fullName"), email: str(fd, "email") };
-  const parsed = signUpSchema.safeParse({ ...values, password: str(fd, "password"), confirm: str(fd, "confirm") });
+  const parsed = signUpSchema.safeParse({ ...values, password: str(fd, "password") });
   if (!parsed.success) return { status: "error", fieldErrors: fieldErrorsOf(parsed.error), values };
   const { fullName, email, password } = parsed.data;
 
@@ -164,7 +164,7 @@ export async function requestPasswordReset(_prev: FormState, fd: FormData): Prom
 
 export async function updatePassword(_prev: FormState, fd: FormData): Promise<FormState> {
   const user = await requireRole();
-  const parsed = newPasswordSchema.safeParse({ password: str(fd, "password"), confirm: str(fd, "confirm") });
+  const parsed = newPasswordSchema.safeParse({ password: str(fd, "password") });
   if (!parsed.success) return { status: "error", fieldErrors: fieldErrorsOf(parsed.error) };
   if (!(await rateLimitAll([[`password:user:${user.id}`, 10, 3600]]))) return { status: "error", message: TOO_MANY };
 

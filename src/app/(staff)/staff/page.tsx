@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/button";
+import { Notice } from "@/components/ui/notice";
 import { requireRole } from "@/lib/auth/session";
 import { getStaffOverview } from "@/lib/data/staff";
 import { plural } from "@/lib/format";
 
 export const metadata = { title: "Scholarship office" };
 
-export default async function StaffHomePage() {
+export default async function StaffHomePage({ searchParams }: { searchParams: Promise<{ password?: string }> }) {
+  const { password } = await searchParams;
   const user = await requireRole("coordinator", "admin");
   const o = await getStaffOverview();
   const isAdmin = user.role === "admin";
@@ -30,6 +32,11 @@ export default async function StaffHomePage() {
 
   return (
     <div className="page-container py-8">
+      {password === "updated" ? (
+        <div className="mb-6">
+          <Notice tone="ok">Your password is updated. Other devices were signed out.</Notice>
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-headline-sm font-bold tracking-tight text-ink sm:text-headline">Scholarship office</h1>

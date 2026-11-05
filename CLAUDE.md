@@ -67,8 +67,8 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
 - **`npm audit`:** reports `postcss` inside Next.js (high). It needs a Next upgrade.
 
 ## First step next session
-Read `docs/PROGRESS.md`, then start Phase 8 stage 2 group 3:
-1. Take before-screenshots of the sign-in pages.
-2. Run the two-agent critique.
+Read `docs/PROGRESS.md`, then continue Phase 8 stage 2 group 3 (sign-in pages):
+1. Done: before-screenshots in `docs/screenshots/phase8-g3-before/`.
+2. In progress (2026-11-05): the two-agent critique. If no `.impeccable/critique/*login*` snapshot exists yet, rerun it.
 3. Ask the user.
 4. Fix, test, then commit and push.

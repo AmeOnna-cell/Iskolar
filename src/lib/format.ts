@@ -42,6 +42,21 @@ export function ago(timestamp: string, now = new Date()): string {
   return formatDate(day);
 }
 
+/**
+ * Weekdays (Mon–Fri, Philippine time) that have fully passed since `timestamp`, not counting its own day.
+ * ponytail: ignores PH holidays; add a holiday list if the reply target needs to be exact.
+ */
+export function schoolDaysSince(timestamp: string, now = new Date()): number {
+  const start = parse(new Date(timestamp).toLocaleDateString("en-CA", { timeZone: "Asia/Manila" }));
+  const end = parse(todayPH(now));
+  let n = 0;
+  for (let d = new Date(start.getTime() + 86_400_000); d < end; d = new Date(d.getTime() + 86_400_000)) {
+    const w = d.getUTCDay();
+    if (w !== 0 && w !== 6) n++;
+  }
+  return n;
+}
+
 export type ListingStatus = "open" | "upcoming" | "closed";
 export type Urgency = "urgent" | "soon" | "none";
 

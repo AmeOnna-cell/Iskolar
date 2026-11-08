@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { Pill } from "@/components/scholarship/bits";
 import { Pagination } from "@/components/ui/table-bits";
 import { requireRole } from "@/lib/auth/session";
 import { getStaffNames, inquiryCounts, listInquiries } from "@/lib/data/staff";
-import { ago } from "@/lib/format";
+import { ago, schoolDaysSince } from "@/lib/format";
 import { one, parsePaging } from "@/lib/paging";
 import { InquiryActions } from "./inquiry-item";
 
@@ -51,12 +52,19 @@ export default async function InquiriesPage({ searchParams }: { searchParams: Pr
             <ul>
               {rows.map((q) => (
                 <li key={q.id} className="border-t border-hairline px-5 py-5 first:border-t-0">
-                  <p className="text-caption text-ink-hint">
-                    {q.student_context || "Student"} · {q.scholarship ? q.scholarship.name : "General question"} · {ago(q.created_at)}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <p className="text-caption text-ink-hint">
+                      {q.student_context || "Student"} · {q.scholarship ? q.scholarship.name : "General question"} · {ago(q.created_at)}
+                    </p>
+                    {q.status === "open" && schoolDaysSince(q.created_at) >= 2 ? (
+                      <Pill tone="warn" icon="warn">
+                        Waiting {schoolDaysSince(q.created_at)} school days
+                      </Pill>
+                    ) : null}
+                  </div>
                   <p className="mt-1 font-semibold text-ink">{q.question}</p>
                   {q.replies.map((r) => (
-                    <p key={r.id} className="mt-3 rounded-sm bg-ok-wash px-3 py-2 text-sm text-ink">
+                    <p key={r.id} className="mt-3 rounded-sm bg-surface-subtle px-3 py-2 text-sm text-ink">
                       <strong>{r.author_id ? names.get(r.author_id) ?? "Staff" : "Staff"}:</strong> {r.body}
                       <span className="mt-1 block text-caption text-ink-hint">{ago(r.created_at)}</span>
                     </p>

@@ -17,6 +17,12 @@ export function AnnouncementForm({ initial = {}, scholarships, onDone }: { initi
   const form = useRef<HTMLFormElement>(null);
   const e = state.fieldErrors ?? {};
   const prefix = initial.id ? `a-${initial.id}` : "a-new";
+  const errorCount = Object.keys(e).length;
+  // After a failed post, focus the first invalid field (its error is read with it), else the message.
+  useEffect(() => {
+    if (state.status !== "error") return;
+    (form.current?.querySelector<HTMLElement>('[aria-invalid="true"]') ?? form.current?.querySelector<HTMLElement>("[data-form-message]"))?.focus();
+  }, [state]);
   useEffect(() => {
     if (state.status === "success") {
       toast(state.message!);
@@ -28,7 +34,13 @@ export function AnnouncementForm({ initial = {}, scholarships, onDone }: { initi
 
   return (
     <form ref={form} action={action} noValidate className="flex flex-col gap-4">
-      {state.status === "error" && state.message ? <Notice tone="danger" live>{state.message}</Notice> : null}
+      {state.status === "error" ? (
+        <div data-form-message tabIndex={-1}>
+          <Notice tone="danger" live>
+            {state.message ?? `${errorCount} ${errorCount === 1 ? "thing" : "things"} to fix below.`}
+          </Notice>
+        </div>
+      ) : null}
       <input type="hidden" name="id" value={initial.id ?? ""} />
       {(
         [
@@ -38,14 +50,14 @@ export function AnnouncementForm({ initial = {}, scholarships, onDone }: { initi
       ).map(([name, label, value, max]) => (
         <div key={name} className="flex flex-col gap-2">
           <label htmlFor={`${prefix}-${name}`} className="text-sm font-semibold text-ink">{label}</label>
-          <input id={`${prefix}-${name}`} name={name} defaultValue={value} maxLength={max} aria-invalid={e[name] ? true : undefined} className={`${inputClass} ${e[name] ? "border-danger" : "border-hairline-strong"}`} />
-          {e[name] ? <p className="text-caption font-semibold text-danger">{e[name]}</p> : null}
+          <input id={`${prefix}-${name}`} name={name} defaultValue={value} maxLength={max} aria-invalid={e[name] ? true : undefined} aria-describedby={e[name] ? `${prefix}-${name}-err` : undefined} className={`${inputClass} ${e[name] ? "border-danger" : "border-hairline-strong"}`} />
+          {e[name] ? <p id={`${prefix}-${name}-err`} className="text-caption font-semibold text-danger">{e[name]}</p> : null}
         </div>
       ))}
       <div className="flex flex-col gap-2">
         <label htmlFor={`${prefix}-body`} className="text-sm font-semibold text-ink">Message</label>
-        <textarea id={`${prefix}-body`} name="body" rows={4} defaultValue={initial.body} maxLength={4000} aria-invalid={e.body ? true : undefined} className={`${inputClass} py-2 ${e.body ? "border-danger" : "border-hairline-strong"}`} />
-        {e.body ? <p className="text-caption font-semibold text-danger">{e.body}</p> : null}
+        <textarea id={`${prefix}-body`} name="body" rows={4} defaultValue={initial.body} maxLength={4000} aria-invalid={e.body ? true : undefined} aria-describedby={e.body ? `${prefix}-body-err` : undefined} className={`${inputClass} py-2 ${e.body ? "border-danger" : "border-hairline-strong"}`} />
+        {e.body ? <p id={`${prefix}-body-err`} className="text-caption font-semibold text-danger">{e.body}</p> : null}
       </div>
       <div className="flex flex-col gap-2">
         <label htmlFor={`${prefix}-sch`} className="text-sm font-semibold text-ink">

@@ -9,13 +9,31 @@ import { replyInquiry, setInquiryStatus } from "@/lib/actions/staff";
 export function InquiryActions({ id, status }: { id: string; status: "open" | "answered" | "closed" }) {
   const toast = useToast();
   const [pending, start] = useTransition();
+  const [replying, setReplying] = useState(false);
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const fieldId = `reply-${id}`;
 
+  const setStatus = (next: "open" | "answered" | "closed") =>
+    start(async () => {
+      const res = await setInquiryStatus(id, next);
+      // Closing is reversible: offer it back, restoring the status it had.
+      toast(res.message, res.ok ? "ok" : "danger", res.ok && next === "closed" ? { label: "Undo", run: () => setStatus(status) } : undefined);
+    });
+
+  if (status === "closed") {
+    return (
+      <div className="mt-4">
+        <Button variant="outline" size="sm" loading={pending} onClick={() => setStatus("open")}>
+          Reopen
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-4 flex flex-col gap-3">
-      {status !== "closed" ? (
+      {replying ? (
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -23,10 +41,12 @@ export function InquiryActions({ id, status }: { id: string; status: "open" | "a
               const res = await replyInquiry(id, body);
               if (!res.ok) {
                 setError(res.message);
+                document.getElementById(fieldId)?.focus();
                 return;
               }
               setBody("");
               setError(null);
+              setReplying(false);
               toast(res.message);
             });
           }}
@@ -40,13 +60,14 @@ export function InquiryActions({ id, status }: { id: string; status: "open" | "a
             rows={3}
             value={body}
             maxLength={4000}
+            autoFocus
             onChange={(e) => setBody(e.target.value)}
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? `${fieldId}-err` : undefined}
             className={`${inputClass} py-2 ${error ? "border-danger" : "border-hairline-strong"}`}
           />
           {error ? (
-            <p id={`${fieldId}-err`} className="text-caption font-semibold text-danger">
+            <p id={`${fieldId}-err`} role="alert" className="text-caption font-semibold text-danger">
               {error}
             </p>
           ) : null}
@@ -56,19 +77,23 @@ export function InquiryActions({ id, status }: { id: string; status: "open" | "a
             </Button>
             <Button
               type="button"
-              variant="outline"
-              size="sm"
-              disabled={pending}
-              onClick={() => start(async () => toast((await setInquiryStatus(id, "closed")).message))}
+              variant="text"
+              onClick={() => {
+                setReplying(false);
+                setError(null);
+              }}
             >
-              Close question
+              Cancel
             </Button>
           </div>
         </form>
       ) : (
-        <div>
-          <Button variant="outline" size="sm" loading={pending} onClick={() => start(async () => toast((await setInquiryStatus(id, "open")).message))}>
-            Reopen
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" onClick={() => setReplying(true)}>
+            Reply
+          </Button>
+          <Button variant="outline" size="sm" disabled={pending} onClick={() => setStatus("closed")}>
+            Close question
           </Button>
         </div>
       )}

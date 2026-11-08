@@ -22,7 +22,11 @@ export default async function AnnouncementsPage({ searchParams }: { searchParams
       <h1 className="text-headline-sm font-bold tracking-tight text-ink sm:text-headline">Announcements</h1>
       <p className="mt-2 text-ink-secondary">Students see announcements on their dashboard, newest first.</p>
       <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-        <section aria-labelledby="list-h" className="overflow-hidden rounded-md border border-hairline bg-surface shadow-rest">
+        <section aria-labelledby="new-h" className="rounded-md border lg:col-start-2 lg:row-start-1 border-hairline bg-surface p-5 shadow-rest">
+          <h2 id="new-h" className="mb-4 text-title-sm font-[650] text-ink">Post an announcement</h2>
+          <AnnouncementForm scholarships={scholarships} />
+        </section>
+        <section aria-labelledby="list-h" className="lg:col-start-1 lg:row-start-1 overflow-hidden rounded-md border border-hairline bg-surface shadow-rest">
           <h2 id="list-h" className="border-b border-hairline px-5 py-4 text-title-sm font-[650] text-ink">Posted</h2>
           {rows.length === 0 ? (
             <p className="px-5 py-10 text-center text-ink-secondary">No announcements yet. Post the first one.</p>
@@ -47,10 +51,6 @@ export default async function AnnouncementsPage({ searchParams }: { searchParams
             </ul>
           )}
           <Pagination pathname="/staff/announcements" sp={sp} page={page} pageSize={pageSize} total={total} />
-        </section>
-        <section aria-labelledby="new-h" className="rounded-md border border-hairline bg-surface p-5 shadow-rest">
-          <h2 id="new-h" className="mb-4 text-title-sm font-[650] text-ink">Post an announcement</h2>
-          <AnnouncementForm scholarships={scholarships} />
         </section>
       </div>
     </div>

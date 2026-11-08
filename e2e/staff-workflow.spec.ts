@@ -105,12 +105,18 @@ test("a student's question gets a staff reply; announcements reach the dashboard
   await sPage.goto("/staff/inquiries?status=open&size=50");
   await waitForHydration(sPage);
   const item = sPage.locator("li").filter({ hasText: question });
+  await item.getByRole("button", { name: "Reply" }).click();
+  await expect(item.getByLabel("Reply")).toBeFocused();
   await item.getByLabel("Reply").fill("Yes, the COR from your student portal is fine.");
   await item.getByRole("button", { name: "Send reply" }).click();
   await expect(sPage.getByRole("status").filter({ hasText: "Reply sent." })).toBeVisible();
 
   await sPage.goto("/staff/announcements");
   await waitForHydration(sPage);
+  // An empty post says what to fix and focuses the first field.
+  await sPage.getByRole("button", { name: "Post announcement" }).click();
+  await expect(sPage.getByText("2 things to fix below.")).toBeVisible();
+  await expect(sPage.getByLabel("Title").first()).toBeFocused();
   await sPage.getByLabel("Title").first().fill(title);
   await sPage.getByLabel("Message").first().fill("Forms are at window 3 this week.");
   await sPage.getByRole("button", { name: "Post announcement" }).click();

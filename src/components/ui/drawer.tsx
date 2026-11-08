@@ -121,7 +121,8 @@ export function Drawer({
             </div>
           )}
           {/* With a hidden title, the content's own header makes room for the floating close button. */}
-          <div className={`min-h-0 flex-1 overflow-auto overscroll-contain ${titleHidden ? "[&_[data-testid=panel-header]]:pr-14" : ""}`}>{children}</div>
+          {/* Focusable so keyboard users can scroll it even when it holds no links (axe scrollable-region-focusable). */}
+          <div tabIndex={0} className={`min-h-0 flex-1 overflow-auto overscroll-contain outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${titleHidden ? "[&_[data-testid=panel-header]]:pr-14" : ""}`}>{children}</div>
           {footer ? <div className="flex shrink-0 items-center justify-between gap-3 border-t border-hairline px-4 py-3 sm:px-6">{footer}</div> : null}
         </D.Content>
       </D.Portal>

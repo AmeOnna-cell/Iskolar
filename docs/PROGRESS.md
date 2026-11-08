@@ -8,7 +8,7 @@
 | 8 Polish/QA | Done and deployed |
 | 9 Tests + docs | Done and deployed (2026-11-08); see `docs/REPORT.md` |
 | Privacy note and `/privacy` | Done and deployed (`7ebb48a`) |
-| Team-leader revisions (groups A–F) | In progress: A and B pushed (`976d79d`); C migration pushed, C code committed |
+| Team-leader revisions (groups A–F) | In progress: A–C pushed (`e061464`); D committed |
 
 ## Team-leader revisions (started 2026-11-08)
 
@@ -59,7 +59,7 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
   - Axe now also covers `/explore?filters=1` and `/explore?s=…&d=1` in both themes.
 - **Screenshots:** `docs/screenshots/revisions-b/`.
 
-### Group C: notifications and profile (migration pushed; code committed, not pushed)
+### Group C: notifications and profile (pushed, `e061464`)
 - **Migration `20261108120000_self_delete.sql`** (pushed with `--remote` before the code; the remote migration list matches):
   - `anonymize_account()` holds the shared personal-data removal. No API role can execute it.
   - `admin_soft_delete_user()` keeps its guards (assert_admin, not yourself, never the last admin) and now calls the shared step.
@@ -79,6 +79,23 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
 - **Critique:** dual-agent, 27/40 before fixes; snapshot in `.impeccable/critique/`. Fixed: dialog focus return, menu focus ring, reminders findability, stale delete dialog, goodbye CTA, the disabled push hint at 2.4:1. Left: urgency colours for deadline alerts in the bell.
 - **Tests:** lint and typecheck clean, unit 52 of 52, pgTAP 281 of 281, E2E 91 of 91 on a reset DB. New `e2e/revisions-c.spec.ts` includes axe with the bell menu and the delete dialog open.
 - **Screenshots:** `docs/screenshots/revisions-c/`.
+
+### Group D: Announcements (committed, not pushed)
+- **Public `/announcements`** (`src/app/announcements/`, data in `lib/data/announcements.ts`):
+  - A searchable list with "General announcements" first, then each scholarship with announcements, newest first.
+  - The selected entry's posts sit beside the list from 1000px (`lg`). Below that, the list is the page and an entry opens in the shared drawer (`?a=key&d=1`, Back closes it).
+  - Arriving with `?a=` on a phone opens that entry at once.
+  - The header shows the scholarship's opening date, deadline and time left (urgency colours).
+  - The default sender shows as the provider.
+  - Empty states: "No announcements yet", a no-match search with "Clear search" / "Find scholarships", and a notice for an unknown or non-public entry.
+- **Navigation:** "Announcements" in the main nav and "News" in the phone tab bar, which stays at five tabs. Help moved to the header's "?" at every width. Signed-out phones hide the theme toggle to make room.
+- **Links in:**
+  - Scholarship details show "N announcements from the scholarship office" (`announcements(count)` in the detail query). Posting or deleting an announcement now revalidates the scholarships tag and `/announcements`.
+  - The dashboard section links "All announcements", and each announcement links to its entry.
+- **Breakpoint fix:** `WIDE_QUERY` in `drawer.tsx` (1000px, Tailwind `lg`) replaces a hard-coded 1024px. Between 1000 and 1023px, /explore (since group B) and the board opened the drawer and hid the side panel.
+- **Critique:** dual-agent, 26/40 before fixes; snapshot in `.impeccable/critique/`. Fixed: deep links on phones, the breakpoint, urgency in the header, the banned left-bar selection, the vague sender, the empty-search dead end, focusable scrolling regions. Left: links to single posts, "new since last visit", grouping closed scholarships. Announcement alerts still open the dashboard; pointing them at the board needs a migration.
+- **Tests:** lint and typecheck clean, unit 52 of 52, pgTAP 281 of 281, E2E 102 of 102 on a reset DB. New `e2e/revisions-d.spec.ts`; axe on `/announcements` and its drawer.
+- **Screenshots:** `docs/screenshots/revisions-d/`.
 
 ## Phase 6: notifications (done)
 

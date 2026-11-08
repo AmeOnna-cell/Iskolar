@@ -10,6 +10,7 @@ const PUBLIC = [
   "/s/tulong-dunong-program",
   "/s/city-educational-assistance",
   "/help",
+  "/privacy",
   "/login",
   "/signup",
   "/forgot-password",

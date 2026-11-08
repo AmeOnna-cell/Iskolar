@@ -46,6 +46,7 @@ Status on 2026-11-08: all nine build phases are done. Live at <https://iskolar-o
 | 4.13 Mobile: no sideways scroll at 360/768/1280/1440, tab bar, tables as cards, dialogs as sheets | `e2e/4.13-mobile.spec.ts`; screenshots in `docs/screenshots/` |
 
 **Phase 9 also fixed:**
+- **Privacy:** a note above "Create account" and a plain-language `/privacy` page (linked from the footer) that states only what the code does.
 - **Back button in the listing editor:** it now asks before leaving unsaved edits.
 - **Saved theme never applied before load:** the inline `<head>` script had been a syntax error since Phase 1. Its string was imported from a client module, so the server saw a client reference instead.
 - **New-password page:** no sign-up pitch for people already signed in, and the email gets its own line.
@@ -57,7 +58,7 @@ Status on 2026-11-08: all nine build phases are done. Live at <https://iskolar-o
 ## Deferred, and why
 
 **Waiting on you**
-- **Privacy note on sign-up:** the slot is in place (`PRIVACY_NOTE` in `src/app/(auth)/forms.tsx`) and renders nothing until you give the wording.
+- **Privacy contact:** `/privacy` shows the placeholder `[CONTACT EMAIL]` (the `CONTACT` constant in `src/app/privacy/page.tsx`) until you give the address.
 
 **Can't be tested automatically**
 - **Web push:** headless Chromium has no push service, so neither subscribing nor delivery is covered end to end. The sending logic, including clean-up of expired subscriptions, is unit-tested.
@@ -82,7 +83,7 @@ Status on 2026-11-08: all nine build phases are done. Live at <https://iskolar-o
 
 ## What you still need to do by hand
 
-1. **Privacy note:** send the wording, with a link if there should be one.
+1. **Privacy contact:** give the address that replaces `[CONTACT EMAIL]` on `/privacy`. Account deletion requests go there.
 2. **Real listings:**
    - Coordinators and admins enter real scholarships and verify each one against its official source.
    - Then archive or delete the nine sample listings.

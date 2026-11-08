@@ -12,6 +12,7 @@ export function Footer() {
           <Link className="inline-flex min-h-11 items-center text-ink-secondary hover:text-ink nav:min-h-0" href="/explore">Find scholarships</Link>
           <Link className="inline-flex min-h-11 items-center text-ink-secondary hover:text-ink nav:min-h-0" href="/check">Eligibility check</Link>
           <Link className="inline-flex min-h-11 items-center text-ink-secondary hover:text-ink nav:min-h-0" href="/help">Help and FAQ</Link>
+          <Link className="inline-flex min-h-11 items-center text-ink-secondary hover:text-ink nav:min-h-0" href="/privacy">Privacy</Link>
           <Link className="inline-flex min-h-11 items-center text-ink-secondary hover:text-ink nav:min-h-0" href="/login?next=/staff">For scholarship offices</Link>
         </nav>
       </div>

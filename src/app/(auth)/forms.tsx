@@ -138,9 +138,14 @@ export function SignupForm() {
 }
 
 // ---------- Sign-up privacy note ----------
-// Shown above "Create account". Wording pending from the project owner (Phase 9): until it's set this
-// renders nothing, so no placeholder text can reach production. Plain text, or JSX with a link.
-const PRIVACY_NOTE: React.ReactNode = null;
+// Shown above "Create account". The owner's wording, plus the question-context clause the "only" needs to stay true.
+const PRIVACY_NOTE: React.ReactNode = (
+  <>
+    By creating an account, you agree that Iskolar will use your answers (like your course, GWA and household income range) only to show which
+    scholarships may fit you, to send the reminders you choose, and to tell the scholarship office your program and year when you ask a question.
+    We don&apos;t sell your information. <Link href="/privacy">Read how we handle your data</Link>.
+  </>
+);
 
 // ---------- Send the email again (60-second cooldown) ----------
 

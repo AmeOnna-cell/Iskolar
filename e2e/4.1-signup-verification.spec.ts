@@ -70,3 +70,13 @@ test("signing up with an existing address looks the same (no account enumeration
   await expect(page).toHaveURL(/\/check-email/);
   await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
 });
+
+test("sign-up shows the privacy note, which links to /privacy, also linked from the footer", async ({ page }) => {
+  await page.goto("/signup");
+  await expect(page.getByText("We don't sell your information.", { exact: false })).toBeVisible();
+  await page.getByRole("link", { name: "Read how we handle your data" }).click();
+  await expect(page).toHaveURL(/\/privacy$/);
+  await expect(page.getByRole("heading", { level: 1, name: "How we handle your data" })).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByRole("navigation", { name: "Footer" }).getByRole("link", { name: "Privacy" })).toHaveAttribute("href", "/privacy");
+});

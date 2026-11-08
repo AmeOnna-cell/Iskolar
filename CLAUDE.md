@@ -51,20 +51,20 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
   - Stage 2, group 2 (eligibility check, results, My applications, alerts, settings hub): done and pushed (`90c0ff1`). 57 of 57 E2E pass.
   - Stage 2, group 3 (sign-in pages): done and pushed (`972d71d`). 57 of 57 E2E pass on a reset DB. CI green.
   - Stage 2, group 4 (staff and admin screens): done and pushed (`a1604dc`).
-- **Phase 9 (tests and docs):** done and committed (2026-11-08); see `docs/REPORT.md`. Not pushed unless the user said so.
+- **Phase 9 (tests and docs):** done and pushed (`50a572d`, CI green); see `docs/REPORT.md`. Privacy page committed, not pushed.
 - **Branch:** `main`. No work-in-progress branch.
 
 ## Remaining work
 All nine phases are done. Waiting on the user:
-- The wording of the sign-up privacy note, which goes in `PRIVACY_NOTE` in `src/app/(auth)/forms.tsx`.
+- The contact email for `/privacy` (replaces `[CONTACT EMAIL]`, the `CONTACT` constant in `src/app/privacy/page.tsx`).
 - The deferred P2/P3 items in `docs/REPORT.md`, if they want them.
 
 ## Open issues
-- **Privacy note:** waiting for the user's wording.
+- **Privacy page:** the user's sign-up wording, plus a question-context clause; `[CONTACT EMAIL]` placeholder until the user gives an address.
 - **`npm audit`:** clean, via `overrides` in package.json. Drop the `next.postcss` override on Next 16.4.5+.
 - **pgTAP:** tests 40 and 60 re-anchor the seed dates (the seed is relative to the reset day), so they pass on an old local DB. E2E still expects a recently reset DB.
 
 ## First step next session
-Read `docs/REPORT.md`. Push Phase 9 if the user hasn't yet (ask first). If the user has sent the privacy wording, put it in `PRIVACY_NOTE`, run the 4.1 spec, commit and ask before pushing.
+Read `docs/REPORT.md`. If the user has sent the privacy contact email, set `CONTACT` in `src/app/privacy/page.tsx`, run the 4.1 and a11y specs, commit and ask before pushing.
 
 **E2E on this machine:** run E2E against a production build (`npm run build`, then `CI=1 npx playwright test`) on a reset DB. Stop any `next dev` or `next start` first, because a server writing to `.next` during a build corrupts it.

@@ -126,6 +126,7 @@ export function SignupForm() {
         error={state.fieldErrors?.email}
       />
       <PasswordField label="Password" name="password" autoComplete="new-password" rules error={state.fieldErrors?.password} />
+      {PRIVACY_NOTE ? <p className="text-caption text-ink-secondary">{PRIVACY_NOTE}</p> : null}
       <Button type="submit" loading={pending} block>
         Create account
       </Button>
@@ -135,6 +136,11 @@ export function SignupForm() {
     </form>
   );
 }
+
+// ---------- Sign-up privacy note ----------
+// Shown above "Create account". Wording pending from the project owner (Phase 9): until it's set this
+// renders nothing, so no placeholder text can reach production. Plain text, or JSX with a link.
+const PRIVACY_NOTE: React.ReactNode = null;
 
 // ---------- Send the email again (60-second cooldown) ----------
 

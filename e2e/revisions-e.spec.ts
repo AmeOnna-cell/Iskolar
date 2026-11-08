@@ -32,7 +32,7 @@ test("wide screens: tracking list with search and progress, the selected applica
   await expect(list.getByRole("link")).toHaveCount(2);
   const row = list.getByRole("link", { name: /Tulong Dunong Program/ });
   await expect(row).toContainText("Preparing");
-  await expect(row).toContainText(/Deadline \w{3} \d+/);
+  await expect(row).toContainText(/Deadline [A-Z][a-z]{2} \d+·Closes in \d+ days?/); // "Deadline" is sr-only
   await expect(row).toContainText("Not checked"); // no eligibility answers yet
 
   // Selecting a row changes the panel in place.

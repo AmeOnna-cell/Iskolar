@@ -39,6 +39,7 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
   - awesome-design-md, through `DESIGN.md`.
   - Playwright screenshots via `npm run screens -- <dir> [student:|coordinator:|admin:]<route>`, at 360/768/1280/1440 in both themes. In Git Bash prefix the command with `MSYS_NO_PATHCONV=1`.
 - **E2E on this machine:**
+  - Export the fake env values from `.github/workflows/ci.yml` (Gmail placeholders, `EMAIL_DEV_SMTP`, `CRON_SECRET`) before the run, or `4.7-notifications` times out.
   - Clear `.next/cache/fetch-cache` before full runs. Stale public search caches break the count assertions.
   - Under heavy memory pressure from other apps, tests time out. Rerun before treating a failure as real.
 
@@ -53,11 +54,11 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
   - Stage 2, group 4 (staff and admin screens): done and pushed (`a1604dc`).
 - **Phase 9 (tests and docs):** done and pushed (`50a572d`, CI green); see `docs/REPORT.md`.
 - **Privacy note and `/privacy`:** done and pushed (`7ebb48a`).
-- **Team-leader revisions** (brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md`, groups A–F): A and B pushed (`976d79d`); C pushed (`e061464`); D pushed (`35ce96c`); group E (My applications two-pane, plus the announcement-link migration) committed, not pushed. Push order for E: `db push --remote` first, then `git push`, asking the user before each. Details and rules are in `docs/PROGRESS.md` under "Team-leader revisions".
+- **Team-leader revisions** (brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md`, groups A–F): A and B pushed (`976d79d`); C pushed (`e061464`); D pushed (`35ce96c`); E pushed (`6646248`, with migration `20261108130000_announcement_links` pushed first). Two small E follow-ups (drawer title tap target, one-line deadline) are committed after that, not pushed. Details and rules are in `docs/PROGRESS.md` under "Team-leader revisions".
 - **Branch:** `main`. No work-in-progress branch.
 
 ## Remaining work
-Team-leader revisions: push group E (after asking), then group F (see `docs/PROGRESS.md`). For each group: build, test on a reset DB, take screenshots, run one critique, commit, update this file and PROGRESS, then ask before pushing.
+Team-leader revisions: group F (ask before pushing it and the E follow-ups) (see `docs/PROGRESS.md`). For each group: build, test on a reset DB, take screenshots, run one critique, commit, update this file and PROGRESS, then ask before pushing.
 
 Also waiting on the user:
 - The deferred P2/P3 items in `docs/REPORT.md`, if they want them.

@@ -30,7 +30,8 @@ export function ApplicationDetail({ s, app, evaluation }: { s: ScholarshipDetail
           <ProviderMark abbr={provider.abbr} color={provider.color} />
           <div className="min-w-0 flex-1">
             <h2 className="text-title font-[650] tracking-tight text-ink">
-              <Link href={`/s/${s.slug}`} className="text-ink">
+              {/* 44px tap target on touch screens (the drawer); compact again from the nav breakpoint. */}
+              <Link href={`/s/${s.slug}`} className="-my-2.5 inline-flex min-h-11 items-center text-ink nav:my-0 nav:min-h-0">
                 {s.name}
               </Link>
             </h2>

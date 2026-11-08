@@ -8,7 +8,7 @@
 | 8 Polish/QA | Done and deployed |
 | 9 Tests + docs | Done and deployed (2026-11-08); see `docs/REPORT.md` |
 | Privacy note and `/privacy` | Done and deployed (`7ebb48a`) |
-| Team-leader revisions (groups A–F) | In progress: A–D pushed (`35ce96c`); E committed |
+| Team-leader revisions (groups A–F) | In progress: A–E pushed (`6646248`); F next |
 
 ## Team-leader revisions (started 2026-11-08)
 
@@ -97,8 +97,8 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
 - **Tests:** lint and typecheck clean, unit 52 of 52, pgTAP 281 of 281, E2E 102 of 102 on a reset DB. New `e2e/revisions-d.spec.ts`; axe on `/announcements` and its drawer.
 - **Screenshots:** `docs/screenshots/revisions-d/`.
 
-### Group E: My applications (committed, not pushed)
-- **Migration `20261108130000_announcement_links.sql`** (ships with group E; push it with `--remote` before the code):
+### Group E: My applications (pushed, `6646248`; follow-up fixes committed, not pushed)
+- **Migration `20261108130000_announcement_links.sql`** (pushed with `--remote` before the code; the remote migration list matches):
   - `notify_announcement()` links alerts to `/announcements?a={slug}`, or `?a=general` for general posts. The bell, `/alerts`, email and push all follow `notifications.link`.
   - Existing announcement alerts are backfilled the same way; alerts whose announcement was deleted link to `/announcements`. A slug that later goes non-public lands on the board's "no public announcements" notice.
   - pgTAP `80_notifications` has 2 new assertions (283 in total).
@@ -115,7 +115,8 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
   - Search spans every stage (the tabs step aside while searching).
   - "N documents not ticked yet" beside Mark as submitted.
   - Stage dots are neutral/blue so amber and red stay for deadlines; "Tracking list" is screen-reader-only on phones; "Not approved" offers open scholarships.
-  - Left, kept as the brief specifies: the control sits above the checklist and "Last updated" stays in the date row. Also left: the drawer's title link is 24px tall at 360 (the footer has a 44px "Open the full page").
+  - Kept as the brief specifies (the user agreed): the control sits above the checklist and "Last updated" stays in the date row.
+  - Follow-up the user asked for: the panel's title link is 44px tall below the nav breakpoint (the drawer), and rows read "Nov 12 · Closes in 4 days" on one line at 360 ("Deadline" stays for screen readers).
 - **Tests:** new `e2e/revisions-e.spec.ts` (wide panel, cross-stage search, ticking moves the bar, phone drawer and Back, alert links, axe on the panel and the drawer); `student-journey` updated for the new layout. E2E runs need the CI env values from `.github/workflows/ci.yml` (fake Gmail, `EMAIL_DEV_SMTP`, `CRON_SECRET`) exported, or `4.7-notifications` times out.
 - **Screenshots:** `docs/screenshots/revisions-e/`.
 

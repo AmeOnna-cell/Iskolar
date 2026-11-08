@@ -60,7 +60,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
       name: s.name,
       provider: shortProvider(s.provider!.name),
       stage: STAGE[a.stage === "submitted" && a.result !== "pending" ? a.result : a.stage],
-      deadline: s.closes_on ? `Deadline ${formatDate(s.closes_on)}` : "No deadline yet",
+      deadline: s.closes_on ? formatDate(s.closes_on) : null,
       due: { text: st.status === "closed" ? "Closed" : dueText({ ...st, opens_on: s.opens_on, closes_on: s.closes_on }), tone: urgency(st.status, st.days_left) },
       eligibility: e && e.verdict !== "none" ? { met: e.met, total: e.total, verdict: e.verdict } : null,
       docs: { done: a.checked.filter((c) => ids.has(c.document_id)).length, total: s.documents.length },

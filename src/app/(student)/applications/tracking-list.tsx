@@ -14,7 +14,8 @@ export type TrackRow = {
   name: string;
   provider: string;
   stage: { label: string; dot: string };
-  deadline: string;
+  /** "Nov 12", or null when there is no deadline yet. */
+  deadline: string | null;
   due: { text: string; tone: keyof typeof DUE_TONE };
   /** null: no answers yet, so nothing to count. */
   eligibility: { met: number; total: number; verdict: "yes" | "maybe" | "no" } | null;
@@ -103,14 +104,25 @@ export function TrackingList({ rows, tab, selected, tabs }: { rows: TrackRow[]; 
                     <span className="min-w-0 flex-1">
                       <span className={`block font-semibold ${current ? "lg:text-primary" : ""}`}>{r.name}</span>
                       <span className="block text-sm text-ink-secondary">{r.provider}</span>
-                      <span className="mt-1 flex flex-wrap items-center gap-x-2 text-sm">
+                      <span className="mt-1 flex flex-wrap items-center gap-x-3 text-sm">
                         <span className="inline-flex items-center gap-1.5 font-medium text-ink">
                           <span aria-hidden="true" className={`size-2 rounded-full ${r.stage.dot}`} />
                           {r.stage.label}
                         </span>
-                        <span className="text-ink-hint" aria-hidden="true">·</span>
-                        <span className="text-ink-secondary">{r.deadline}</span>
-                        <span className={`font-semibold ${DUE_TONE[r.due.tone]}`}>{r.due.text}</span>
+                        {/* "Nov 12 · Closes in 4 days" never breaks: on a narrow row it moves to its own line
+                            whole. The word "Deadline" is for screen readers. */}
+                        <span className="whitespace-nowrap">
+                          {r.deadline ? (
+                            <>
+                              <span className="text-ink-secondary">
+                                <span className="sr-only">Deadline </span>
+                                {r.deadline}
+                              </span>
+                              <span className="px-1.5 text-ink-hint" aria-hidden="true">·</span>
+                            </>
+                          ) : null}
+                          <span className={`font-semibold ${DUE_TONE[r.due.tone]}`}>{r.due.text}</span>
+                        </span>
                       </span>
                       <span className="mt-2 grid grid-cols-2 gap-4">
                         <Bar

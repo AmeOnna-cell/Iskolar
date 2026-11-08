@@ -35,8 +35,9 @@ test("deactivate blocks sign-in, reactivate restores it, both are audited", asyn
   // Audit log
   await page.goto(`/admin/audit?actor=${encodeURIComponent(admin.email)}`);
   const audit = page.getByTestId("audit-rows");
-  for (const action of ["user.deactivate", "user.ban_and_sign_out", "user.reactivate", "user.unban"]) {
-    await expect(audit.getByText(action, { exact: true })).toBeVisible();
+  // Plain-language labels, each naming the account it was about.
+  for (const label of ["Deactivated account", "Blocked sign-in and signed out", "Reactivated account", "Allowed sign-in again"]) {
+    await expect(audit.locator("summary").filter({ hasText: label }).filter({ hasText: student.email }).first()).toBeVisible();
   }
 });
 

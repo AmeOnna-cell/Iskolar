@@ -1,22 +1,50 @@
 import Link from "next/link";
+import { Icon } from "@/components/icons";
 import { buttonClass } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
-import { parseAuditParams } from "@/lib/audit-params";
+import { actionLabel, entityLabel, parseAuditParams } from "@/lib/audit-params";
 import { requireRole } from "@/lib/auth/session";
 import { auditFacets, getStaffNames, listAudit } from "@/lib/data/staff";
 import { withParams } from "@/lib/paging";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Audit log" };
 
 type SP = Record<string, string | string[] | undefined>;
+type Json = Record<string, unknown> | null;
 
 const when = (ts: string) =>
   new Date(ts).toLocaleString("en-PH", { timeZone: "Asia/Manila", month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
 
-function show(v: unknown) {
-  if (v === null || v === undefined) return "—";
-  if (typeof v === "string") return v;
-  return JSON.stringify(v);
+function show(v: unknown): string {
+  if (v === null || v === undefined || v === "") return "—";
+  if (typeof v === "boolean") return v ? "Yes" : "No";
+  if (Array.isArray(v)) return v.length ? v.map(show).join(", ") : "None";
+  if (typeof v === "object") return JSON.stringify(v);
+  return String(v);
+}
+
+const field = (k: string) => k.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
+
+/** Names for the listings and accounts the rows on this page point at, so the summary can say who or what. */
+async function targetNames(rows: Array<{ entity_type: string; entity_id: string | null; before: unknown; after: unknown }>) {
+  const scholarshipIds = new Set<string>();
+  const userIds = new Set<string>();
+  for (const r of rows) {
+    const j = { ...((r.before as Json) ?? {}), ...((r.after as Json) ?? {}) };
+    if (r.entity_type === "scholarship" && r.entity_id) scholarshipIds.add(r.entity_id);
+    else if (r.entity_type === "user" && r.entity_id) userIds.add(r.entity_id);
+    else if (typeof j.scholarship_id === "string") scholarshipIds.add(j.scholarship_id);
+  }
+  const supabase = await createClient();
+  const [{ data: sch }, { data: people }] = await Promise.all([
+    scholarshipIds.size ? supabase.from("scholarships").select("id, name").in("id", [...scholarshipIds]) : Promise.resolve({ data: [] }),
+    userIds.size ? supabase.from("profiles").select("id, email").in("id", [...userIds]) : Promise.resolve({ data: [] }),
+  ]);
+  return {
+    scholarships: new Map((sch ?? []).map((s) => [s.id, s.name])),
+    people: new Map((people ?? []).map((p) => [p.id, p.email ?? "Deleted account"])),
+  };
 }
 
 export default async function AuditPage({ searchParams }: { searchParams: Promise<SP> }) {
@@ -24,12 +52,20 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   const sp = await searchParams;
   const q = parseAuditParams(sp);
   const [{ rows, hasMore }, facets] = await Promise.all([listAudit(q), auditFacets()]);
-  const names = await getStaffNames([...new Set(rows.map((r) => r.actor_id).filter(Boolean) as string[])]);
+  const [names, targets] = await Promise.all([getStaffNames([...new Set(rows.map((r) => r.actor_id).filter(Boolean) as string[])]), targetNames(rows)]);
   const pathname = "/admin/audit";
   const last = rows.at(-1);
   const filters: SP = { ...sp };
   delete filters.before;
   const exportHref = withParams("/admin/audit/export", filters, {});
+
+  const target = (r: (typeof rows)[number]) => {
+    const j = { ...((r.before as Json) ?? {}), ...((r.after as Json) ?? {}) };
+    const str = (v: unknown) => (typeof v === "string" && v ? v : null);
+    if (r.entity_type === "user") return (r.entity_id && targets.people.get(r.entity_id)) ?? str(j.email);
+    if (r.entity_type === "scholarship") return (r.entity_id && targets.scholarships.get(r.entity_id)) ?? str(j.name);
+    return (typeof j.scholarship_id === "string" && targets.scholarships.get(j.scholarship_id)) || str(j.title) || str(j.name) || str(j.question);
+  };
 
   return (
     <div className="page-container py-8">
@@ -45,24 +81,27 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
 
       <form action={pathname} className="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto_auto_auto]">
         <label className="flex flex-col gap-1 text-sm font-semibold text-ink">
-          Actor email
-          <input name="actor" defaultValue={q.actor} maxLength={120} placeholder="name@school.edu.ph" className={`${inputClass} border-hairline-strong`} />
+          Done by (email)
+          <input name="actor" defaultValue={q.actor} maxLength={120} placeholder="name@example.com" className={`${inputClass} border-hairline-strong`} />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold text-ink">
           Action
           <select name="action" defaultValue={q.action} className={`${inputClass} border-hairline-strong`}>
             <option value="">Any action</option>
-            {facets.actions.map((a) => (
-              <option key={a} value={a}>{a}</option>
-            ))}
+            {facets.actions
+              .map((a) => [a, actionLabel(a)] as const)
+              .sort((x, y) => x[1].localeCompare(y[1]))
+              .map(([a, label]) => (
+                <option key={a} value={a}>{label}</option>
+              ))}
           </select>
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold text-ink">
-          Entity
+          About
           <select name="entity" defaultValue={q.entity} className={`${inputClass} border-hairline-strong`}>
             <option value="">Anything</option>
             {facets.entities.map((e) => (
-              <option key={e} value={e}>{e}</option>
+              <option key={e} value={e}>{entityLabel(e).replace(/^./, (c) => c.toUpperCase())}</option>
             ))}
           </select>
         </label>
@@ -89,23 +128,25 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
           <ul data-testid="audit-rows">
             {rows.map((r) => {
               const keys = [...new Set([...Object.keys((r.before as object) ?? {}), ...Object.keys((r.after as object) ?? {})])];
+              const what = target(r);
               return (
-                <li key={r.id} className="border-b border-hairline px-4 py-3 last:border-b-0 sm:px-5">
-                  <details>
-                    <summary className="grid cursor-pointer list-none grid-cols-1 gap-1 py-1 sm:grid-cols-[180px_minmax(0,1fr)_minmax(0,1fr)] sm:items-center sm:gap-4 [&::-webkit-details-marker]:hidden">
-                      <span className="tnum text-caption text-ink-hint">{when(r.created_at)}</span>
-                      <span className="min-w-0 text-sm">
-                        <span className="font-semibold text-ink">{r.action}</span>
-                        <span className="text-ink-secondary"> · {r.entity_type}</span>
+                <li key={r.id} className="border-b border-hairline last:border-b-0">
+                  <details className="group">
+                    <summary className="grid cursor-pointer list-none grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1 px-4 py-3 hover:bg-surface-hover sm:grid-cols-[180px_minmax(0,1fr)_minmax(0,0.7fr)_auto] sm:items-center sm:gap-x-4 sm:px-5 [&::-webkit-details-marker]:hidden">
+                      <span className="tnum text-caption text-ink-hint max-sm:order-2 max-sm:col-span-2">{when(r.created_at)}</span>
+                      <span className="min-w-0 text-sm max-sm:order-1">
+                        <span className="font-semibold text-ink">{actionLabel(r.action)}</span>
+                        {what ? <span className="break-words text-ink-secondary"> · {what}</span> : null}
                       </span>
-                      <span className="truncate text-sm text-ink-secondary">
-                        {r.actor_id ? names.get(r.actor_id) ?? "Unknown" : "System"}
-                        {r.actor_role ? ` (${r.actor_role})` : ""}
+                      <span className="truncate text-sm text-ink-secondary max-sm:order-3 max-sm:col-span-2">
+                        {r.actor_id ? names.get(r.actor_id) ?? "Unknown" : "System (setup or scheduled job)"}
+                        {r.actor_id && r.actor_role ? ` (${r.actor_role})` : ""}
                       </span>
+                      <Icon name="chevron" size={16} className="text-ink-hint transition-transform group-open:rotate-180 max-sm:order-1 motion-reduce:transition-none" />
                     </summary>
-                    <div className="mt-3 overflow-x-auto">
+                    <div className="overflow-x-auto px-4 pb-4 sm:px-5">
                       <p className="mb-2 text-caption text-ink-hint">
-                        Entity id <span className="font-mono">{r.entity_id ?? "—"}</span>
+                        <span className="font-mono">{r.action}</span> · {entityLabel(r.entity_type)} <span className="font-mono">{r.entity_id ?? "—"}</span>
                         {r.ip ? ` · IP ${r.ip}` : ""}
                       </p>
                       {keys.length ? (
@@ -120,9 +161,9 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
                           <tbody>
                             {keys.map((k) => (
                               <tr key={k} className="border-b border-hairline last:border-b-0 align-top">
-                                <td className="py-2 pr-4 font-semibold text-ink">{k}</td>
-                                <td className="py-2 pr-4 break-all text-danger">{show((r.before as Record<string, unknown> | null)?.[k])}</td>
-                                <td className="py-2 break-all text-ok">{show((r.after as Record<string, unknown> | null)?.[k])}</td>
+                                <th scope="row" className="py-2 pr-4 text-left font-semibold text-ink">{field(k)}</th>
+                                <td className="py-2 pr-4 break-all text-ink-secondary">{show((r.before as Json)?.[k])}</td>
+                                <td className="py-2 break-all text-ink">{show((r.after as Json)?.[k])}</td>
                               </tr>
                             ))}
                           </tbody>

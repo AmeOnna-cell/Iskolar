@@ -30,3 +30,50 @@ export function csvCell(v: unknown): string {
   const safe = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
   return `"${safe.replace(/"/g, '""')}"`;
 }
+
+// ---------- Plain-language labels (the raw code stays in the row details and the CSV) ----------
+
+const ENTITY: Record<string, string> = {
+  scholarship: "listing",
+  scholarship_criteria: "listing requirements",
+  scholarship_benefit: "benefit",
+  scholarship_document: "document",
+  scholarship_step: "how-to-apply step",
+  scholarship_note: "requirement",
+  provider: "provider",
+  announcement: "announcement",
+  inquiry: "question",
+  inquiry_reply: "reply",
+  user: "account",
+};
+
+const ACTION: Record<string, string> = {
+  "scholarship.publish": "Published listing",
+  "scholarship.unpublish": "Unpublished listing",
+  "scholarship.archive": "Archived listing",
+  "scholarship.submit_for_review": "Sent listing for verification",
+  "scholarship.return_to_draft": "Moved listing back to draft",
+  "scholarship.verify": "Verified listing",
+  "scholarship.unverify": "Marked listing unverified",
+  "scholarship.deadline_change": "Changed deadline",
+  "user.role_change": "Changed role",
+  "user.deactivate": "Deactivated account",
+  "user.reactivate": "Reactivated account",
+  "user.delete": "Deleted account data",
+  "user.ban_and_sign_out": "Blocked sign-in and signed out",
+  "user.unban": "Allowed sign-in again",
+  "user.sign_out_after_role_change": "Signed out after role change",
+  "user.auth_deleted": "Deleted sign-in account",
+  "inquiry.status_change": "Changed question status",
+};
+
+const VERB: Record<string, string> = { create: "Added", update: "Edited", delete: "Removed" };
+
+export const entityLabel = (entity: string) => ENTITY[entity] ?? entity.replace(/_/g, " ");
+
+/** "scholarship.publish" → "Published listing"; "scholarship_document.update" → "Edited document"; unknown codes unchanged. */
+export function actionLabel(action: string): string {
+  if (ACTION[action]) return ACTION[action];
+  const [entity, verb] = action.split(".");
+  return entity && verb && VERB[verb] ? `${VERB[verb]} ${entityLabel(entity)}` : action;
+}

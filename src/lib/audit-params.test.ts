@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { csvCell, parseAuditParams } from "./audit-params";
+import { actionLabel, csvCell, parseAuditParams } from "./audit-params";
 
 describe("audit params", () => {
   it("parses a valid keyset cursor and rejects junk", () => {
@@ -14,5 +14,12 @@ describe("audit params", () => {
     expect(csvCell("=HYPERLINK(1)")).toBe(`"'=HYPERLINK(1)"`);
     expect(csvCell({ a: 1 })).toBe('"{""a"":1}"');
     expect(csvCell(null)).toBe('""');
+  });
+
+  it("labels audit actions in plain words, keeping unknown codes as they are", () => {
+    expect(actionLabel("scholarship.publish")).toBe("Published listing");
+    expect(actionLabel("scholarship_document.update")).toBe("Edited document");
+    expect(actionLabel("announcement.create")).toBe("Added announcement");
+    expect(actionLabel("e2e.seed")).toBe("e2e.seed");
   });
 });

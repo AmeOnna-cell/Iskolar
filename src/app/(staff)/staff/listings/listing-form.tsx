@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { cloneElement, useEffect, useId, useRef, useState, useTransition } from "react";
 import { Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/toast";
 import { saveListing } from "@/lib/actions/staff";
 import { FIELDS, PROVIDER_TYPES, REGIONS } from "@/lib/reference";
 import type { ListingInput } from "@/lib/validation/listing";
+import { useLeaveGuard } from "./unsaved";
 
 type Option = { id: string; label: string };
 type Item = Record<string, string> & { key: string };
@@ -19,29 +20,42 @@ const k = () => `n${++seq}`;
 
 const field = `${inputClass} border-hairline-strong`;
 
-function L({ label, hint, error, children, htmlFor }: { label: string; hint?: string; error?: string; children: React.ReactNode; htmlFor: string }) {
+/**
+ * Label, hint, control and error, with the same contract as TextField (components/ui/field.tsx):
+ * the control gets aria-invalid, aria-describedby (hint + error) and a danger border when invalid.
+ */
+function L({ label, hint, error, children, htmlFor, optional }: { label: string; hint?: string; error?: string; children: React.ReactElement<{ className?: string }>; htmlFor: string; optional?: boolean }) {
+  const hintId = hint ? `${htmlFor}-hint` : undefined;
+  const errorId = error ? `${htmlFor}-error` : undefined;
+  const cls = children.props.className ?? "";
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor={htmlFor} className="text-sm font-semibold text-ink">
         {label}
+        {optional ? <span className="font-normal text-ink-hint"> (optional)</span> : null}
       </label>
-      {hint ? <p className="-mt-1 text-caption text-ink-hint">{hint}</p> : null}
-      {children}
-      {error ? <p className="text-caption font-semibold text-danger" role="alert">{error}</p> : null}
+      {hint ? <p id={hintId} className="-mt-1 text-caption text-ink-hint">{hint}</p> : null}
+      {cloneElement(children, {
+        "aria-invalid": error ? true : undefined,
+        "aria-describedby": [hintId, errorId].filter(Boolean).join(" ") || undefined,
+        // Keep a focused field clear of the sticky header and the save bar.
+        className: `${error ? cls.replace("border-hairline-strong", "border-danger") : cls} scroll-mt-24 scroll-mb-40`,
+      } as object)}
+      {error ? <p id={errorId} className="text-caption font-semibold text-danger">{error}</p> : null}
     </div>
   );
 }
 
 function Fieldset({ legend, hint, children }: { legend: string; hint?: string; children: React.ReactNode }) {
+  const id = useId();
   return (
-    <fieldset className="flex flex-col gap-5 rounded-md border border-hairline bg-surface p-5 shadow-rest sm:p-6">
-      <legend className="sr-only">{legend}</legend>
+    <section aria-labelledby={id} className="flex flex-col gap-5 rounded-md border border-hairline bg-surface p-5 shadow-rest sm:p-6">
       <div>
-        <h2 className="text-title-sm font-[650] text-ink">{legend}</h2>
+        <h2 id={id} className="text-title-sm font-[650] text-ink">{legend}</h2>
         {hint ? <p className="mt-1 text-sm text-ink-secondary">{hint}</p> : null}
       </div>
       {children}
-    </fieldset>
+    </section>
   );
 }
 
@@ -150,6 +164,17 @@ export function ListingForm({
   const set = (patch: Partial<FormInitial>) => setV((x) => ({ ...x, ...patch }));
   const setC = (patch: Partial<FormInitial["criteria"]>) => setV((x) => ({ ...x, criteria: { ...x.criteria, ...patch } }));
   const np = v.new_provider ?? { name: "", short_name: "", abbr: "", color: "#334155", type: "government", website: "" };
+  const [saved, setSaved] = useState(false);
+  const dirty = !saved && (newProvider !== (!initial.provider_id && providers.length === 0) || JSON.stringify(v) !== JSON.stringify(initial));
+  useLeaveGuard(dirty);
+
+  // After a failed save, focus the first invalid field (its error is read with it), else the summary.
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (!message) return;
+    const root = formRef.current;
+    (root?.querySelector<HTMLElement>('[aria-invalid="true"]') ?? root?.querySelector<HTMLElement>("[data-form-message]"))?.focus();
+  }, [message, errors]);
 
   const submit = () =>
     start(async () => {
@@ -165,11 +190,12 @@ export function ListingForm({
         notes: strip(v.notes) as never,
       });
       if (res.status === "error") {
+        const n = Object.keys(res.fieldErrors ?? {}).length;
         setErrors(res.fieldErrors ?? {});
-        setMessage(res.message ?? "Some fields need attention.");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        setMessage(n ? `${n} ${n === 1 ? "thing" : "things"} to fix below.` : (res.message ?? "That didn't save. Try again."));
         return;
       }
+      setSaved(true); // the page reloads with the saved version; don't ask "leave without saving?"
       toast(v.id ? "Listing saved" : "Listing created as a draft");
       router.replace(`/staff/listings/${res.id}?saved=1`);
       router.refresh();
@@ -177,6 +203,7 @@ export function ListingForm({
 
   return (
     <form
+      ref={formRef}
       noValidate
       onSubmit={(e) => {
         e.preventDefault();
@@ -185,17 +212,18 @@ export function ListingForm({
       className="flex flex-col gap-6"
     >
       {message ? (
-        <Notice tone="danger" live>
-          {message}
-          {Object.keys(errors).length ? ` (${Object.keys(errors).length} ${Object.keys(errors).length === 1 ? "field" : "fields"})` : ""}
-        </Notice>
+        <div data-form-message tabIndex={-1} className="scroll-mt-24">
+          <Notice tone="danger" live>
+            {message}
+          </Notice>
+        </div>
       ) : null}
 
       <Fieldset legend="Basics">
         <L label="Scholarship name" htmlFor="f-name" error={errors.name}>
           <input id="f-name" value={v.name} maxLength={160} onChange={(e) => set({ name: e.target.value })} className={field} />
         </L>
-        <L label="Web address (slug)" hint="Leave empty to make one from the name." htmlFor="f-slug" error={errors.slug}>
+        <L label="Web address" hint="The last part of the listing's link. Leave empty to make one from the name." htmlFor="f-slug" optional error={errors.slug}>
           <input id="f-slug" value={v.slug ?? ""} maxLength={80} placeholder="e.g. city-merit-grant" onChange={(e) => set({ slug: e.target.value })} className={field} />
         </L>
         <div className="flex flex-col gap-2">
@@ -236,20 +264,20 @@ export function ListingForm({
           <L label="Amount, as students read it" hint="e.g. ₱15,000 a year" htmlFor="f-amount" error={errors.amount_text}>
             <input id="f-amount" value={v.amount_text} maxLength={120} onChange={(e) => set({ amount_text: e.target.value })} className={field} />
           </L>
-          <L label="Yearly value in pesos" hint="For “highest amount” sorting. Optional." htmlFor="f-amount-num" error={errors.amount_num}>
+          <L label="Yearly value in pesos" hint="For “highest amount” sorting." htmlFor="f-amount-num" optional error={errors.amount_num}>
             <input id="f-amount-num" type="number" inputMode="numeric" min={0} value={String(v.amount_num ?? "")} onChange={(e) => set({ amount_num: e.target.value })} className={field} />
           </L>
-          <L label="Applications open" htmlFor="f-opens" error={errors.opens_on}>
+          <L label="Applications open" htmlFor="f-opens" optional error={errors.opens_on}>
             <input id="f-opens" type="date" value={v.opens_on} onChange={(e) => set({ opens_on: e.target.value })} className={field} />
           </L>
-          <L label="Deadline" hint="Changing it alerts students who track this scholarship." htmlFor="f-closes" error={errors.closes_on}>
+          <L label="Deadline" hint="Changing it alerts students who track this scholarship." htmlFor="f-closes" optional error={errors.closes_on}>
             <input id="f-closes" type="date" value={v.closes_on} onChange={(e) => set({ closes_on: e.target.value })} className={field} />
           </L>
-          <L label="Where it applies" hint="e.g. Nationwide, or Central Luzon (city residents)" htmlFor="f-loc" error={errors.location_label}>
+          <L label="Where it applies" hint="e.g. Nationwide, or Central Luzon (city residents)" htmlFor="f-loc" optional error={errors.location_label}>
             <input id="f-loc" value={v.location_label ?? ""} maxLength={120} onChange={(e) => set({ location_label: e.target.value })} className={field} />
           </L>
           {isAdmin ? (
-            <L label="Assigned coordinator" htmlFor="f-coord">
+            <L label="Assigned coordinator" htmlFor="f-coord" optional>
               <select id="f-coord" value={v.assigned_coordinator_id ?? ""} onChange={(e) => set({ assigned_coordinator_id: e.target.value })} className={field}>
                 <option value="">Unassigned</option>
                 {coordinators.map((c) => (
@@ -259,7 +287,7 @@ export function ListingForm({
             </L>
           ) : null}
         </div>
-        <L label="Summary" hint="One or two plain sentences: who it's for and what it gives." htmlFor="f-summary" error={errors.summary}>
+        <L label="Summary" hint="One or two plain sentences: who it's for and what it gives." htmlFor="f-summary" optional error={errors.summary}>
           <textarea id="f-summary" rows={3} value={v.summary ?? ""} maxLength={600} onChange={(e) => set({ summary: e.target.value })} className={`${field} py-2`} />
         </L>
       </Fieldset>
@@ -269,7 +297,7 @@ export function ListingForm({
           <L label="Source name" hint="e.g. ched.gov.ph, or Provincial Capitol announcement" htmlFor="f-src" error={errors.source_label}>
             <input id="f-src" value={v.source_label} maxLength={160} onChange={(e) => set({ source_label: e.target.value })} className={field} />
           </L>
-          <L label="Official link" hint="Optional. A full https:// address." htmlFor="f-url" error={errors.source_url}>
+          <L label="Official link" hint="A full https:// address." htmlFor="f-url" optional error={errors.source_url}>
             <input id="f-url" type="url" value={v.source_url} maxLength={500} onChange={(e) => set({ source_url: e.target.value })} className={field} />
           </L>
         </div>
@@ -277,10 +305,10 @@ export function ListingForm({
 
       <Fieldset legend="Who can apply" hint="Requirements the eligibility check can test. Leave a part empty if there's no such requirement.">
         <div className="grid gap-5 sm:grid-cols-2">
-          <L label="Highest GWA allowed" hint="e.g. 2.00 (1.00 is the best grade)" htmlFor="c-gwa" error={errors["criteria.gwa_max"]}>
+          <L label="Highest GWA allowed" hint="e.g. 2.00 (1.00 is the best grade)" htmlFor="c-gwa" optional error={errors["criteria.gwa_max"]}>
             <input id="c-gwa" type="number" inputMode="decimal" step={0.01} min={1} max={5} value={String(v.criteria.gwa_max)} onChange={(e) => setC({ gwa_max: e.target.value })} className={field} />
           </L>
-          <L label="Household income limit (₱ a year)" hint="e.g. 400000" htmlFor="c-income" error={errors["criteria.income_max"]}>
+          <L label="Household income limit (₱ a year)" hint="e.g. 400000" htmlFor="c-income" optional error={errors["criteria.income_max"]}>
             <input id="c-income" type="number" inputMode="numeric" min={1} value={String(v.criteria.income_max)} onChange={(e) => setC({ income_max: e.target.value })} className={field} />
           </L>
         </div>
@@ -313,13 +341,13 @@ export function ListingForm({
       <Fieldset legend="What students get">
         <ListEditor name="benefits" items={v.benefits} setItems={(benefits) => set({ benefits })} fields={[{ key: "text", label: "Benefit", max: 300 }]} addLabel="Add a benefit" errors={errors} />
         <div className="grid gap-5 sm:grid-cols-3">
-          <L label="Duration" htmlFor="f-dur" error={errors.duration}>
+          <L label="Duration" htmlFor="f-dur" optional error={errors.duration}>
             <input id="f-dur" value={v.duration ?? ""} maxLength={300} onChange={(e) => set({ duration: e.target.value })} className={field} />
           </L>
-          <L label="To keep it" htmlFor="f-ren" error={errors.renewal}>
+          <L label="To keep it" htmlFor="f-ren" optional error={errors.renewal}>
             <input id="f-ren" value={v.renewal ?? ""} maxLength={600} onChange={(e) => set({ renewal: e.target.value })} className={field} />
           </L>
-          <L label="Obligations" htmlFor="f-obl" error={errors.obligations}>
+          <L label="Obligations" htmlFor="f-obl" optional error={errors.obligations}>
             <input id="f-obl" value={v.obligations ?? ""} maxLength={600} onChange={(e) => set({ obligations: e.target.value })} className={field} />
           </L>
         </div>
@@ -333,8 +361,14 @@ export function ListingForm({
         <ListEditor name="steps" items={v.steps} setItems={(steps) => set({ steps })} fields={[{ key: "title", label: "Step", max: 200 }, { key: "detail", label: "Detail", max: 600 }]} addLabel="Add a step" errors={errors} />
       </Fieldset>
 
-      <div className="sticky bottom-[calc(64px+env(safe-area-inset-bottom))] z-20 flex flex-wrap items-center justify-end gap-3 rounded-md border border-hairline bg-surface p-4 shadow-overlay nav:bottom-4">
-        <span className="mr-auto text-sm text-ink-secondary">{v.id ? "Changes go live right away on published listings." : "New listings start as drafts."}</span>
+      <div className="sticky bottom-[calc(64px+env(safe-area-inset-bottom))] z-20 flex items-center justify-end gap-3 rounded-md border border-hairline bg-surface p-3 shadow-overlay nav:bottom-4 sm:p-4">
+        <span className="mr-auto text-sm text-ink-secondary">
+          {dirty ? <span className="font-semibold text-ink">Unsaved changes</span> : null}
+          <span className="max-sm:hidden">
+            {dirty ? " · " : ""}
+            {v.id ? "Changes go live right away on published listings." : "New listings start as drafts."}
+          </span>
+        </span>
         <Button type="submit" loading={pending}>{v.id ? "Save changes" : "Create draft"}</Button>
       </div>
     </form>

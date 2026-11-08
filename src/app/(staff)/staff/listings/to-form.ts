@@ -23,7 +23,7 @@ export const EMPTY_LISTING: FormInitial = {
   assigned_coordinator_id: "",
   criteria: { income_max: "", gwa_max: "", year_levels: [], fields: [], regions: [], requires_ofw: false, requires_four_ps: false },
   benefits: [],
-  documents: [{ key: key(), id: "", name: "", where_to_get: "" }],
+  documents: [],
   steps: [],
   notes: [],
 };

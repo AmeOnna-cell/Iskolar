@@ -17,15 +17,21 @@ test("coordinator drafts → admin verifies and publishes → students see it", 
   // Validation first
   await page.getByRole("button", { name: "Create draft" }).click();
   await expect(page.getByText("Name: at least 3 characters.")).toBeVisible();
+  // Focus lands on the first invalid field, which carries its error; no untouched document row errors.
+  await expect(page.getByLabel("Scholarship name")).toBeFocused();
+  await expect(page.getByLabel("Scholarship name")).toHaveAttribute("aria-invalid", "true");
+  await expect(page.getByText("things to fix below.")).toBeVisible();
+  await expect(page.getByText("Document name: can't be empty.")).toHaveCount(0);
 
   await page.getByLabel("Scholarship name").fill("E2E Engineering Bridge Grant");
-  await page.getByLabel("Web address (slug)").fill(slug);
+  await page.getByLabel("Web address").fill(slug);
   await page.getByLabel("Provider", { exact: true }).selectOption({ label: "Commission on Higher Education (CHED)" });
   await page.getByLabel("Amount, as students read it").fill("₱12,000 a year");
   await page.getByLabel("Applications open").fill("2026-01-05");
-  await page.getByLabel("Deadline", { exact: true }).fill("2030-12-20");
+  await page.getByLabel(/^Deadline/).fill("2030-12-20");
   await page.getByLabel("Source name").fill("CHED memo (E2E)");
   await page.getByLabel("Engineering").check();
+  await page.getByRole("button", { name: "Add a document" }).click();
   await page.getByLabel("Document 1", { exact: true }).fill("Certificate of Registration (COR)");
   await page.getByLabel("Where to get it 1", { exact: true }).fill("Registrar’s office");
   await page.getByRole("button", { name: "Create draft" }).click();
@@ -35,7 +41,10 @@ test("coordinator drafts → admin verifies and publishes → students see it", 
   await expect(page.getByText(/Coordinator: Test Coordinator/)).toBeVisible();
 
   // Move the deadline: recorded in the history
-  await page.getByLabel("Deadline", { exact: true }).fill("2030-12-27");
+  await page.getByLabel(/^Deadline/).fill("2030-12-27");
+  // Status actions wait until the edit is saved.
+  await expect(page.getByText("Unsaved changes")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Send for verification" })).toBeDisabled();
   await page.getByRole("button", { name: "Save changes" }).click();
   await expect(page.getByText(/Dec 20, 2030 → Dec 27, 2030/)).toBeVisible();
 
@@ -58,6 +67,7 @@ test("coordinator drafts → admin verifies and publishes → students see it", 
   await aPage.getByRole("button", { name: "Verify against the source" }).click();
   await expect(aPage.getByText(/^Verified /)).toBeVisible();
   await aPage.getByRole("button", { name: "Publish" }).click();
+  await aPage.getByRole("dialog", { name: "Publish this listing?" }).getByRole("button", { name: "Publish" }).click();
   await expect(aPage.getByText("Published", { exact: true })).toBeVisible();
 
   // Public now (the cache was revalidated by the staff action)

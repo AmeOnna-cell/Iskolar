@@ -54,14 +54,17 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
   - Stage 2, group 4 (staff and admin screens): done and pushed (`a1604dc`).
 - **Phase 9 (tests and docs):** done and pushed (`50a572d`, CI green); see `docs/REPORT.md`.
 - **Privacy note and `/privacy`:** done and pushed (`7ebb48a`).
-- **Team-leader revisions** (brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md`, groups A–F): A and B pushed (`976d79d`); C pushed (`e061464`); D pushed (`35ce96c`); E pushed (`6646248`, with migration `20261108130000_announcement_links` pushed first). Two small E follow-ups (drawer title tap target, one-line deadline) are committed after that, not pushed. Details and rules are in `docs/PROGRESS.md` under "Team-leader revisions".
+- **Team-leader revisions** (brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md`, groups A–F): all built.
+  - A–E pushed: A `77783d7`, B `976d79d`, C `e061464`, D `35ce96c`, E `6646248` plus follow-ups `a60e479`.
+  - Migrations `20261108120000_self_delete` and `20261108130000_announcement_links` are live; local and cloud match.
+  - Group F (`cc70fa8`) and the final summary docs are committed, not pushed.
+  - Final run on a fresh reset: unit 52, pgTAP 283, E2E 107, all pass.
+  - The summary table is at the top of "Team-leader revisions" in `docs/PROGRESS.md`.
 - **Branch:** `main`. No work-in-progress branch.
 
 ## Remaining work
-Team-leader revisions: group F (ask before pushing it and the E follow-ups) (see `docs/PROGRESS.md`). For each group: build, test on a reset DB, take screenshots, run one critique, commit, update this file and PROGRESS, then ask before pushing.
-
-Also waiting on the user:
-- The deferred P2/P3 items in `docs/REPORT.md`, if they want them.
+- Push group F and the summary docs (ask the user first; group F has no migration).
+- Waiting on the user: the deferred P2/P3 items in `docs/REPORT.md`, and the items left by choice in PROGRESS ("Summary: all revision groups").
 
 ## Open issues
 - **Privacy page:** the user's sign-up wording, plus a question-context clause and contact iskolar.notifications@gmail.com.
@@ -69,6 +72,9 @@ Also waiting on the user:
 - **pgTAP:** tests 40 and 60 re-anchor the seed dates (the seed is relative to the reset day), so they pass on an old local DB. E2E still expects a recently reset DB.
 
 ## First step next session
-Read `docs/PROGRESS.md` under "Team-leader revisions", and the brief. If the latest group isn't pushed yet, ask before pushing, then continue with the next group. The drawer (`components/ui/drawer.tsx`: `Drawer` + `useUrlPanel`) is shared by groups B, D and E.
+Run `git status`. If group F (`cc70fa8`) isn't pushed yet, ask before pushing. Then ask the user what's next: the deferred items in `docs/REPORT.md` or the "left by choice" list in PROGRESS. Shared pieces: the drawer (`components/ui/drawer.tsx`: `Drawer` + `useUrlPanel`) and the list/detail split (`components/scholarship/split.tsx`).
 
-**E2E on this machine:** run E2E against a production build (`npm run build`, then `CI=1 npx playwright test`) on a reset DB. Stop any `next dev` or `next start` first, because a server writing to `.next` during a build corrupts it.
+**E2E on this machine:**
+- Run against a production build (`npm run build`, then `CI=1 npx playwright test`) on a reset DB.
+- Export the fake env values from `.github/workflows/ci.yml` first.
+- Stop any `next dev` or `next start` before building, because a server writing to `.next` during a build corrupts it.

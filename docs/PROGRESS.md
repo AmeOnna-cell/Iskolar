@@ -8,7 +8,7 @@
 | 8 Polish/QA | Done and deployed |
 | 9 Tests + docs | Done and deployed (2026-11-08); see `docs/REPORT.md` |
 | Privacy note and `/privacy` | Done and deployed (`7ebb48a`) |
-| Team-leader revisions (groups A–F) | In progress: A–E pushed (`6646248`); F next |
+| Team-leader revisions (groups A–F) | Done: A–E pushed (`a60e479`); F committed (`cc70fa8`), not pushed |
 
 ## Team-leader revisions (started 2026-11-08)
 
@@ -23,9 +23,9 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
 | C | Bell dropdown, account menu, My profile with self-delete | `e6d866a`, `e061464` | `20261108120000_self_delete` | Pushed |
 | D | Public Announcements board, nav changes, links in | `cd8be3f`, `35ce96c` | — | Pushed |
 | E | My applications two-pane; announcement alerts open the board | `6646248`, `a60e479` | `20261108130000_announcement_links` | Pushed |
-| F | Eligibility check: one field size, 16px inputs, only the step title larger | see `git log` | — | Committed; ask before pushing |
+| F | Eligibility check: one field size, 16px inputs, only the step title larger | `cc70fa8` | — | Committed; ask before pushing |
 
-- **Final tests (fresh reset, production build):** see the Group F entry and `git log`; each group's numbers are in its own section above.
+- **Final tests after group F (fresh reset, production build, 2026-11-09):** lint and typecheck clean, unit 52 of 52, pgTAP 283 of 283, E2E 107 of 107. Migrations: local and cloud match through `20261108130000`.
 - **Left by choice:** "Done" in the filter drawer shows no result count before applying (B); urgency colours for deadline alerts in the bell (C); links to single announcements, "new since last visit" and grouping closed scholarships on the board (D, the user said skip the first two for now); radio tiles at 14px beside 16px typed values on phones (F).
 - **E2E on this machine:** export the fake env values from `.github/workflows/ci.yml` before a run, or `4.7-notifications` times out.
 
@@ -135,7 +135,7 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
 - **Tests:** new `e2e/revisions-e.spec.ts` (wide panel, cross-stage search, ticking moves the bar, phone drawer and Back, alert links, axe on the panel and the drawer); `student-journey` updated for the new layout. E2E runs need the CI env values from `.github/workflows/ci.yml` (fake Gmail, `EMAIL_DEV_SMTP`, `CRON_SECRET`) exported, or `4.7-notifications` times out.
 - **Screenshots:** `docs/screenshots/revisions-e/`.
 
-### Group F: eligibility check type (committed, not pushed)
+### Group F: eligibility check type (committed `cc70fa8`, not pushed)
 - **One field size** (`src/app/(student)/check/wizard.tsx`, `FIELD` / `LABEL` / `HINT` / `ERROR`): labels, radio options, hints, errors, the checkbox label and each step's intro are 14px below 640px and 16px above, where they match the inputs. Hints and errors were 13px and labels 14px at every width.
 - **Inputs** (program, GWA, course area and region comboboxes) stay 16px at every width (DESIGN.md: never below 16px in inputs).
 - **Only the step title is larger** (18px on phones, 20px above). Below 640px the page heading is a 14px label, "Eligibility check · Step n of 4" (it was a 24px heading), and the page intro shows on step 1 only.

@@ -1,7 +1,7 @@
 // Staff workflow end to end: a coordinator drafts a listing, an admin publishes it, a student sees it;
 // questions and announcements reach the student.
 import { expect, test } from "@playwright/test";
-import { adminClient, createUser, signIn, waitForHydration } from "./support";
+import { adminClient, createUser, pickOption, signIn, waitForHydration } from "./support";
 
 test.afterAll(async () => {
   await adminClient().from("scholarships").delete().like("slug", "e2e-%");
@@ -25,7 +25,7 @@ test("coordinator drafts → admin verifies and publishes → students see it", 
 
   await page.getByLabel("Scholarship name").fill("E2E Engineering Bridge Grant");
   await page.getByLabel("Web address").fill(slug);
-  await page.getByLabel("Provider", { exact: true }).selectOption({ label: "Commission on Higher Education (CHED)" });
+  await pickOption(page, "Provider", "Commission on Higher Education (CHED)");
   await page.getByLabel("Amount, as students read it").fill("₱12,000 a year");
   await page.getByLabel("Applications open").fill("2026-01-05");
   await page.getByLabel(/^Deadline/).fill("2030-12-20");

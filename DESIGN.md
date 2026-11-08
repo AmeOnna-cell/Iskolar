@@ -238,6 +238,7 @@ Dark mode is a first-class theme, applied with `prefers-color-scheme` unless the
 ### Hierarchy
 - **Display** (700, clamp(28px → 40px), 1.15, −0.02em): the landing band headline only. Max ~22ch.
 - **Headline** (700, 28px desktop / 24px below 640px, 1.2): page titles (`h1`): "Your eligibility results", "My applications", the scholarship name on its detail page.
+  - Exception (team-leader revision): the dashboard greeting is 18px below 640px, with its one fact at 14px medium, to give phones a shorter band.
 - **Title Large** (650, 20px / 18px mobile, 1.3): section headings inside a page (`h2`): "Closing soon", "Do you qualify?", "Documents to prepare".
 - **Title** (600, 16px, 1.35): card titles (scholarship names in cards), list item leads, criterion labels.
 - **Body** (400, 16px, 1.55): all running copy, inputs, descriptions. Max line length 70ch. Never below 16px in inputs (prevents mobile zoom).

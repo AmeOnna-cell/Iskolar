@@ -138,7 +138,7 @@ export function headline(input: { hasProfile: boolean; urgent: TrackedItem[]; qu
   if (input.qualifyCount > 0) {
     return {
       fact: `You qualify for ${plural(input.qualifyCount, "open or upcoming scholarship")}. Nothing you track closes this week.`,
-      action: { label: "See what I qualify for", href: "/explore?mine=1&sort=match" },
+      action: { label: "See my eligibility results", href: "/check/results" },
     };
   }
   return { fact: "Nothing you track closes this week.", action: { label: "Find scholarships", href: "/explore" } };

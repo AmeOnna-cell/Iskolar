@@ -1,3 +1,4 @@
+import { Combobox } from "@/components/ui/combobox";
 import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { ProviderMark } from "@/components/scholarship/bits";
@@ -7,7 +8,7 @@ import { buttonClass } from "@/components/ui/button";
 import { getListingStats, getProvidersWithListings, parseSearchParams, searchScholarships } from "@/lib/data/scholarships";
 import type { EligibilityItem } from "@/lib/eligibility";
 import { plural, shortProvider } from "@/lib/format";
-import { FIELDS, PROVIDER_TYPES } from "@/lib/reference";
+import { FIELD_OPTIONS, PROVIDER_TYPES } from "@/lib/reference";
 
 // What the eligibility check looks like, with made-up answers (shown as an example, never as a result).
 const EXAMPLE: EligibilityItem[] = [
@@ -40,15 +41,10 @@ export default async function LandingPage() {
               <span className="sr-only">Keyword</span>
               <input name="q" maxLength={100} placeholder="Scholarship name or provider" className="h-11 w-full bg-transparent text-base text-ink placeholder:text-ink-hint focus:outline-none" />
             </label>
-            <label className="flex items-center gap-2 rounded-sm border-hairline px-3 text-ink-hint focus-within:ring-2 focus-within:ring-primary max-sm:border-t sm:border-l">
-              <span className="sr-only">Course area</span>
-              <select name="field" defaultValue="" className="h-11 w-full bg-transparent text-base text-ink focus:outline-none">
-                <option value="">Any course</option>
-                {FIELDS.map(([v, l]) => (
-                  <option key={v} value={v}>{l}</option>
-                ))}
-              </select>
-            </label>
+            <div className="rounded-sm border-hairline px-3 focus-within:ring-2 focus-within:ring-primary max-sm:border-t sm:border-l">
+              <label htmlFor="hero-field" className="sr-only">Course area</label>
+              <Combobox id="hero-field" name="field" options={FIELD_OPTIONS} emptyLabel="Any course" className="h-11 w-full bg-transparent text-base text-ink placeholder:text-ink focus:outline-none" />
+            </div>
             <button type="submit" className={buttonClass("primary", "md", "h-12 px-6")}>
               Find scholarships
             </button>

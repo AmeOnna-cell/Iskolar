@@ -1,3 +1,4 @@
+import { Combobox } from "@/components/ui/combobox";
 import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { buttonClass } from "@/components/ui/button";
@@ -84,18 +85,17 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
           Done by (email)
           <input name="actor" defaultValue={q.actor} maxLength={120} placeholder="name@example.com" className={`${inputClass} border-hairline-strong`} />
         </label>
-        <label className="flex flex-col gap-1 text-sm font-semibold text-ink">
-          Action
-          <select name="action" defaultValue={q.action} className={`${inputClass} border-hairline-strong`}>
-            <option value="">Any action</option>
-            {facets.actions
-              .map((a) => [a, actionLabel(a)] as const)
-              .sort((x, y) => x[1].localeCompare(y[1]))
-              .map(([a, label]) => (
-                <option key={a} value={a}>{label}</option>
-              ))}
-          </select>
-        </label>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="audit-action" className="text-sm font-semibold text-ink">Action</label>
+          <Combobox
+            id="audit-action"
+            name="action"
+            options={facets.actions.map((a) => [a, actionLabel(a)] as [string, string]).sort((x, y) => x[1].localeCompare(y[1]))}
+            emptyLabel="Any action"
+            defaultValue={q.action}
+            className={`${inputClass} border-hairline-strong`}
+          />
+        </div>
         <label className="flex flex-col gap-1 text-sm font-semibold text-ink">
           About
           <select name="entity" defaultValue={q.entity} className={`${inputClass} border-hairline-strong`}>

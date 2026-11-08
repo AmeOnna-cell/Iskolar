@@ -1,7 +1,7 @@
 // The student journey from the research (register → check eligibility → review details → prepare
 // documents → track), plus 4.12: the dashboard is one column in priority order.
 import { expect, test } from "@playwright/test";
-import { createUser, signIn, waitForHydration } from "./support";
+import { createUser, pickOption, signIn, waitForHydration } from "./support";
 
 test("onboarding → results → checklist → dashboard → tracker", async ({ page }) => {
   const user = await createUser("student", "journey");
@@ -19,9 +19,9 @@ test("onboarding → results → checklist → dashboard → tracker", async ({ 
   await expect(page.getByText("Select your course area so we can match course-specific scholarships.")).toBeVisible();
   // A failed step keeps the student's picks, announces the problem and focuses the first one.
   await expect(page.getByRole("radio", { name: "2nd year" })).toBeChecked();
-  await expect(page.getByLabel("Course area")).toBeFocused();
+  await expect(page.getByRole("combobox", { name: "Course area" })).toBeFocused();
   await expect(page.locator("main").getByRole("alert")).toHaveText("One answer needs attention.");
-  await page.getByLabel("Course area").selectOption({ label: "Science & Math" });
+  await pickOption(page, "Course area (needed)", "Science & Math");
   await page.getByLabel(/Program/).fill("BS Biology");
   await page.getByRole("radio", { name: "2nd year" }).check();
   await page.getByRole("button", { name: "Next", exact: true }).click();
@@ -39,7 +39,7 @@ test("onboarding → results → checklist → dashboard → tracker", async ({ 
 
   // Step 4
   await expect(page).toHaveURL(/step=4/);
-  await page.getByLabel("Home region").selectOption({ label: "Region III – Central Luzon" });
+  await pickOption(page, "Home region", "Region III – Central Luzon");
   await page.getByRole("button", { name: "See my results" }).click();
 
   // Results match the prototype's verdicts for Ana

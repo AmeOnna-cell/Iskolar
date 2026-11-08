@@ -1,5 +1,6 @@
 "use client";
 
+import { Combobox } from "@/components/ui/combobox";
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -63,12 +64,7 @@ export function AnnouncementForm({ initial = {}, scholarships, onDone }: { initi
         <label htmlFor={`${prefix}-sch`} className="text-sm font-semibold text-ink">
           About a scholarship <span className="font-normal text-ink-hint">(optional)</span>
         </label>
-        <select id={`${prefix}-sch`} name="scholarship_id" defaultValue={initial.scholarship_id ?? ""} className={`${inputClass} border-hairline-strong`}>
-          <option value="">Not about one scholarship</option>
-          {scholarships.map((s) => (
-            <option key={s.id} value={s.id}>{s.name}</option>
-          ))}
-        </select>
+        <Combobox id={`${prefix}-sch`} name="scholarship_id" options={scholarships.map((s) => [s.id, s.name])} emptyLabel="Not about one scholarship" defaultValue={initial.scholarship_id ?? ""} className={`${inputClass} border-hairline-strong`} />
       </div>
       <div>
         <Button type="submit" loading={pending}>{initial.id ? "Save changes" : "Post announcement"}</Button>

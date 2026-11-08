@@ -58,6 +58,9 @@ describe("dashboard priorities", () => {
     expect(headline({ hasProfile: true, urgent: [], qualifyCount: 4 }).fact).toBe(
       "You qualify for 4 open or upcoming scholarships. Nothing you track closes this week.",
     );
+    // Answered → the results page; not answered → the check. The label names where it goes.
+    expect(headline({ hasProfile: true, urgent: [], qualifyCount: 4 }).action).toEqual({ label: "See my eligibility results", href: "/check/results" });
+    expect(headline({ hasProfile: false, urgent: [], qualifyCount: 0 }).action).toEqual({ label: "Check my eligibility", href: "/check" });
   });
 
   it("profile completeness counts answered fields (false and 'unsure' count as answered)", () => {

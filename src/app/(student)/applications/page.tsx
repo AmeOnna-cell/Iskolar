@@ -46,13 +46,14 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
         </ButtonLink>
       </div>
 
-      <nav aria-label="Application stages" className="mt-6 mb-4 flex gap-1 overflow-x-auto border-b border-hairline">
+      {/* Inset hairline instead of a border + -mb-px overlap: the overlap made the row overflow vertically (stray scrollbar). */}
+      <nav aria-label="Application stages" className="mt-6 mb-4 flex gap-1 overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_var(--hairline)] [scrollbar-width:none] max-sm:pr-12 max-sm:[mask-image:linear-gradient(to_right,#000_80%,transparent)]">
         {TABS.map((t) => (
           <Link
             key={t.key}
             href={`/applications?tab=${t.key}`}
             aria-current={t.key === tab ? "page" : undefined}
-            className={`-mb-px flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm font-semibold whitespace-nowrap no-underline sm:px-4 ${
+            className={`flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm font-semibold whitespace-nowrap no-underline sm:px-4 ${
               t.key === tab ? "border-primary text-primary" : "border-transparent text-ink-secondary hover:text-ink"
             }`}
           >

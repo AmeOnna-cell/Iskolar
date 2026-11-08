@@ -39,6 +39,41 @@ export const REGIONS: Array<[Region, string]> = [
   ["barmm", "BARMM"],
 ];
 
+// Words students actually type into the course and region search boxes (their degree, city or province).
+// ponytail: hand-kept lists, not exhaustive; add words when students report a miss.
+const FIELD_WORDS: Record<CourseField, string> = {
+  science_math: "biology chemistry physics mathematics math statistics geology marine science",
+  engineering: "civil mechanical electrical electronics chemical industrial computer engineering ece",
+  it_cs: "information technology computer science it cs bsit bscs information systems",
+  agriculture_fisheries: "agriculture fisheries forestry agribusiness animal science agronomy",
+  health_sciences: "nursing bsn medical technology medtech pharmacy midwifery physical therapy radiologic nutrition dentistry",
+  education: "bsed beed teaching teacher secondary elementary physical education",
+  business_accountancy: "accountancy accounting bsa business administration management marketing finance entrepreneurship hospitality tourism",
+  arts_humanities_social: "psychology political science communication journalism english history social work sociology philosophy fine arts",
+};
+const REGION_WORDS: Record<Region, string> = {
+  ncr: "metro manila manila quezon city makati pasig taguig caloocan marikina paranaque las pinas muntinlupa pasay valenzuela",
+  car: "cordillera baguio benguet ifugao abra kalinga apayao mountain province",
+  ilocos: "ilocos norte ilocos sur la union pangasinan laoag vigan dagupan",
+  cagayan_valley: "cagayan isabela nueva vizcaya quirino batanes tuguegarao santiago",
+  central_luzon: "bulacan pampanga tarlac nueva ecija bataan zambales aurora angeles olongapo malolos",
+  calabarzon: "cavite laguna batangas rizal quezon province lucena antipolo calamba",
+  mimaropa: "occidental mindoro oriental mindoro marinduque romblon palawan puerto princesa calapan",
+  bicol: "albay camarines norte camarines sur catanduanes masbate sorsogon legazpi naga",
+  western_visayas: "iloilo aklan antique capiz guimaras boracay",
+  central_visayas: "cebu bohol siquijor lapu-lapu mandaue tagbilaran",
+  eastern_visayas: "leyte samar biliran tacloban ormoc catbalogan",
+  zamboanga_peninsula: "zamboanga dipolog pagadian zamboanga del norte zamboanga del sur zamboanga sibugay",
+  northern_mindanao: "bukidnon misamis oriental misamis occidental cagayan de oro iligan camiguin lanao del norte",
+  davao: "davao city davao del norte davao del sur davao oriental davao de oro tagum",
+  soccsksargen: "south cotabato cotabato sultan kudarat sarangani general santos koronadal",
+  caraga: "agusan surigao dinagat butuan",
+  barmm: "bangsamoro maguindanao lanao del sur basilan sulu tawi-tawi marawi cotabato city",
+};
+/** Course and region options with search words, for the type-to-search boxes. */
+export const FIELD_OPTIONS = FIELDS.map(([v, l]) => [v, l, FIELD_WORDS[v]] as [string, string, string]);
+export const REGION_OPTIONS = REGIONS.map(([v, l]) => [v, l, REGION_WORDS[v]] as [string, string, string]);
+
 export const INCOME: Array<[IncomeBracket, string]> = [
   ["below_150k", "Below ₱150,000"],
   ["150k_250k", "₱150,000 to ₱250,000"],

@@ -6,6 +6,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { removeApplication, setApplicationStage } from "@/lib/actions/student";
 import { Pill } from "./bits";
+import { ShareButton } from "./share-button";
 
 type Stage = "saved" | "preparing" | "submitted" | null;
 
@@ -21,6 +22,10 @@ export function DetailActions({
   docsTotal,
   docsDone,
   dueText,
+  name,
+  sample,
+  documentsId,
+  className = "mt-6",
 }: {
   scholarshipId: string;
   slug: string;
@@ -33,6 +38,11 @@ export function DetailActions({
   docsDone: number;
   /** "closes in 4 days" / "closes today" while open, otherwise null. */
   dueText: string | null;
+  name: string;
+  sample: boolean;
+  /** Id of the "Documents to prepare" heading (prefixed in the side panel). */
+  documentsId: string;
+  className?: string;
 }) {
   const toast = useToast();
   const [pending, start] = useTransition();
@@ -97,7 +107,7 @@ export function DetailActions({
             {left === 1 ? "1 document left" : `${left} documents left`}
             {dueText ? ` · ${dueText}` : ""}
           </p>
-          <ButtonLink href={`#documents-${slug}`}>See what&apos;s missing</ButtonLink>
+          <ButtonLink href={`#${documentsId}`}>See what&apos;s missing</ButtonLink>
           <Button variant="outline" loading={pending} onClick={() => go("submitted")}>Mark as submitted</Button>
         </>
       ) : (
@@ -116,8 +126,9 @@ export function DetailActions({
   }
 
   return (
-    <div className="mt-6 flex flex-wrap items-center gap-2">
+    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
       {main}
+      <ShareButton slug={slug} name={name} sample={sample} />
       {official}
     </div>
   );

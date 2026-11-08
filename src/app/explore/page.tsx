@@ -103,7 +103,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: SP }
           {panel ? (
             <aside
               aria-label="Selected scholarship"
-              className="sticky top-20 hidden max-h-[calc(100dvh-6rem)] overflow-auto rounded-md border border-hairline bg-surface shadow-rest lg:block"
+              className="sticky top-20 hidden max-h-[calc(100dvh-6rem)] scroll-pt-56 overflow-auto rounded-md border border-hairline bg-surface shadow-rest lg:block"
             >
               <DetailBody {...panel} compact />
               {/* Pinned footer: shows the panel continues, and opens the full page. */}

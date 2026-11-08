@@ -1,11 +1,12 @@
 "use client";
 
+import { Combobox } from "@/components/ui/combobox";
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
 import { Notice } from "@/components/ui/notice";
-import { FIELDS, INCOME, REGIONS } from "@/lib/reference";
+import { FIELD_OPTIONS, INCOME, REGION_OPTIONS } from "@/lib/reference";
 import { saveStep, type StepState } from "./actions";
 
 export type Answers = {
@@ -104,12 +105,9 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="w-field" className="text-sm font-semibold text-ink">Course area <span className="font-normal text-ink-hint">(needed)</span></label>
-              <select id="w-field" name="field" defaultValue={(a.field as string | null) ?? ""} aria-invalid={e.field ? true : undefined} aria-describedby={e.field ? "w-field-err" : undefined} className={`${inputClass} max-w-[420px] ${e.field ? "border-danger" : "border-hairline-strong"}`}>
-                <option value="">Select your course area</option>
-                {FIELDS.map(([v, l]) => (
-                  <option key={v} value={v}>{l}</option>
-                ))}
-              </select>
+              <div className="max-w-[420px]">
+                <Combobox id="w-field" name="field" options={FIELD_OPTIONS} emptyLabel="Select your course area" defaultValue={(a.field as string | null) ?? ""} aria-invalid={Boolean(e.field)} aria-describedby={e.field ? "w-field-err" : undefined} className={`${inputClass} ${e.field ? "border-danger" : "border-hairline-strong"}`} />
+              </div>
               {e.field ? <p id="w-field-err" className="text-caption font-semibold text-danger">{e.field}</p> : null}
             </div>
             <div className="flex flex-col gap-2">
@@ -207,12 +205,9 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="w-region" className="text-sm font-semibold text-ink">Home region</label>
-              <select id="w-region" name="region" defaultValue={(a.region as string | null) ?? ""} className={`${inputClass} max-w-[420px] border-hairline-strong`}>
-                <option value="">Select your region</option>
-                {REGIONS.map(([v, l]) => (
-                  <option key={v} value={v}>{l}</option>
-                ))}
-              </select>
+              <div className="max-w-[420px]">
+                <Combobox id="w-region" name="region" options={REGION_OPTIONS} emptyLabel="Select your region" defaultValue={(a.region as string | null) ?? ""} className={`${inputClass} border-hairline-strong`} />
+              </div>
             </div>
           </>
         ) : null}

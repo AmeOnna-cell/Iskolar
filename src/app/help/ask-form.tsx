@@ -1,5 +1,6 @@
 "use client";
 
+import { Combobox } from "@/components/ui/combobox";
 import { useActionState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
@@ -21,12 +22,7 @@ export function AskForm({ options, about }: { options: Array<{ id: string; name:
       ) : null}
       <div className="flex flex-col gap-2">
         <label htmlFor="ask-topic" className="text-sm font-semibold text-ink">Topic</label>
-        <select id="ask-topic" name="scholarshipId" defaultValue={about ?? ""} className={`${inputClass} border-hairline-strong`}>
-          <option value="">General question</option>
-          {options.map((o) => (
-            <option key={o.id} value={o.id}>{o.name}</option>
-          ))}
-        </select>
+        <Combobox id="ask-topic" name="scholarshipId" options={options.map((o) => [o.id, o.name])} emptyLabel="General question" defaultValue={about ?? ""} className={`${inputClass} border-hairline-strong`} />
       </div>
       <div className="flex flex-col gap-2">
         <label htmlFor="ask-q" className="text-sm font-semibold text-ink">Your question</label>

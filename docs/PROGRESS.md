@@ -6,7 +6,30 @@
 | 6 Notifications | Done and deployed |
 | 7 Performance | Done and deployed |
 | 8 Polish/QA | Done and deployed |
-| 9 Tests + docs | Done (2026-11-08), committed; see `docs/REPORT.md` |
+| 9 Tests + docs | Done and deployed (2026-11-08); see `docs/REPORT.md` |
+| Privacy note and `/privacy` | Done and deployed (`7ebb48a`) |
+| Team-leader revisions (groups A–F) | In progress: A committed |
+
+## Team-leader revisions (started 2026-11-08)
+
+Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Groups A–F in order. Each group gets tests on a reset DB, screenshots at 4 sizes × 2 themes, one critique, a commit, and then the user is asked before pushing. Rules: DESIGN.md and taste dials 3/3/4. Phones get smaller type and less vertical space, but inputs stay ≥16px and body text ≥14px. Keep the Sample listing badge, the verdicts and the "preliminary check" wording. New drawers and dialogs need a focus trap, Esc, focus return, and URL state so Back closes them.
+
+### Group A: quick fixes (committed, not pushed)
+- **Sticky header in the Find scholarships side panel:** logo, name, provider, location, pills and actions stay in view (`DetailBody compact`). The panel has `scroll-pt-56`, so focused content isn't hidden under it.
+- **Share** (`components/scholarship/share-button.tsx`): Web Share API, else copy the link with a "Link copied" toast. It's in the side panel and on `/s/[slug]`; the My applications detail gets it in group E. Sample listings share as "Name (sample listing)", and `/s/[slug]` has Open Graph tags that lead with "Sample listing · Deadline …".
+- **Dashboard greeting on phones:** 18px greeting, the fact at 14px medium, the date at caption size, less padding. Recorded as a DESIGN.md exception.
+- **Dashboard button:** answered → "See my eligibility results" (`/check/results`); not answered → "Check my eligibility" (`/check`). Unit-tested in `dashboard.test.ts`.
+- **My applications tabs:** the stray vertical scrollbar came from `-mb-px` overflowing an `overflow-x-auto` row. Now an inset-shadow hairline, `overflow-y-hidden` and a hidden scrollbar. On phones a right-edge fade shows that the cut-off "Results" tab is there.
+- **Phone footer:** one short line and a 2-column link grid (44px rows).
+- **Combobox** (`components/ui/combobox.tsx`, ARIA APG list autocomplete, no dependency):
+  - Used for course area and region (wizard, landing hero), provider and coordinator (listing editor), scholarship (announcements, Help question) and action (audit filter).
+  - Searches the labels plus students' own words (`FIELD_OPTIONS` and `REGION_OPTIONS` in `lib/reference.ts`: degrees, cities, provinces).
+  - Leaving the box with one match picks it. A miss shows "No matches for “X”" with the full list below.
+  - z-40 above the tab bar. On touch the field scrolls to the top before opening; the list opens upward when there's no room below (also inside dialogs).
+  - Find scholarships' own filter selects are left for group B, where they move into the filter drawer.
+- **Critique:** dual-agent, 27/40 before fixes; snapshot in `.impeccable/critique/`. Four P1s fixed: search words, list placement on phones, hidden Results tab, sample label lost when shared. Kept as the leader specified, and raised with the user: the sticky header's contents, and comboboxes for course and region on phones.
+- **Tests:** lint and typecheck clean, unit 50 of 50, pgTAP 247 of 247, E2E 77 of 77 on a reset DB. New `e2e/revisions-a.spec.ts`; `pickOption` helper in `e2e/support.ts`.
+- **Screenshots:** `docs/screenshots/revisions-a/`.
 
 ## Phase 6: notifications (done)
 
@@ -230,6 +253,5 @@ Details are in `docs/performance.md`. The dataset was 5,009 listings, 2,085 stud
 - **GitHub Actions CI failure (fixed 2026-11-05):** the audit CSV/paging E2E test assumed more than one page of audit rows, which a fresh CI database doesn't have. The test now seeds 26 rows. CI is split into static, database and e2e jobs, on the Node 24 v7 actions.
 - **One-off pgTAP failure from Phase 6:** fixed in Phase 9 (seed dates vs. test day).
 - **`npm audit`:** clean, via overrides. Remove the `postcss` override when moving to Next 16.
-- **Privacy note on sign-up:** waiting for the user's wording.
 - **E2E on this machine:** clear `.next/cache/fetch-cache` before full runs. Tests can time out under memory pressure from other apps, so rerun before treating a failure as real.
 - **Detector agents:** deleting a test auth user leaves its profile tombstone, which is by design. Critique agents now also delete those profile rows.

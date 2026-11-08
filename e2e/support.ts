@@ -49,6 +49,14 @@ export async function waitForHydration(page: Page) {
 }
 
 /** The message inside the page's form (Next.js also renders a route announcer with role="alert"). */
+/** Picks an option in a type-to-search combobox (components/ui/combobox) by typing its label. */
+export async function pickOption(page: Page, name: string, option: string) {
+  const box = page.getByRole("combobox", { name, exact: true });
+  await box.fill(option);
+  await page.getByRole("option", { name: option, exact: true }).click();
+  await expect(box).toHaveValue(option);
+}
+
 export const formAlert = (page: Page) => page.locator("main").getByRole("alert");
 export const formStatus = (page: Page) => page.locator("main").getByRole("status");
 

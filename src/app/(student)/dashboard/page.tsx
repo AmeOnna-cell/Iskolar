@@ -130,21 +130,21 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const SHOWN = 3;
 
   return (
-    <div className="page-container py-8">
-      <div className="reading-column flex flex-col gap-8">
+    <div className="page-container py-5 sm:py-8">
+      <div className="reading-column flex flex-col gap-6 sm:gap-8">
         {password === "updated" ? <Notice tone="ok">Your password is updated. Other devices were signed out.</Notice> : null}
 
         {/* Act now: the greeting's one fact and action, then everything with a deadline or a question. */}
         <header>
-          <p className="text-sm text-ink-hint">{longDate(today)}</p>
-          <h1 className="mt-1 text-headline-sm font-bold tracking-tight text-ink sm:text-headline">
+          <p className="text-caption text-ink-hint sm:text-sm">{longDate(today)}</p>
+          <h1 className="mt-1 text-title-sm font-bold tracking-tight text-ink sm:text-headline">
             {greeting()}
             {first ? `, ${first}` : ""}
           </h1>
-          <p className="mt-2 text-base text-ink sm:text-title-sm sm:leading-normal" data-testid="dashboard-fact">
+          <p className="mt-1 text-sm font-medium text-ink sm:mt-2 sm:text-title-sm sm:font-normal sm:leading-normal" data-testid="dashboard-fact">
             {head.fact}
           </p>
-          <ButtonLink href={head.action.href} className="mt-4">
+          <ButtonLink href={head.action.href} className="mt-3 sm:mt-4">
             {head.action.label}
           </ButtonLink>
         </header>

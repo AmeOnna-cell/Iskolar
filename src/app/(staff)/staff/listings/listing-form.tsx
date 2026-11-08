@@ -1,5 +1,6 @@
 "use client";
 
+import { Combobox } from "@/components/ui/combobox";
 import { useRouter } from "next/navigation";
 import { cloneElement, useEffect, useId, useRef, useState, useTransition } from "react";
 import { Icon } from "@/components/icons";
@@ -248,12 +249,7 @@ export function ListingForm({
             </div>
           ) : (
             <L label="Provider" htmlFor="f-provider" error={errors.provider_id}>
-              <select id="f-provider" value={v.provider_id ?? ""} onChange={(e) => set({ provider_id: e.target.value })} className={field}>
-                <option value="">Choose a provider</option>
-                {providers.map((p) => (
-                  <option key={p.id} value={p.id}>{p.label}</option>
-                ))}
-              </select>
+              <Combobox id="f-provider" options={providers.map((p) => [p.id, p.label])} emptyLabel="Choose a provider" value={v.provider_id ?? ""} onChange={(x) => set({ provider_id: x })} className={field} />
             </L>
           )}
           <Button type="button" variant="text" onClick={() => setNewProvider((x) => !x)} className="self-start">
@@ -278,12 +274,7 @@ export function ListingForm({
           </L>
           {isAdmin ? (
             <L label="Assigned coordinator" htmlFor="f-coord" optional>
-              <select id="f-coord" value={v.assigned_coordinator_id ?? ""} onChange={(e) => set({ assigned_coordinator_id: e.target.value })} className={field}>
-                <option value="">Unassigned</option>
-                {coordinators.map((c) => (
-                  <option key={c.id} value={c.id}>{c.label}</option>
-                ))}
-              </select>
+              <Combobox id="f-coord" options={coordinators.map((c) => [c.id, c.label])} emptyLabel="Unassigned" value={v.assigned_coordinator_id ?? ""} onChange={(x) => set({ assigned_coordinator_id: x })} className={field} />
             </L>
           ) : null}
         </div>

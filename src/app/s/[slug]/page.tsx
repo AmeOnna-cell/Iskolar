@@ -15,7 +15,12 @@ type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const s = await getScholarshipDetail((await params).slug);
-  return s ? { title: s.name, description: s.summary } : { title: "Scholarship not found" };
+  if (!s) return { title: "Scholarship not found" };
+  // The preview a shared link shows on Facebook and Messenger: samples say so, and the deadline is up front.
+  const lead = [s.is_sample ? "Sample listing" : null, s.closes_on ? `Deadline ${formatDate(s.closes_on, true)}` : null, s.amount_text].filter(Boolean).join(" · ");
+  const description = [lead, s.summary].filter(Boolean).join(". ");
+  const title = s.is_sample ? `${s.name} (sample listing)` : s.name;
+  return { title: s.name, description, openGraph: { title, description, type: "website" } };
 }
 
 export default async function ScholarshipPage({ params }: Params) {

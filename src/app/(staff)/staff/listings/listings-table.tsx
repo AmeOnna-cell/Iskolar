@@ -185,7 +185,7 @@ export function ListingsTable({ rows, isAdmin }: { rows: ListingRow[]; isAdmin: 
           <span className="mr-2 text-sm font-semibold text-ink">{selected.size} selected</span>
           {actions.map(([a, label]) =>
             a === "delete" ? (
-              <Button key={a} variant="outline" size="sm" disabled={pending} onClick={() => setConfirmDelete(true)} className="text-danger">
+              <Button key={a} variant="outline-danger" size="sm" disabled={pending} onClick={() => setConfirmDelete(true)}>
                 {label}
               </Button>
             ) : (

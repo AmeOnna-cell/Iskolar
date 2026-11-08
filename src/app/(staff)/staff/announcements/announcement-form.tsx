@@ -74,7 +74,7 @@ export function AnnouncementRowActions({ a, scholarships, canEdit }: { a: Requir
   return (
     <div className="mt-3 flex gap-2">
       <Button variant="outline" size="sm" onClick={() => setEditing(true)}>Edit<span className="sr-only"> {a.title}</span></Button>
-      <Button variant="outline" size="sm" onClick={() => setConfirm(true)} className="text-danger">Delete<span className="sr-only"> {a.title}</span></Button>
+      <Button variant="outline-danger" size="sm" onClick={() => setConfirm(true)}>Delete<span className="sr-only"> {a.title}</span></Button>
       <Dialog open={editing} onOpenChange={setEditing} title="Edit announcement">
         <AnnouncementForm initial={a} scholarships={scholarships} onDone={() => setEditing(false)} />
       </Dialog>

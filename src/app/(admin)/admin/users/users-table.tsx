@@ -45,7 +45,7 @@ function RowActions({ u, onResult }: { u: UserRow; onResult: (r: AdminResult) =>
         {u.status === "active" ? "Deactivate" : "Reactivate"}
         <span className="sr-only"> {u.email}</span>
       </Button>
-      <Button variant="outline" size="sm" className="text-danger" onClick={() => setDeleting(true)}>
+      <Button variant="outline-danger" size="sm" onClick={() => setDeleting(true)}>
         Delete<span className="sr-only"> {u.email}</span>
       </Button>
       <Dialog

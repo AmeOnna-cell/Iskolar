@@ -28,7 +28,7 @@ export function AccountMenu({ viewer, signOut }: Props) {
     <Menu.Root>
       <Menu.Trigger
         aria-label="Account menu"
-        className="ml-1 grid size-11 place-items-center rounded-full outline-none hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-primary"
+        className="ml-1 grid size-11 place-items-center rounded-full hover:bg-surface-hover"
       >
         <span className="grid size-9 place-items-center rounded-full bg-primary-wash text-sm font-bold text-primary">
           {initial}

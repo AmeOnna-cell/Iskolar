@@ -14,13 +14,13 @@ export function Header({ viewer, userId, unread = 0, signOut }: Props) {
   return (
     <>
       {viewer && !isStudent ? (
-        <div className="bg-band text-white">
+        <section aria-label="Scholarship office view" className="bg-band text-white">
           <div className="page-container flex h-10 items-center gap-2 text-caption">
             <Icon name="shield" size={16} />
             <span className="font-semibold">Scholarship office view</span>
             <span className="text-band-text-soft">· {viewer.role === "admin" ? "Admin" : "Coordinator"}</span>
           </div>
-        </div>
+        </section>
       ) : null}
       <header className="sticky top-0 z-30 border-b border-hairline bg-surface">
         <div className="page-container flex h-14 items-center gap-6 nav:h-16">

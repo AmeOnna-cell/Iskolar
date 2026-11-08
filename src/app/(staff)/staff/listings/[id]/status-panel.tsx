@@ -54,7 +54,7 @@ export function StatusPanel({
               Archive
             </Button>
           ) : null}
-          <Button variant="outline" disabled={pending} onClick={() => setConfirm(true)} className="text-danger">
+          <Button variant="outline-danger" disabled={pending} onClick={() => setConfirm(true)}>
             Delete
           </Button>
           <Dialog open={confirm} onOpenChange={setConfirm} title="Delete this listing?" description="Students tracking it lose their checklist for it. Archive it instead if you may need it again.">

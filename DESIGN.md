@@ -240,6 +240,7 @@ Dark mode is a first-class theme, applied with `prefers-color-scheme` unless the
 - **Headline** (700, 28px desktop / 24px below 640px, 1.2): page titles (`h1`): "Your eligibility results", "My applications", the scholarship name on its detail page.
   - Exception (team-leader revision): the dashboard greeting is 18px below 640px, with its one fact at 14px medium, to give phones a shorter band.
   - Exception (team-leader revision): the scholarship card's amount is 20px at 700 ("large and bold"), with its period beside it at 14px 500.
+  - Exception (team-leader revision): in the eligibility check every field part (labels, radio options, hints, errors, each step's intro) is one size, 14px below 640px and 16px above, where it matches the inputs. Text inputs stay 16px at every width. Only the step title is larger: below 640px the page heading is a 14px label with the step count ("Eligibility check · Step 2 of 4") and the page intro shows on step 1 only.
 - **Title Large** (650, 20px / 18px mobile, 1.3): section headings inside a page (`h2`): "Closing soon", "Do you qualify?", "Documents to prepare".
 - **Title** (600, 16px, 1.35): card titles (scholarship names in cards), list item leads, criterion labels.
 - **Body** (400, 16px, 1.55): all running copy, inputs, descriptions. Max line length 70ch. Never below 16px in inputs (prevents mobile zoom).

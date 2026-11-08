@@ -24,24 +24,32 @@ export type Answers = {
 
 const STEPS = ["Studies", "Grades", "Family", "Location"] as const;
 
+// One size for every field part (labels, options, hints, errors, the step's intro): 14px on phones,
+// 16px from 640px, where it matches the inputs. Text inputs stay 16px everywhere (no iOS zoom on focus).
+// Only the step title is larger (DESIGN.md, team-leader exception).
+const FIELD = "text-sm sm:text-base";
+const LABEL = `${FIELD} font-semibold text-ink`;
+const HINT = `${FIELD} text-ink-hint`;
+const ERROR = `${FIELD} font-semibold text-danger`;
+
 function Choice({ name, value, label, checked }: { name: string; value: string; label: string; checked: boolean }) {
   return (
     <label className="relative">
       <input type="radio" name={name} value={value} defaultChecked={checked} className="peer absolute inset-0 m-0 size-full cursor-pointer opacity-0" />
-      <span className="flex min-h-11 items-center rounded-sm border border-hairline-strong bg-surface px-4 text-base peer-checked:border-primary peer-checked:bg-primary-wash peer-checked:font-semibold peer-checked:text-primary peer-checked:ring-1 peer-checked:ring-primary peer-checked:ring-inset peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary peer-hover:bg-surface-hover peer-checked:peer-hover:bg-primary-wash">
+      <span className={`flex min-h-11 items-center rounded-sm border border-hairline-strong bg-surface px-4 ${FIELD} peer-checked:border-primary peer-checked:bg-primary-wash peer-checked:font-semibold peer-checked:text-primary peer-checked:ring-1 peer-checked:ring-primary peer-checked:ring-inset peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary peer-hover:bg-surface-hover peer-checked:peer-hover:bg-primary-wash`}>
         {label}
       </span>
     </label>
   );
 }
 
-function Question({ legend, hint, error, children, id }: { legend: string; hint?: string; error?: string; children: React.ReactNode; id: string }) {
+function Question({ legend, hint, error, children, id }: { legend: React.ReactNode; hint?: string; error?: string; children: React.ReactNode; id: string }) {
   return (
     <fieldset className="flex flex-col gap-2" data-invalid={error ? true : undefined} aria-describedby={[hint ? `${id}-hint` : null, error ? `${id}-err` : null].filter(Boolean).join(" ") || undefined}>
-      <legend className="mb-1 text-sm font-semibold text-ink">{legend}</legend>
-      {hint ? <p id={`${id}-hint`} className="-mt-1 text-caption text-ink-hint">{hint}</p> : null}
+      <legend className={`mb-1 ${LABEL}`}>{legend}</legend>
+      {hint ? <p id={`${id}-hint`} className={`-mt-1 ${HINT}`}>{hint}</p> : null}
       {children}
-      {error ? <p id={`${id}-err`} className="text-caption font-semibold text-danger">{error}</p> : null}
+      {error ? <p id={`${id}-err`} className={ERROR}>{error}</p> : null}
     </fieldset>
   );
 }
@@ -72,10 +80,11 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
 
   return (
     <>
-      <ol className="mb-6 grid grid-cols-4 gap-2" aria-label="Progress">
+      <ol className="mb-4 grid grid-cols-4 gap-2 sm:mb-6" aria-label="Progress">
         {STEPS.map((label, i) => {
           const n = i + 1;
-          const cls = `block border-t-[3px] pt-2 text-caption font-semibold ${n <= step ? "border-primary text-ink" : "border-hairline text-ink-hint"}`;
+          // You are here: the current step in primary; steps done in ink; steps ahead muted.
+          const cls = `block border-t-[3px] pt-2 text-caption font-semibold ${n === step ? "border-primary text-primary" : n < step ? "border-primary text-ink" : "border-hairline text-ink-hint"}`;
           const text = (
             <>
               <span className="sr-only">Step {n} of 4: </span>
@@ -96,27 +105,27 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
           );
         })}
       </ol>
-      <form ref={formRef} key={state.attempt ?? 0} action={action} noValidate className="flex flex-col gap-6 rounded-md border border-hairline bg-surface p-4 shadow-rest sm:p-6">
+      <form ref={formRef} key={state.attempt ?? 0} action={action} noValidate className="flex flex-col gap-4 rounded-md border border-hairline bg-surface p-4 shadow-rest sm:gap-6 sm:p-6">
         {step === 1 ? (
           <>
             <div>
               <h2 className="text-title-sm font-[650] text-ink sm:text-title">Your studies</h2>
-              <p className="mt-1 text-ink-secondary">Some scholarships are only for certain courses or year levels.</p>
+              <p className={`mt-1 ${FIELD} text-ink-secondary`}>Some scholarships are only for certain courses or year levels.</p>
             </div>
             <div className="flex flex-col gap-2">
-              <label htmlFor="w-field" className="text-sm font-semibold text-ink">Course area <span className="font-normal text-ink-hint">(needed)</span></label>
+              <label htmlFor="w-field" className={LABEL}>Course area <span className="font-normal text-ink-hint">(needed)</span></label>
               <div className="max-w-[420px]">
                 <Combobox id="w-field" name="field" options={FIELD_OPTIONS} emptyLabel="Select your course area" defaultValue={(a.field as string | null) ?? ""} aria-invalid={Boolean(e.field)} aria-describedby={e.field ? "w-field-err" : undefined} className={`${inputClass} ${e.field ? "border-danger" : "border-hairline-strong"}`} />
               </div>
-              {e.field ? <p id="w-field-err" className="text-caption font-semibold text-danger">{e.field}</p> : null}
+              {e.field ? <p id="w-field-err" className={ERROR}>{e.field}</p> : null}
             </div>
             <div className="flex flex-col gap-2">
-              <label htmlFor="w-program" className="text-sm font-semibold text-ink">
+              <label htmlFor="w-program" className={LABEL}>
                 Program <span className="font-normal text-ink-hint">(optional)</span>
               </label>
               <input id="w-program" name="program" maxLength={120} placeholder="e.g. BS Biology" defaultValue={(a.program as string | null) ?? ""} className={`${inputClass} max-w-[420px] border-hairline-strong`} />
             </div>
-            <Question legend="Year level (needed)" error={e.year_level} id="w-year">
+            <Question legend={<>Year level <span className="font-normal text-ink-hint">(needed)</span></>} error={e.year_level} id="w-year">
               <div className="flex flex-wrap gap-2">
                 {[1, 2, 3, 4, 5].map((y) => (
                   <Choice key={y} name="year_level" value={String(y)} label={`${y}${["th", "st", "nd", "rd"][y] ?? "th"} year`} checked={a.year_level === String(y)} />
@@ -130,11 +139,11 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
           <>
             <div>
               <h2 className="text-title-sm font-[650] text-ink sm:text-title">Your grades</h2>
-              <p className="mt-1 text-ink-secondary">Many scholarships require a minimum general weighted average (GWA).</p>
+              <p className={`mt-1 ${FIELD} text-ink-secondary`}>Many scholarships require a minimum general weighted average (GWA).</p>
             </div>
             <div className="flex flex-col gap-2">
-              <label htmlFor="w-gwa" className="text-sm font-semibold text-ink">GWA last semester</label>
-              <p id="w-gwa-hint" className="-mt-1 text-caption text-ink-hint">
+              <label htmlFor="w-gwa" className={LABEL}>GWA last semester</label>
+              <p id="w-gwa-hint" className={`-mt-1 ${HINT}`}>
                 Most schools use 1.00 as the highest grade. If yours uses percentages, ask the registrar for the equivalent.
               </p>
               <input
@@ -152,9 +161,9 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
                 aria-describedby={`w-gwa-hint${e.gwa ? " w-gwa-err" : ""}`}
                 className={`${inputClass} max-w-[200px] ${e.gwa ? "border-danger" : "border-hairline-strong"}`}
               />
-              {e.gwa ? <p id="w-gwa-err" className="text-caption font-semibold text-danger">{e.gwa}</p> : null}
+              {e.gwa ? <p id="w-gwa-err" className={ERROR}>{e.gwa}</p> : null}
             </div>
-            <label className="flex min-h-11 cursor-pointer items-center gap-3 text-base">
+            <label className={`flex min-h-11 cursor-pointer items-center gap-3 ${FIELD} text-ink`}>
               <input type="checkbox" name="gwa_unknown" defaultChecked={a.gwa_unknown} onChange={(ev) => setGwaUnknown(ev.target.checked)} className="size-[18px] accent-[var(--primary)]" />
               I don&apos;t know my GWA yet
             </label>
@@ -165,7 +174,7 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
           <>
             <div>
               <h2 className="text-title-sm font-[650] text-ink sm:text-title">Your family</h2>
-              <p className="mt-1 text-ink-secondary">
+              <p className={`mt-1 ${FIELD} text-ink-secondary`}>
                 Government scholarships often depend on household income. Only you can see these answers.
               </p>
             </div>
@@ -201,10 +210,10 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
           <>
             <div>
               <h2 className="text-title-sm font-[650] text-ink sm:text-title">Where you live</h2>
-              <p className="mt-1 text-ink-secondary">Local government and some private scholarships are only for certain regions.</p>
+              <p className={`mt-1 ${FIELD} text-ink-secondary`}>Local government and some private scholarships are only for certain regions.</p>
             </div>
             <div className="flex flex-col gap-2">
-              <label htmlFor="w-region" className="text-sm font-semibold text-ink">Home region</label>
+              <label htmlFor="w-region" className={LABEL}>Home region</label>
               <div className="max-w-[420px]">
                 <Combobox id="w-region" name="region" options={REGION_OPTIONS} emptyLabel="Select your region" defaultValue={(a.region as string | null) ?? ""} className={`${inputClass} border-hairline-strong`} />
               </div>
@@ -213,7 +222,7 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
         ) : null}
 
         {state.status === "error" && state.message ? <Notice tone="danger" live>{state.message}</Notice> : null}
-        <div className="flex items-center justify-between gap-3 border-t border-hairline pt-6">
+        <div className="flex items-center justify-between gap-3 border-t border-hairline pt-4 sm:pt-6">
           {step > 1 ? (
             // Saves this step's valid answers, then goes back (never blocked by this step's errors).
             <Button type="submit" name="dir" value="back" variant="outline" disabled={pending}>

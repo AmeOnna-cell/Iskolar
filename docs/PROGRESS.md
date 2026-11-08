@@ -65,7 +65,7 @@ Details are in `docs/performance.md`. The dataset was 5,009 listings, 2,085 stud
 - Trade-off: the daily reminder job went from 121 to about 340 ms (585 reminders) and was kept. See the doc.
 - Tests: pgTAP `90_performance` (the tally matches the explainable items for 40,000+ combinations; a planted bug fails it), 247 assertions in total; a keyset paging check added to E2E 4.5; 56 of 56 E2E pass.
 
-## Phase 8: polish/QA (in progress)
+## Phase 8: polish/QA (done)
 
 1. **Sample listings (done and live; migration `20261104010000_sample_listings` pushed).**
    - A "Sample listing" badge appears on cards and detail pages, and samples are never shown as verified.
@@ -153,7 +153,58 @@ Details are in `docs/performance.md`. The dataset was 5,009 listings, 2,085 stud
      - Signed-out visitors get a Sign in button.
    - Tests: 57 of 57 E2E pass on a reset DB, with new checks for focus and the error summary, the Gmail link and the reset cooldown. The detector is clean.
    - Screenshots: `docs/screenshots/phase8-g3-before/` and `docs/screenshots/phase8-g3-after/`.
-6. **Next: stage 2, group 4 (staff and admin screens).**
+6. **Stage 2, group 4: staff and admin screens (done, committed 2026-11-08).**
+   - Critique scores out of 40: overview 27, listings 25, editor 21, questions 28, announcements 25, users 22, audit 24. Snapshots are in `.impeccable/critique/`.
+   - The user chose P0 + P1 + most P2, a work-queue overview, a confirm/undo split for consequential actions, and blocking the editor's status actions while there are unsaved changes.
+   - **Shared:**
+     - The account menu's focus ring shows again (`outline-none` was cancelling it).
+     - The office band is a labelled region (axe `region`).
+     - New `outline-danger` button variant, so Delete is red again.
+     - Toasts can carry an Undo action (6 s).
+     - New `CheckCell`: a 44px hit area for row checkboxes.
+   - **/admin/users:**
+     - Role change is a confirm dialog. It was a select that committed on every change, so an arrow key promoted a user (P0).
+     - Deactivate offers Undo.
+     - Rows line up in columns, and emails wrap.
+   - **Listing editor:**
+     - Unsaved-changes guard on links and tab close.
+     - Status actions are disabled until the form is saved.
+     - Publish and Unpublish confirm first; archiving a live listing offers Undo.
+     - Fields follow the `TextField` error contract, and a failed save focuses the first invalid field.
+     - New listings start with no document row.
+     - Optional fields are marked.
+     - Sample listings never show Verified.
+     - A coordinator who can't edit a listing gets a notice instead of an empty Status card.
+   - **Listings table:**
+     - Coordinators can only select their own drafts.
+     - Failed rows give a reason specific to the action.
+     - Every phone card links to the listing.
+     - Batch Publish and Unpublish confirm first; batch archive offers Undo.
+     - New "Closing within 7 days" filter.
+   - **Questions:**
+     - A Reply button opens the reply box.
+     - A "Waiting N school days" pill (`schoolDaysSince`, unit-tested).
+     - Close question offers Undo.
+   - **Announcements:** errors are announced and focused, and the form comes first on phones.
+   - **Audit log:**
+     - Plain-language action labels (`actionLabel`, unit-tested) and the affected listing or account in each row.
+     - Neutral before/after colours and an expand chevron.
+     - Raw codes stay in the details and the CSV.
+   - **Overview:**
+     - Work queue: the 3 questions waiting longest, and listings closing within 7 days.
+     - Role-aware summary sentence.
+     - Tiles link to the right filters.
+   - Tests: 58 of 58 E2E pass on a reset DB. Unit tests 50 of 50, pgTAP 247 of 247, and axe is clean on every staff and admin route in both themes. The detector shows only the two known `#334155` provider-colour defaults.
+   - Skipped (P2/P3), listed for later:
+     - Collapsible filters on phones.
+     - Sorting from column headers.
+     - An announcement preview, and a locked "Posted as".
+     - A "More" menu for the admin batch bar.
+     - Audit log in the admin tab bar (it's linked from /admin/users and the account menu instead).
+     - Staff footer links.
+     - A browser Back guard in the editor.
+   - Screenshots: `docs/screenshots/phase8-g4-before/` and `docs/screenshots/phase8-g4-after/`.
+7. **Next: Phase 9.**
 
 ## Open issues
 

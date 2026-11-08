@@ -50,12 +50,11 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
   - Stage 2, group 1 (landing, scholarship detail, help): done and pushed (`ee3de05`).
   - Stage 2, group 2 (eligibility check, results, My applications, alerts, settings hub): done and pushed (`90c0ff1`). 57 of 57 E2E pass.
   - Stage 2, group 3 (sign-in pages): done and pushed (`972d71d`). 57 of 57 E2E pass on a reset DB. CI green.
-  - Stage 2, group 4: in progress. Before-screenshots in `docs/screenshots/phase8-g4-before/`.
+  - Stage 2, group 4 (staff and admin screens): done and committed (2026-11-08). 58 of 58 E2E pass on a reset DB. Not pushed yet unless the user said so.
 - **Branch:** `main`. No work-in-progress branch.
 
 ## Remaining work, in order
-1. **Phase 8 stage 2, group 4, staff and admin screens:** /staff overview, listings table, listing editor, questions, announcements, /admin/users, /admin/audit.
-2. **Phase 9:**
+1. **Phase 9:**
    - The remaining E2E specs from the brief (4.1–4.13 coverage review).
    - README, SETUP checklist, final report.
    - Investigate the one-off pgTAP failure seen in Phase 6.
@@ -67,8 +66,6 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
 - **`npm audit`:** reports `postcss` inside Next.js (high). It needs a Next upgrade.
 
 ## First step next session
-Read `docs/PROGRESS.md`. Continue Phase 8 stage 2 group 4 (staff and admin screens):
-1. Take before-screenshots.
-2. Run the two-agent critique.
-3. Ask the user.
-4. Fix, test against a reset DB, then commit and push.
+Read `docs/PROGRESS.md`. Push group 4 if the user hasn't yet (ask first). Then start Phase 9: the E2E coverage review against brief §4.1–4.13, README, SETUP checklist, final report, the pgTAP investigation, and the Next.js upgrade. The group 4 skipped items are listed in PROGRESS.
+
+**E2E on this machine:** run E2E against a production build (`npm run build`, then `CI=1 npx playwright test`). Dev mode compiles routes on first hit, and the long workflow test can then pass its 30 s limit. Stop any `next dev` or `next start` first, because a server writing to `.next` during a build corrupts it.

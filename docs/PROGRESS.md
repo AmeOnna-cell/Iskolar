@@ -14,6 +14,21 @@
 
 Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Groups A–F in order. Each group gets tests on a reset DB, screenshots at 4 sizes × 2 themes, one critique, a commit, and then the user is asked before pushing. Rules: DESIGN.md and taste dials 3/3/4. Phones get smaller type and less vertical space, but inputs stay ≥16px and body text ≥14px. Keep the Sample listing badge, the verdicts and the "preliminary check" wording. New drawers and dialogs need a focus trap, Esc, focus return, and URL state so Back closes them.
 
+### Summary: all revision groups
+
+| Group | What | Commit | Migration | Status |
+|---|---|---|---|---|
+| A | Sticky panel header, Share, combobox, dashboard and phone tightening | `77783d7` | — | Pushed |
+| B | Filter drawer, new scholarship card, phone details drawer | `976d79d` | — | Pushed |
+| C | Bell dropdown, account menu, My profile with self-delete | `e6d866a`, `e061464` | `20261108120000_self_delete` | Pushed |
+| D | Public Announcements board, nav changes, links in | `cd8be3f`, `35ce96c` | — | Pushed |
+| E | My applications two-pane; announcement alerts open the board | `6646248`, `a60e479` | `20261108130000_announcement_links` | Pushed |
+| F | Eligibility check: one field size, 16px inputs, only the step title larger | see `git log` | — | Committed; ask before pushing |
+
+- **Final tests (fresh reset, production build):** see the Group F entry and `git log`; each group's numbers are in its own section above.
+- **Left by choice:** "Done" in the filter drawer shows no result count before applying (B); urgency colours for deadline alerts in the bell (C); links to single announcements, "new since last visit" and grouping closed scholarships on the board (D, the user said skip the first two for now); radio tiles at 14px beside 16px typed values on phones (F).
+- **E2E on this machine:** export the fake env values from `.github/workflows/ci.yml` before a run, or `4.7-notifications` times out.
+
 ### Group A: quick fixes (pushed, `77783d7`)
 - **Sticky header in the Find scholarships side panel:** logo, name, provider, location, pills and actions stay in view (`DetailBody compact`). The panel has `scroll-pt-56`, so focused content isn't hidden under it.
 - **Share** (`components/scholarship/share-button.tsx`): Web Share API, else copy the link with a "Link copied" toast. It's in the side panel and on `/s/[slug]`; the My applications detail gets it in group E. Sample listings share as "Name (sample listing)", and `/s/[slug]` has Open Graph tags that lead with "Sample listing · Deadline …".
@@ -97,7 +112,7 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
 - **Tests:** lint and typecheck clean, unit 52 of 52, pgTAP 281 of 281, E2E 102 of 102 on a reset DB. New `e2e/revisions-d.spec.ts`; axe on `/announcements` and its drawer.
 - **Screenshots:** `docs/screenshots/revisions-d/`.
 
-### Group E: My applications (pushed, `6646248`; follow-up fixes committed, not pushed)
+### Group E: My applications (pushed, `6646248`; follow-ups `a60e479` pushed)
 - **Migration `20261108130000_announcement_links.sql`** (pushed with `--remote` before the code; the remote migration list matches):
   - `notify_announcement()` links alerts to `/announcements?a={slug}`, or `?a=general` for general posts. The bell, `/alerts`, email and push all follow `notifications.link`.
   - Existing announcement alerts are backfilled the same way; alerts whose announcement was deleted link to `/announcements`. A slug that later goes non-public lands on the board's "no public announcements" notice.
@@ -119,6 +134,17 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
   - Follow-up the user asked for: the panel's title link is 44px tall below the nav breakpoint (the drawer), and rows read "Nov 12 · Closes in 4 days" on one line at 360 ("Deadline" stays for screen readers).
 - **Tests:** new `e2e/revisions-e.spec.ts` (wide panel, cross-stage search, ticking moves the bar, phone drawer and Back, alert links, axe on the panel and the drawer); `student-journey` updated for the new layout. E2E runs need the CI env values from `.github/workflows/ci.yml` (fake Gmail, `EMAIL_DEV_SMTP`, `CRON_SECRET`) exported, or `4.7-notifications` times out.
 - **Screenshots:** `docs/screenshots/revisions-e/`.
+
+### Group F: eligibility check type (committed, not pushed)
+- **One field size** (`src/app/(student)/check/wizard.tsx`, `FIELD` / `LABEL` / `HINT` / `ERROR`): labels, radio options, hints, errors, the checkbox label and each step's intro are 14px below 640px and 16px above, where they match the inputs. Hints and errors were 13px and labels 14px at every width.
+- **Inputs** (program, GWA, course area and region comboboxes) stay 16px at every width (DESIGN.md: never below 16px in inputs).
+- **Only the step title is larger** (18px on phones, 20px above). Below 640px the page heading is a 14px label, "Eligibility check · Step n of 4" (it was a 24px heading), and the page intro shows on step 1 only.
+- **Less vertical space on phones:** the progress bar, form gaps and footer padding tighten below 640px.
+- **Progress bar:** the current step is in primary, steps done in ink, steps ahead muted. Year level's "(needed)" matches the other labels.
+- **DESIGN.md:** recorded as a team-leader exception under Typography.
+- **Critique:** dual-agent, 28/40 before fixes; snapshot in `.impeccable/critique/`. Detector: CLI clean; overlay flagged the single font (design-system choice) and, on phones, a flat h1/step-title pair (fixed with the label). Fixed: the phone heading, "you are here" in the progress bar, the repeated intro, off-scale 20px gaps. Kept: radio tiles at 14px beside 16px typed values on phones (inputs stay 16px by the brief and DESIGN.md).
+- **Tests:** new `e2e/revisions-f.spec.ts` measures the computed sizes on all four steps at 360 and 1280 (and the 14px heading label on phones), plus axe on step 3 at 360 in both themes.
+- **Screenshots:** `docs/screenshots/revisions-f/`.
 
 ## Phase 6: notifications (done)
 

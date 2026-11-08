@@ -128,3 +128,28 @@ test("a student's question gets a staff reply; announcements reach the dashboard
   await page.goto("/dashboard");
   await expect(page.getByText(title)).toBeVisible();
 });
+
+test("the browser Back button asks before leaving unsaved listing edits", async ({ page }) => {
+  const admin = await createUser("admin", "back-guard");
+  await signIn(page, admin.email);
+  await page.goto("/staff/listings?q=Tulong");
+  await waitForHydration(page);
+  await page.locator("table").getByRole("link", { name: "Edit Tulong Dunong Program" }).click();
+  await expect(page.getByLabel("Scholarship name")).toHaveValue("Tulong Dunong Program");
+  const editorUrl = page.url();
+  await page.getByLabel("Scholarship name").fill("Tulong Dunong Program (edited)");
+  await expect(page.getByText("Unsaved changes")).toBeVisible();
+
+  // Cancel: stays on the editor with the edit intact.
+  page.once("dialog", (d) => d.dismiss());
+  await page.evaluate(() => history.back());
+  await expect(page.getByText("Unsaved changes")).toBeVisible();
+  await expect(page).toHaveURL(editorUrl);
+  await expect(page.getByLabel("Scholarship name")).toHaveValue("Tulong Dunong Program (edited)");
+
+  // OK: goes back to the list; nothing was saved.
+  page.once("dialog", (d) => d.accept());
+  await page.evaluate(() => history.back());
+  await expect(page).toHaveURL(/\/staff\/listings\?q=Tulong$/);
+  expect((await adminClient().from("scholarships").select("name").eq("slug", "tulong-dunong-program").single()).data?.name).toBe("Tulong Dunong Program");
+});

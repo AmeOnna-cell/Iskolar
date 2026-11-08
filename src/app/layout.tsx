@@ -5,7 +5,7 @@ import { Footer } from "@/components/shell/footer";
 import { Header } from "@/components/shell/header";
 import { TabBar } from "@/components/shell/nav-links";
 import { SignOutItem } from "@/components/shell/sign-out";
-import { themeInitScript } from "@/components/shell/theme-toggle";
+import { headScript } from "@/lib/head-scripts";
 import { getSessionUser } from "@/lib/auth/session";
 import { unreadCount } from "@/lib/data/notifications";
 import { primaryNav, type Viewer } from "@/lib/nav";
@@ -34,7 +34,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script dangerouslySetInnerHTML={{ __html: headScript }} />
       </head>
       <body className="flex min-h-dvh flex-col pb-[calc(64px+env(safe-area-inset-bottom))] nav:pb-0">
         <Providers>

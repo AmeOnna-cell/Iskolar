@@ -2,11 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
-
-export const THEME_KEY = "iskolar-theme";
-
-/** Runs before paint (inline in <head>) so a stored choice never flashes the wrong theme. */
-export const themeInitScript = `try{var t=localStorage.getItem("${THEME_KEY}");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}`;
+import { THEME_KEY } from "@/lib/head-scripts";
 
 type Theme = "light" | "dark";
 

@@ -44,7 +44,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
     <div className="page-container py-8">
       <h1 className="text-headline-sm font-bold tracking-tight text-ink sm:text-headline">Users</h1>
       <p className="mt-2 text-ink-secondary">
-        Deactivated accounts can&apos;t sign in and are signed out everywhere right away. Every change here is in the audit log.
+        Deactivated accounts can&apos;t sign in and are signed out everywhere right away. Every change here is in the <Link href="/admin/audit">audit log</Link>.
       </p>
 
       <form action={pathname} role="search" className="mt-6 flex flex-wrap items-end gap-2">

@@ -42,15 +42,15 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
   - Clear `.next/cache/fetch-cache` before full runs. Stale public search caches break the count assertions.
   - Under heavy memory pressure from other apps, tests time out. Rerun before treating a failure as real.
 
-## Progress (2026-11-04)
+## Progress (2026-11-08)
 - **Phases 1–7:** done and live. These are foundation, the email pipeline, database, auth, student screens, staff/admin, notifications and performance.
 - **Phase 8 (polish/QA):**
   - Item 1, sample-listing badges: live.
   - Stage 1, dashboard and Find scholarships: live (`7bad2d3`).
   - Stage 2, group 1 (landing, scholarship detail, help): done and pushed (`ee3de05`).
   - Stage 2, group 2 (eligibility check, results, My applications, alerts, settings hub): done and pushed (`90c0ff1`). 57 of 57 E2E pass.
-  - Stage 2, group 3 (sign-in pages): done and committed (2026-11-05). 57 of 57 E2E pass on a reset DB.
-  - Stage 2, group 4: not started.
+  - Stage 2, group 3 (sign-in pages): done and pushed (`972d71d`). 57 of 57 E2E pass on a reset DB. CI green.
+  - Stage 2, group 4: in progress. Before-screenshots in `docs/screenshots/phase8-g4-before/`.
 - **Branch:** `main`. No work-in-progress branch.
 
 ## Remaining work, in order
@@ -67,7 +67,7 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
 - **`npm audit`:** reports `postcss` inside Next.js (high). It needs a Next upgrade.
 
 ## First step next session
-Read `docs/PROGRESS.md`. Group 3 is committed; push it if the user hasn't yet (ask first). Then start Phase 8 stage 2 group 4 (staff and admin screens):
+Read `docs/PROGRESS.md`. Continue Phase 8 stage 2 group 4 (staff and admin screens):
 1. Take before-screenshots.
 2. Run the two-agent critique.
 3. Ask the user.

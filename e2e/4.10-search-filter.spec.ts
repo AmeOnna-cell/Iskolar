@@ -25,13 +25,16 @@ test("search, filters and sort update the URL and the results", async ({ page })
   await expect(page.getByTestId("result-count")).toHaveText("1 scholarship");
   await expect(cards(page).first()).toContainText("DOST-SEI Junior Level Science Scholarship");
 
-  await page.getByRole("button", { name: "Clear all filters" }).click();
+  await page.getByRole("searchbox", { name: "Search scholarships" }).fill("");
   await expect(page).toHaveURL(/\/explore$/);
 
-  // Status filter
-  await page.getByLabel("Status").selectOption("upcoming");
+  // Status filter, in the filter drawer; "Done" applies it
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
+  await page.getByRole("group", { name: "Status" }).getByRole("radio", { name: "Opening soon" }).check();
+  await page.getByRole("button", { name: "Done" }).click();
   await expect(page).toHaveURL(/status=upcoming/);
   await expect(page.getByTestId("result-count")).toHaveText("2 scholarships");
+  await expect(page.getByRole("button", { name: "Filters, 1 on" })).toBeVisible();
 
   // Sort by amount: DOST JLSS (₱124,000) before CHED Merit (₱120,000)
   await page.getByLabel("Sort by").selectOption("amount");
@@ -45,13 +48,15 @@ test("search, filters and sort update the URL and the results", async ({ page })
 
   // The URL is the state: reload keeps it
   await page.goto("/explore?type=private");
-  await expect(page.getByLabel("Provider type")).toHaveValue("private");
+  await page.getByRole("button", { name: "Filters, 1 on" }).click();
+  await expect(page.getByRole("group", { name: "Provider type" }).getByRole("radio", { name: "Private" })).toBeChecked();
+  await page.keyboard.press("Escape");
   await expect(page.getByTestId("result-count")).toHaveText("1 scholarship");
 });
 
 test("no results shows a way out", async ({ page }) => {
   await page.goto("/explore?q=zzznothingmatches");
   await expect(page.getByRole("heading", { name: "No scholarships match your search" })).toBeVisible();
-  await page.getByRole("link", { name: "Clear all filters" }).click();
+  await page.getByRole("link", { name: "Clear search" }).click();
   await expect(page.getByTestId("result-count")).toHaveText("9 scholarships");
 });

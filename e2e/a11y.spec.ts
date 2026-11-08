@@ -7,6 +7,8 @@ const PUBLIC = [
   "/",
   "/explore",
   "/explore?q=zzznothing",
+  "/explore?filters=1", // filter drawer open
+  "/explore?s=tulong-dunong-program&d=1", // details drawer open
   "/s/tulong-dunong-program",
   "/s/city-educational-assistance",
   "/help",

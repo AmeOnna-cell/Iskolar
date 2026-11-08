@@ -239,6 +239,7 @@ Dark mode is a first-class theme, applied with `prefers-color-scheme` unless the
 - **Display** (700, clamp(28px → 40px), 1.15, −0.02em): the landing band headline only. Max ~22ch.
 - **Headline** (700, 28px desktop / 24px below 640px, 1.2): page titles (`h1`): "Your eligibility results", "My applications", the scholarship name on its detail page.
   - Exception (team-leader revision): the dashboard greeting is 18px below 640px, with its one fact at 14px medium, to give phones a shorter band.
+  - Exception (team-leader revision): the scholarship card's amount is 20px at 700 ("large and bold"), with its period beside it at 14px 500.
 - **Title Large** (650, 20px / 18px mobile, 1.3): section headings inside a page (`h2`): "Closing soon", "Do you qualify?", "Documents to prepare".
 - **Title** (600, 16px, 1.35): card titles (scholarship names in cards), list item leads, criterion labels.
 - **Body** (400, 16px, 1.55): all running copy, inputs, descriptions. Max line length 70ch. Never below 16px in inputs (prevents mobile zoom).
@@ -260,7 +261,7 @@ The spatial model is a **centered reading column inside a centered page containe
 
 - **Page container:** max 1200px, side gutter 24px (16px below 640px).
 - **Reading column:** 760px for the student dashboard (single column, priority-ordered), 720px for the eligibility wizard and forms, 70ch for prose.
-- **Explore:** list (≤440px) + sticky detail panel at ≥1000px. Single list below that, with detail on its own page.
+- **Explore:** list (≤440px) + sticky detail panel at ≥1024px. Below that, a single list; a card opens its details in a drawer over the list (bottom sheet under 640px), and the full page stays for shared links. Filters live in a drawer behind a filter button, with the applied ones listed under the search box.
 - **Detail page:** body column + 320px sticky aside at ≥1000px. The aside drops below the body under that width.
 - **Staff tables:** full container width. Below 768px they become stacked row-cards, and bulk actions move into a sticky bottom action bar.
 

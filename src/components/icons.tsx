@@ -112,6 +112,13 @@ const PATHS = {
     </>
   ),
   bookmark: <path d="M6 3h12v18l-6-4.5L6 21z" />,
+  filter: (
+    <>
+      <path d="M4 6h16" />
+      <path d="M7 12h10" />
+      <path d="M10 18h4" />
+    </>
+  ),
   share: (
     <>
       <path d="M12 3v12" />

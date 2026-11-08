@@ -78,5 +78,11 @@ export function dueText(s: { status: string; days_left: number | null; opens_on:
   return s.closes_on ? `Closed ${formatDate(s.closes_on)}` : "Closed";
 }
 
+/** "₱5,000 a semester" → { main: "₱5,000", period: "per semester" }; text without a period stays whole. */
+export function splitAmount(text: string): { main: string; period: string | null } {
+  const m = text.match(/^(.*\S)\s+(?:a|an|per)\s+(semester|year|school year|academic year|month|term|week)$/i);
+  return m ? { main: m[1], period: `per ${m[2].toLowerCase()}` } : { main: text, period: null };
+}
+
 /** Prototype shortProv: provider name without the parenthetical. */
 export const shortProvider = (name: string) => name.replace(/ \(.*\)$/, "");

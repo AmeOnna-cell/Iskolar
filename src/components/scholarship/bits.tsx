@@ -64,12 +64,14 @@ export const DUE_TONE = { urgent: "text-danger", soon: "text-warn", none: "text-
 
 export function DueText({
   s,
+  size = "caption",
   className = "",
 }: {
   s: { status: string; days_left: number | null; opens_on: string | null; closes_on: string | null };
+  size?: "caption" | "sm";
   className?: string;
 }) {
-  return <span className={`text-caption font-semibold ${DUE_TONE[urgency(s.status, s.days_left)]} ${className}`}>{dueText(s)}</span>;
+  return <span className={`${size === "sm" ? "text-sm" : "text-caption"} font-semibold ${DUE_TONE[urgency(s.status, s.days_left)]} ${className}`}>{dueText(s)}</span>;
 }
 
 /** Progress meter; turns green when complete. */

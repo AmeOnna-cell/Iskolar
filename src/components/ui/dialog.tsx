@@ -22,6 +22,10 @@ export function Dialog({
       <D.Portal>
         <D.Overlay className="fixed inset-0 z-50 bg-[var(--scrim)]" />
         <D.Content
+          // Esc inside an open combobox list closes only the list.
+          onEscapeKeyDown={(e) => {
+            if ((e.target as HTMLElement | null)?.getAttribute?.("aria-expanded") === "true") e.preventDefault();
+          }}
           className="fixed z-50 flex flex-col overflow-auto bg-surface text-ink shadow-overlay outline-none max-sm:inset-x-0 max-sm:bottom-0 max-sm:max-h-[100dvh] max-sm:min-h-[60dvh] max-sm:rounded-t-lg sm:top-1/2 sm:left-1/2 sm:max-h-[90dvh] sm:w-[min(520px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg"
         >
           <div className="flex items-start justify-between gap-4 border-b border-hairline px-5 py-4 sm:px-6">

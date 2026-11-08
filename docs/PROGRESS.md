@@ -8,13 +8,13 @@
 | 8 Polish/QA | Done and deployed |
 | 9 Tests + docs | Done and deployed (2026-11-08); see `docs/REPORT.md` |
 | Privacy note and `/privacy` | Done and deployed (`7ebb48a`) |
-| Team-leader revisions (groups A–F) | In progress: A committed |
+| Team-leader revisions (groups A–F) | In progress: A pushed (`77783d7`), B committed |
 
 ## Team-leader revisions (started 2026-11-08)
 
 Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Groups A–F in order. Each group gets tests on a reset DB, screenshots at 4 sizes × 2 themes, one critique, a commit, and then the user is asked before pushing. Rules: DESIGN.md and taste dials 3/3/4. Phones get smaller type and less vertical space, but inputs stay ≥16px and body text ≥14px. Keep the Sample listing badge, the verdicts and the "preliminary check" wording. New drawers and dialogs need a focus trap, Esc, focus return, and URL state so Back closes them.
 
-### Group A: quick fixes (committed, not pushed)
+### Group A: quick fixes (pushed, `77783d7`)
 - **Sticky header in the Find scholarships side panel:** logo, name, provider, location, pills and actions stay in view (`DetailBody compact`). The panel has `scroll-pt-56`, so focused content isn't hidden under it.
 - **Share** (`components/scholarship/share-button.tsx`): Web Share API, else copy the link with a "Link copied" toast. It's in the side panel and on `/s/[slug]`; the My applications detail gets it in group E. Sample listings share as "Name (sample listing)", and `/s/[slug]` has Open Graph tags that lead with "Sample listing · Deadline …".
 - **Dashboard greeting on phones:** 18px greeting, the fact at 14px medium, the date at caption size, less padding. Recorded as a DESIGN.md exception.
@@ -30,6 +30,34 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
 - **Critique:** dual-agent, 27/40 before fixes; snapshot in `.impeccable/critique/`. Four P1s fixed: search words, list placement on phones, hidden Results tab, sample label lost when shared. Kept as the leader specified, and raised with the user: the sticky header's contents, and comboboxes for course and region on phones.
 - **Tests:** lint and typecheck clean, unit 50 of 50, pgTAP 247 of 247, E2E 77 of 77 on a reset DB. New `e2e/revisions-a.spec.ts`; `pickOption` helper in `e2e/support.ts`.
 - **Screenshots:** `docs/screenshots/revisions-a/`.
+
+### Group B: Find scholarships (committed, not pushed)
+- **Filter drawer** (`components/ui/drawer.tsx`, Radix): a bottom sheet under 640px and a right-hand side drawer above that.
+  - Opened by the filter button next to the search, which shows the active-filter count.
+  - Holds only the existing filters: "Only ones I qualify for", status, provider type and year as chip radios; course area and region as comboboxes.
+  - The drawer edits a draft. "Done" applies it; "Clear all" resets it; Esc, X, the scrim and Back discard it.
+  - Sort stays outside the drawer.
+- **Drawer URL state** (`useUrlPanel`): `?filters=1`, so Back closes the drawer and a shared link reopens it. Focus returns to whatever opened it. Esc inside an open combobox list closes only the list (also in `Dialog`).
+- **Applied filters by name** under the search box, each removable, plus "Clear filters". The empty state names the filters and offers "Clear filters" (keeps the search) and "Clear search" separately.
+- **New card** (`components/scholarship/card.tsx`), everywhere cards appear (Find scholarships, eligibility results, dashboard recommendations, landing):
+  - Mark and name with save at the top.
+  - Amount at 20px/700 with its period (`splitAmount` in `lib/format.ts`, unit-tested).
+  - Location (wraps; it can carry eligibility, e.g. "(city residents)") and a provider-type tag.
+  - Verdict and trust pills.
+  - A rule, then the deadline in its urgency colour and "Posted …".
+  - The selected ring shows only from 1024px, where the side panel is.
+- **Details drawer below 1024px:** a card tap pushes `?s=slug&d=1` and opens the details over the list. Back closes it with the scroll position and focus kept. The dialog is named by the scholarship, with a floating close button and an "Open the full page" link. From 1024px the side panel stays (DESIGN.md updated from 1000).
+- **Fixes from the critique** (dual-agent, 27/40 before fixes, snapshot in `.impeccable/critique/`):
+  - 7px of sideways scroll at 360 on `/explore` and `/`: the results grid had no column template below lg, so it sized to the cards' min-content.
+  - Applied filters were invisible.
+  - The first card looked selected on phones.
+  - The details drawer had a doubled header.
+  - Not changed, raised with the user: "Done" shows no result count before applying.
+- **Tests:**
+  - Lint and typecheck clean, unit 52 of 52, pgTAP 247 of 247.
+  - E2E 86 of 86 on a reset DB. New `e2e/revisions-b.spec.ts`; `4.10` updated for the drawer.
+  - Axe now also covers `/explore?filters=1` and `/explore?s=…&d=1` in both themes.
+- **Screenshots:** `docs/screenshots/revisions-b/`.
 
 ## Phase 6: notifications (done)
 
@@ -66,6 +94,8 @@ Details and setup are in `docs/notifications.md`.
 - **Unexplained:** one pgTAP run failed once and couldn't be reproduced (8 passing runs since). The claim test now ignores other local rows, which removes one possible cause.
 
 ## Local dev notes
+
+- **Restarting `next start` locally:** a restart keeps `.next/cache/fetch-cache` but forgets tag revalidations made by the previous process, so pages can show stale data (for example the 4.9 spec's "(cache check)" amount). Clear `.next/cache/fetch-cache` before restarting. Vercel's shared data cache doesn't have this problem.
 
 - `.env.local` is never created, read or edited by the assistant; it holds the real Gmail credentials. Local push keys and `CRON_SECRET` are passed as environment variables when the server starts.
 - Local Vault needs `iskolar_app_url = http://host.docker.internal:3000` and `iskolar_cron_secret` (see `docs/notifications.md`).

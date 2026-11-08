@@ -1,6 +1,7 @@
 "use client";
 
 import * as D from "@radix-ui/react-dialog";
+import { useRef } from "react";
 import { Icon } from "@/components/icons";
 
 /** Modal dialog; a full-height bottom sheet below 640px (DESIGN.md). Focus is trapped and restored. */
@@ -17,11 +18,23 @@ export function Dialog({
   description?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  // The element focused when the dialog opened; Radix only restores focus to its own D.Trigger.
+  const opener = useRef<HTMLElement | null>(null);
   return (
     <D.Root open={open} onOpenChange={onOpenChange}>
       <D.Portal>
         <D.Overlay className="fixed inset-0 z-50 bg-[var(--scrim)]" />
         <D.Content
+          onOpenAutoFocus={() => {
+            // Runs before focus moves into the dialog, so this is still the button that opened it.
+            opener.current = document.activeElement as HTMLElement | null;
+          }}
+          onCloseAutoFocus={(e) => {
+            if (opener.current?.isConnected) {
+              e.preventDefault();
+              opener.current.focus({ preventScroll: true });
+            }
+          }}
           // Esc inside an open combobox list closes only the list.
           onEscapeKeyDown={(e) => {
             if ((e.target as HTMLElement | null)?.getAttribute?.("aria-expanded") === "true") e.preventDefault();

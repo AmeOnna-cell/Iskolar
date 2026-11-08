@@ -88,7 +88,7 @@ export default async function ScholarshipPage({ params }: Params) {
               )}
             </p>
             {isStudent ? (
-              <Link href="/settings#reminders" className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold">
+              <Link href="/profile#reminders" className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold">
                 Change reminder settings
               </Link>
             ) : null}

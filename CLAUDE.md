@@ -53,11 +53,11 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
   - Stage 2, group 4 (staff and admin screens): done and pushed (`a1604dc`).
 - **Phase 9 (tests and docs):** done and pushed (`50a572d`, CI green); see `docs/REPORT.md`.
 - **Privacy note and `/privacy`:** done and pushed (`7ebb48a`).
-- **Team-leader revisions** (brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md`, groups A–F): group A pushed (`77783d7`); group B committed, not pushed. Details and rules are in `docs/PROGRESS.md` under "Team-leader revisions".
+- **Team-leader revisions** (brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md`, groups A–F): A and B pushed (`976d79d`); C's migration pushed to the cloud, C's code committed, not pushed. Details and rules are in `docs/PROGRESS.md` under "Team-leader revisions".
 - **Branch:** `main`. No work-in-progress branch.
 
 ## Remaining work
-Team-leader revisions, groups C–F, in order (see `docs/PROGRESS.md`). For each group: build, test on a reset DB, take screenshots, run one critique, commit, update this file and PROGRESS, then ask before pushing.
+Team-leader revisions, groups D–F, in order (see `docs/PROGRESS.md`). For each group: build, test on a reset DB, take screenshots, run one critique, commit, update this file and PROGRESS, then ask before pushing.
 
 Also waiting on the user:
 - The deferred P2/P3 items in `docs/REPORT.md`, if they want them.

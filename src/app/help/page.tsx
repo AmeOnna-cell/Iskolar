@@ -16,7 +16,7 @@ const FAQ: Array<[string, string, React.ReactNode]> = [
   ["faq-accurate", "How do I know a listing is accurate?", "Each listing shows its official source and when it was last checked. Listings marked “Unverified” came from unofficial posts, so confirm them with the provider before preparing documents."],
   ["faq-sample", "Why are some listings marked “Sample listing”?", "They are example data to show how Iskolar works. Confirm everything with the provider’s official page before you apply."],
   ["faq-two", "Can I receive more than one scholarship?", "Sometimes. Many government programs don’t allow two government grants at once, while private and school awards often do. Check “Obligations” on each listing or ask the provider."],
-  ["faq-reminders", "How do reminders work?", <>Save a scholarship or start preparing it, and we’ll remind you before it closes. Choose email, push or on-site alerts and how many days ahead in <Link href="/settings#reminders">Settings</Link>.</>],
+  ["faq-reminders", "How do reminders work?", <>Save a scholarship or start preparing it, and we’ll remind you before it closes. Choose email, push or on-site alerts and how many days ahead in <Link href="/profile#reminders">My profile</Link>.</>],
 ];
 
 export default async function HelpPage({ searchParams }: { searchParams: Promise<{ about?: string }> }) {

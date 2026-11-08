@@ -8,7 +8,7 @@
 | 8 Polish/QA | Done and deployed |
 | 9 Tests + docs | Done and deployed (2026-11-08); see `docs/REPORT.md` |
 | Privacy note and `/privacy` | Done and deployed (`7ebb48a`) |
-| Team-leader revisions (groups A–F) | In progress: A pushed (`77783d7`), B committed |
+| Team-leader revisions (groups A–F) | In progress: A and B pushed (`976d79d`); C migration pushed, C code committed |
 
 ## Team-leader revisions (started 2026-11-08)
 
@@ -31,7 +31,7 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
 - **Tests:** lint and typecheck clean, unit 50 of 50, pgTAP 247 of 247, E2E 77 of 77 on a reset DB. New `e2e/revisions-a.spec.ts`; `pickOption` helper in `e2e/support.ts`.
 - **Screenshots:** `docs/screenshots/revisions-a/`.
 
-### Group B: Find scholarships (committed, not pushed)
+### Group B: Find scholarships (pushed, `976d79d`)
 - **Filter drawer** (`components/ui/drawer.tsx`, Radix): a bottom sheet under 640px and a right-hand side drawer above that.
   - Opened by the filter button next to the search, which shows the active-filter count.
   - Holds only the existing filters: "Only ones I qualify for", status, provider type and year as chip radios; course area and region as comboboxes.
@@ -58,6 +58,27 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
   - E2E 86 of 86 on a reset DB. New `e2e/revisions-b.spec.ts`; `4.10` updated for the drawer.
   - Axe now also covers `/explore?filters=1` and `/explore?s=…&d=1` in both themes.
 - **Screenshots:** `docs/screenshots/revisions-b/`.
+
+### Group C: notifications and profile (migration pushed; code committed, not pushed)
+- **Migration `20261108120000_self_delete.sql`** (pushed with `--remote` before the code; the remote migration list matches):
+  - `anonymize_account()` holds the shared personal-data removal. No API role can execute it.
+  - `admin_soft_delete_user()` keeps its guards (assert_admin, not yourself, never the last admin) and now calls the shared step.
+  - `delete_my_account(email, password)` acts only on `auth.uid()`. It re-checks the email and the current password in the database (pgcrypto bcrypt) and allows 5 password tries an hour (a wrong password returns instead of raising, so the counter survives). It blocks the last active admin, audits `user.self_delete` and deletes the person's `auth.sessions`.
+  - pgTAP `95_self_delete` has 34 assertions.
+- **Bell dropdown** (`components/shell/alerts-bell.tsx`, Radix menu, non-modal):
+  - The 10 latest alerts, unread marked by a wash, a dot, a bold title and sr-only text. Each item goes through `/alerts/[id]`, which marks it read.
+  - "Mark all as read" keeps the menu open. The footer has "See all notifications" and "Reminder settings".
+  - Full width on phones. The live count and list refresh through Realtime.
+- **Account menu:** students get My profile, Edit eligibility answers, Help and FAQ, Sign out. Staff keep the office view and the audit log first. Both menus are non-modal and show a focus ring on the highlighted item.
+- **My profile** (`/profile`, moved from `/settings`):
+  - Sections: name, password (current plus new, signs out other devices), eligibility answers, reminders and delete account, with jump links under the heading.
+  - `/settings` and `/settings/notifications` (the link in every email) redirect there, and the `#fragment` is kept.
+  - Self-delete: a dialog asks for the email and current password and lists what is deleted and what is kept, with links to the privacy page and to reminders. The form resets each time the dialog opens. It ends on `/goodbye`.
+  - `docs/data-retention.md` and `/privacy` now describe self-service deletion.
+- **`Dialog` returns focus to its opener:** none of the app's dialogs had a Radix trigger, so focus fell to `<body>` on close. Fixed for all of them.
+- **Critique:** dual-agent, 27/40 before fixes; snapshot in `.impeccable/critique/`. Fixed: dialog focus return, menu focus ring, reminders findability, stale delete dialog, goodbye CTA, the disabled push hint at 2.4:1. Left: urgency colours for deadline alerts in the bell.
+- **Tests:** lint and typecheck clean, unit 52 of 52, pgTAP 281 of 281, E2E 91 of 91 on a reset DB. New `e2e/revisions-c.spec.ts` includes axe with the bell menu and the delete dialog open.
+- **Screenshots:** `docs/screenshots/revisions-c/`.
 
 ## Phase 6: notifications (done)
 

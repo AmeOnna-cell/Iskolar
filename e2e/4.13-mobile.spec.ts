@@ -6,7 +6,7 @@ import { createUser, signIn, waitForHydration } from "./support";
 
 const SIZES = Object.values(VIEWPORTS);
 const PUBLIC = ["/", "/explore", "/s/tulong-dunong-program", "/help", "/login", "/signup"];
-const STUDENT = ["/dashboard", "/check?step=1", "/applications", "/alerts", "/settings", "/s/tulong-dunong-program"];
+const STUDENT = ["/dashboard", "/check?step=1", "/applications", "/alerts", "/profile", "/s/tulong-dunong-program"];
 const STAFF = ["/staff", "/staff/listings", "/staff/listings/new", "/staff/inquiries", "/staff/announcements", "/admin/users", "/admin/audit"];
 
 /** Loads the route once, then checks every size (the layout is CSS-driven, so a resize is enough). */

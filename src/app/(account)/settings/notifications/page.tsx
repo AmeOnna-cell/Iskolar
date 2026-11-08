@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-// Kept for the "change what we send you" link in every email: reminders now live in Settings.
+// The "change what we send you" link in every email (PREFERENCES_PATH): reminders live in My profile.
 export default function NotificationSettingsPage() {
-  redirect("/settings#reminders");
+  redirect("/profile#reminders");
 }

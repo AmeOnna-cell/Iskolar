@@ -35,6 +35,17 @@ export const emailOnlySchema = z.object({ email });
 
 export const newPasswordSchema = z.object({ password: newPassword });
 
+const fullName = z.string({ error: "Enter your name." }).trim().min(1, "Enter your name.").max(120, "Use 120 characters or fewer.");
+const currentPassword = z.string({ error: "Enter your current password." }).min(1, "Enter your current password.").max(200);
+
+// My profile.
+export const nameSchema = z.object({ fullName });
+export const changePasswordSchema = z.object({ current: currentPassword, password: newPassword });
+export const deleteAccountSchema = z.object({
+  email: z.string({ error: "Type your email to confirm." }).trim().min(1, "Type your email to confirm.").max(320),
+  password: currentPassword,
+});
+
 /** Form state returned by auth server actions. */
 export type FormState = {
   status: "idle" | "error" | "success";

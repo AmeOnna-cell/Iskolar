@@ -8,7 +8,7 @@ import type { Viewer } from "@/lib/nav";
 type Props = { viewer: NonNullable<Viewer>; signOut: React.ReactNode };
 
 const itemClass =
-  "flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-sm px-3 text-sm text-ink no-underline outline-none data-[highlighted]:bg-surface-hover";
+  "flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-sm px-3 text-sm text-ink no-underline outline-none data-[highlighted]:bg-surface-hover data-[highlighted]:outline-2 data-[highlighted]:-outline-offset-2 data-[highlighted]:outline-primary";
 
 function Item({ href, icon, children }: { href: string; icon: IconName; children: React.ReactNode }) {
   return (
@@ -25,7 +25,7 @@ export function AccountMenu({ viewer, signOut }: Props) {
   const initial = (viewer.name?.trim()[0] ?? viewer.email[0] ?? "S").toUpperCase();
   const isStaff = viewer.role !== "student";
   return (
-    <Menu.Root>
+    <Menu.Root modal={false}>
       <Menu.Trigger
         aria-label="Account menu"
         className="ml-1 grid size-11 place-items-center rounded-full hover:bg-surface-hover"
@@ -46,18 +46,16 @@ export function AccountMenu({ viewer, signOut }: Props) {
               {viewer.subtitle || (isStaff ? (viewer.role === "admin" ? "Admin" : "Coordinator") : viewer.email)}
             </p>
           </div>
+          {/* Students: My profile, Edit eligibility answers, Help, Sign out. Alerts live behind the bell.
+              Staff keep their office links first. */}
           {isStaff ? (
             <>
               <Item href="/staff" icon="shield">Scholarship office view</Item>
               {viewer.role === "admin" ? <Item href="/admin/audit" icon="list">Audit log</Item> : null}
             </>
-          ) : (
-            <>
-              <Item href="/check" icon="edit">Edit eligibility answers</Item>
-              <Item href="/alerts" icon="bell">Alerts</Item>
-            </>
-          )}
-          <Item href="/settings" icon="settings">Settings</Item>
+          ) : null}
+          <Item href="/profile" icon="user">My profile</Item>
+          {isStaff ? null : <Item href="/check" icon="edit">Edit eligibility answers</Item>}
           <Item href="/help" icon="help">Help and FAQ</Item>
           <Menu.Separator className="my-2 h-px bg-hairline" />
           {signOut}

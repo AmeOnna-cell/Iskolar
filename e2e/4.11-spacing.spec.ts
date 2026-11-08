@@ -31,7 +31,7 @@ test("public and student pages: touch targets are at least 44px on a phone", asy
   for (const route of ["/", "/explore", "/help", "/login"]) expect(await smallTargets(page, route), route).toEqual([]);
   const student = await createUser("student", "targets");
   await signIn(page, student.email);
-  for (const route of ["/dashboard", "/applications", "/alerts", "/settings"]) expect(await smallTargets(page, route), route).toEqual([]);
+  for (const route of ["/dashboard", "/applications", "/alerts", "/profile"]) expect(await smallTargets(page, route), route).toEqual([]);
 });
 
 test("staff and admin pages: touch targets are at least 44px on a phone", async ({ page }) => {

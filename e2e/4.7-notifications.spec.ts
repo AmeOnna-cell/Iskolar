@@ -62,7 +62,7 @@ test("deadline reminder: once per lead time, emailed with a preferences link, li
   await expect(page).toHaveURL(/\/dashboard$/);
   await waitForHydration(page);
   await expect(page.getByTestId("unread-badge")).toHaveText("1");
-  await expect(page.locator('a[href="/alerts"][data-live="true"]')).toBeVisible(); // Realtime connected
+  await expect(page.locator('button[title="Alerts"][data-live="true"]')).toBeVisible(); // Realtime connected
   await admin.from("scholarships").update({ closes_on: new Date(Date.now() + 9 * 86_400_000).toISOString().slice(0, 10) }).eq("id", listing.id);
   await expect(page.getByTestId("unread-badge")).toHaveText("2"); // "deadline moved", no reload
 

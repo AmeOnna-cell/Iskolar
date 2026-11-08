@@ -12,19 +12,23 @@ export function PasswordField({
   error,
   autoComplete,
   rules = false,
+  id,
 }: {
   label: string;
   name: string;
   error?: string;
   autoComplete: "current-password" | "new-password";
   rules?: boolean;
+  /** Needed when two password fields with the same name share a page (the default id is f-{name}). */
+  id?: string;
 }) {
   const [shown, setShown] = useState(false);
   const [value, setValue] = useState("");
-  const rulesId = `f-${name}-rules`;
+  const rulesId = `${id ?? `f-${name}`}-rules`;
   return (
     <div className="flex flex-col gap-2">
       <TextField
+        id={id}
         label={label}
         name={name}
         type={shown ? "text" : "password"}

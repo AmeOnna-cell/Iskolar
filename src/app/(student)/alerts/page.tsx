@@ -78,7 +78,7 @@ export default async function AlertsPage({ searchParams }: { searchParams: Promi
         <section aria-labelledby="prefs-h" className="rounded-md border border-hairline bg-surface p-4 shadow-rest sm:p-6">
           <h2 id="prefs-h" className="text-title-sm font-[650] text-ink">Reminders</h2>
           <p className="mt-2 text-sm text-ink-secondary" data-testid="prefs-summary">{summary}</p>
-          <Link href="/settings#reminders" className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold">
+          <Link href="/profile#reminders" className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold">
             Change reminder settings
           </Link>
         </section>

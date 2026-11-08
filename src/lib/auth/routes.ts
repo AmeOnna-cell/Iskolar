@@ -19,6 +19,7 @@ const RULES: Array<[prefix: string, access: Access]> = [
   ["/alerts", { kind: "roles", roles: ["student"] }],
   ["/check", { kind: "roles", roles: ["student"] }],
   ["/settings", { kind: "signed-in" }],
+  ["/profile", { kind: "signed-in" }],
   ["/staff", { kind: "roles", roles: ["coordinator", "admin"] }],
   ["/admin", { kind: "roles", roles: ["admin"] }],
 ];

@@ -114,17 +114,18 @@ export default function PrivacyPage() {
           <h2 id="choices-h" className={h2}>Your choices</h2>
           <ul className={list}>
             <li>
-              <strong className="font-semibold text-ink">Change or delete your answers</strong> any time in <Link href="/settings#answers">Settings</Link>.
+              <strong className="font-semibold text-ink">Change or delete your answers</strong> any time in <Link href="/profile#answers">My profile</Link>.
               Deleting them removes them right away; your saved scholarships and alerts stay.
             </li>
             <li>
-              <strong className="font-semibold text-ink">Choose your alerts</strong> in <Link href="/settings#reminders">Settings</Link>: email, push or
+              <strong className="font-semibold text-ink">Choose your alerts</strong> in <Link href="/profile#reminders">My profile</Link>: email, push or
               on-site, how many days before a deadline, and whether to hear about new matches and changes. Every email also links there.
             </li>
             <li>
-              <strong className="font-semibold text-ink">Delete your account:</strong> ask us at {CONTACT}, and an admin will delete it. This removes
-              your answers, tracker, alerts, alert settings and push sign-ups, clears your name and email, and ends every session. It can&apos;t be
-              undone, but you can sign up again later with the same email.
+              <strong className="font-semibold text-ink">Delete your account</strong> yourself in <Link href="/profile#delete">My profile</Link>, with
+              your email and current password, or ask us at {CONTACT} and an admin will delete it. This removes your answers, tracker, alerts, alert
+              settings and push sign-ups, clears your name and email, and ends every session. It can&apos;t be undone, but you can sign up again
+              later with the same email.
             </li>
           </ul>
           <p className="mt-3">A few things stay after deletion:</p>

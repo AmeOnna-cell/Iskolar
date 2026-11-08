@@ -10,7 +10,7 @@ import { idle, type FormState } from "@/lib/validation/auth";
 import { requestPasswordReset, resendConfirmation, signIn, signUp, updatePassword } from "./actions";
 
 /** The form's result: the server's message, or a count of field errors when there is no message. */
-function FormMessage({ state }: { state: FormState }) {
+export function FormMessage({ state }: { state: FormState }) {
   const fieldCount = Object.keys(state.fieldErrors ?? {}).length;
   const text = state.message ?? (fieldCount ? `${fieldCount} ${fieldCount === 1 ? "thing" : "things"} to fix below.` : null);
   if (!text) return null;
@@ -27,7 +27,7 @@ function FormMessage({ state }: { state: FormState }) {
  * After each submit, move focus to the first invalid field, else to the result message, so a
  * keyboard or screen-reader user isn't left on <body> once the submit button re-enables.
  */
-function useFocusResult<T extends HTMLElement>(state: FormState) {
+export function useFocusResult<T extends HTMLElement>(state: FormState) {
   const ref = useRef<T>(null);
   useEffect(() => {
     if (state.status === "idle") return;

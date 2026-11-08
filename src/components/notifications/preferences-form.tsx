@@ -38,10 +38,10 @@ async function unsubscribe() {
 
 function Check({ name, label, hint, defaultChecked, disabled }: { name: string; label: string; hint?: string; defaultChecked: boolean; disabled?: boolean }) {
   return (
-    <label className={`flex min-h-11 items-start gap-3 py-2 ${disabled ? "opacity-60" : ""}`}>
+    <label className="flex min-h-11 items-start gap-3 py-2">
       <input type="checkbox" name={name} defaultChecked={defaultChecked} disabled={disabled} className="mt-0.5 size-[18px] shrink-0 accent-[var(--primary)]" />
       <span>
-        <span className="block text-base text-ink">{label}</span>
+        <span className={`block text-base ${disabled ? "text-ink-secondary" : "text-ink"}`}>{label}</span>
         {hint ? <span className="block text-caption [overflow-wrap:anywhere] text-ink-hint">{hint}</span> : null}
       </span>
     </label>

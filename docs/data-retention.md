@@ -1,16 +1,31 @@
 # Data retention and account deletion
 
-## Deleting an account (admin → Users → Delete)
+## Deleting an account
 
-The admin must type the account's exact email to confirm. Then, in order:
+There are two ways in, and both remove the same data through one internal function, `public.anonymize_account` (no API role can call it directly).
 
-1. **Remove personal data** (`public.admin_soft_delete_user`, one transaction):
+### By the person themselves (My profile → Delete my account)
+
+Anyone signed in can delete their own account, and only their own. `public.delete_my_account(email, password)` has no target parameter: it acts on `auth.uid()`. In one transaction it:
+
+- re-checks the typed email and the current password (bcrypt, in the database, so calling the RPC directly can't skip either check), allowing 5 password tries an hour;
+- refuses the last active admin ("Make someone else an admin first");
+- writes `user.self_delete` to the audit log in the person's own name;
+- removes the personal data (below) and ends every session.
+
+The server then deletes the sign-in account (Supabase Auth Admin API) and logs `user.auth_deleted`, clears the browser's cookies and shows `/goodbye`.
+
+### By an admin (admin → Users → Delete)
+
+The admin must type the account's exact email to confirm. Admins can't delete themselves this way (they use My profile), and never the last active admin. Then, in order:
+
+1. **Remove personal data** (`public.admin_soft_delete_user` → `anonymize_account`, one transaction):
    - deleted: eligibility answers (`student_profiles`), applications and checklists, notifications, notification preferences, push subscriptions;
    - kept but anonymised: the `profiles` row becomes a tombstone (`status = deleted`, name and email cleared), and questions the student asked keep their text with the context replaced by "Deleted account".
 2. **End every session** (`public.revoke_user_sessions`, service role).
 3. **Delete the sign-in account** (Supabase Auth Admin API, `auth.users`).
 
-Each step is written to the audit log: `user.delete` from the database trigger and `user.auth_deleted` in the admin's name.
+Each step is written to the audit log: `user.delete` from the database trigger and `user.auth_deleted` in the admin's name. (A self-delete adds `user.self_delete`, and the actor is the person themselves.)
 
 ### Why a tombstone instead of deleting the profile row
 

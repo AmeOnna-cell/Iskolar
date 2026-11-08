@@ -47,7 +47,7 @@ export async function savePreferences(_prev: FormState, fd: FormData): Promise<F
   const { error } = await supabase.from("notification_preferences").update(parsed.data).eq("user_id", user.id);
   if (error) return { status: "error", message: "Couldn't save your settings. Try again." };
   revalidatePath("/alerts");
-  revalidatePath("/settings");
+  revalidatePath("/profile");
   return { status: "success", message: "Reminder settings saved." };
 }
 

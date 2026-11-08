@@ -30,7 +30,7 @@ export default async function AuthErrorPage({ searchParams }: { searchParams: Pr
           <p className="text-ink">
             Email change links work once and expire after 1 hour. Sign in and change your email again to get a new link.
           </p>
-          <ButtonLink href="/login?next=/settings">Sign in</ButtonLink>
+          <ButtonLink href="/login?next=/profile">Sign in</ButtonLink>
         </div>
       </AuthShell>
     );

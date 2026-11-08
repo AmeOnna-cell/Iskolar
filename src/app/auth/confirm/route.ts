@@ -11,7 +11,7 @@ const DESTINATION: Partial<Record<EmailOtpType, string>> = {
   signup: "/check?welcome=1",
   invite: "/check?welcome=1",
   recovery: "/auth/update-password",
-  email_change: "/settings?email=changed",
+  email_change: "/profile?email=changed",
 };
 
 export async function GET(request: NextRequest) {

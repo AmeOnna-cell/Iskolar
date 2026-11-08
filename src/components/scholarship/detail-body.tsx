@@ -20,7 +20,24 @@ type Props = {
   compact?: boolean;
 };
 
-function Section({ title, compact, id, children }: { title: string; compact?: boolean; id: string; children: React.ReactNode }) {
+export function Steps({ steps }: { steps: ScholarshipDetail["steps"] }) {
+  return (
+    <ol className="flex flex-col">
+      {steps.map((step, i) => (
+        <li key={step.position} className="relative grid grid-cols-[28px_minmax(0,1fr)] gap-3 pb-6 last:pb-0">
+          <span className="grid size-[26px] place-items-center rounded-full bg-primary-wash text-caption font-semibold text-primary">{i + 1}</span>
+          {i < steps.length - 1 ? <span aria-hidden="true" className="absolute top-8 bottom-1 left-3 w-0.5 bg-hairline" /> : null}
+          <div className="pt-0.5">
+            <p className="font-semibold text-ink">{step.title}</p>
+            {step.detail ? <p className="text-sm text-ink-secondary">{step.detail}</p> : null}
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export function Section({ title, compact, id, children }: { title: string; compact?: boolean; id: string; children: React.ReactNode }) {
   const H = compact ? "h3" : "h2";
   return (
     <section aria-labelledby={id} className="border-t border-hairline px-4 py-6 sm:px-6">
@@ -225,18 +242,7 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
 
       {s.steps.length ? (
         <Section title="How to apply" compact={compact} id={sid("steps")}>
-          <ol className="flex flex-col">
-            {s.steps.map((step, i) => (
-              <li key={step.position} className="relative grid grid-cols-[28px_minmax(0,1fr)] gap-3 pb-6 last:pb-0">
-                <span className="grid size-[26px] place-items-center rounded-full bg-primary-wash text-caption font-semibold text-primary">{i + 1}</span>
-                {i < s.steps.length - 1 ? <span aria-hidden="true" className="absolute top-8 bottom-1 left-3 w-0.5 bg-hairline" /> : null}
-                <div className="pt-0.5">
-                  <p className="font-semibold text-ink">{step.title}</p>
-                  {step.detail ? <p className="text-sm text-ink-secondary">{step.detail}</p> : null}
-                </div>
-              </li>
-            ))}
-          </ol>
+          <Steps steps={s.steps} />
         </Section>
       ) : null}
 

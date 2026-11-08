@@ -42,7 +42,7 @@ async function signedInContext(browser: Browser, role: string, theme: string): P
     await admin.from("notifications").insert([
       { user_id: uid, kind: "change", title: "OFW Dependents Scholarship Program: deadline moved", body: "New deadline is Nov 12, 2026 (was Nov 19, 2026).", link: "/s/owwa-ofw-dependents-scholarship", dedupe_key: "screens:change", created_at: hour(20) },
       { user_id: uid, kind: "new", title: "New scholarship: DOST-SEI Junior Level Science Scholarship", body: "Matches your profile.", link: "/s/dost-sei-junior-level-science-scholarship", dedupe_key: "screens:new", created_at: hour(50), read_at: hour(40) },
-      { user_id: uid, kind: "announce", title: "Scholarship forms at window 3 this week", body: "Bring your COR and a valid ID.", link: "/dashboard", dedupe_key: "screens:announce", created_at: hour(80), read_at: hour(70) },
+      { user_id: uid, kind: "announce", title: "Scholarship forms at window 3 this week", body: "Bring your COR and a valid ID.", link: "/announcements?a=general", dedupe_key: "screens:announce", created_at: hour(80), read_at: hour(70) },
     ]);
   }
   const ctx = await browser.newContext({ colorScheme: theme as "light" | "dark" });

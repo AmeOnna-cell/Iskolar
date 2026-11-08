@@ -4,7 +4,11 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
-import { removeApplication, setApplicationResult, setApplicationStage } from "@/lib/actions/student";
+import {
+  removeApplication,
+  setApplicationResult,
+  setApplicationStage,
+} from "@/lib/actions/student";
 
 /**
  * The row's one next move (Start preparing → Mark as submitted → record the result), a small way
@@ -17,6 +21,7 @@ export function RowControl({
   stage,
   result,
   docsDone,
+  docsTotal = 0,
 }: {
   applicationId: string;
   scholarshipId: string;
@@ -24,6 +29,7 @@ export function RowControl({
   stage: "saved" | "preparing" | "submitted";
   result: "pending" | "approved" | "rejected";
   docsDone: number;
+  docsTotal?: number;
 }) {
   const toast = useToast();
   const [pending, start] = useTransition();
@@ -39,46 +45,106 @@ export function RowControl({
   let back: React.ReactNode = null;
   if (stage === "saved") {
     next = (
-      <Button variant="outline" size="sm" loading={pending} onClick={() => run(() => setApplicationStage(scholarshipId, "preparing"))}>
+      <Button
+        variant="outline"
+        size="sm"
+        loading={pending}
+        onClick={() =>
+          run(() => setApplicationStage(scholarshipId, "preparing"))
+        }
+      >
         Start preparing{sr}
       </Button>
     );
   } else if (stage === "preparing") {
+    const left = docsTotal - docsDone;
     next = (
-      <Button variant="outline" size="sm" loading={pending} onClick={() => run(() => setApplicationStage(scholarshipId, "submitted"))}>
-        Mark as submitted{sr}
-      </Button>
+      <>
+        {left > 0 ? (
+          // Still allowed (they may have sent it anyway), but say what's unticked first.
+          <p
+            className="w-full text-sm text-ink-secondary"
+            data-testid="docs-left"
+          >
+            {left === 1 ? "1 document" : `${left} documents`} not ticked yet.
+          </p>
+        ) : null}
+        <Button
+          variant="outline"
+          size="sm"
+          loading={pending}
+          onClick={() =>
+            run(() => setApplicationStage(scholarshipId, "submitted"))
+          }
+        >
+          Mark as submitted{sr}
+        </Button>
+      </>
     );
   } else if (result === "pending") {
     next = (
       <>
-        <Button variant="outline" size="sm" disabled={pending} onClick={() => run(() => setApplicationResult(applicationId, "approved"))}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={pending}
+          onClick={() =>
+            run(() => setApplicationResult(applicationId, "approved"))
+          }
+        >
           Approved{sr}
         </Button>
-        <Button variant="outline" size="sm" disabled={pending} onClick={() => run(() => setApplicationResult(applicationId, "rejected"))}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={pending}
+          onClick={() =>
+            run(() => setApplicationResult(applicationId, "rejected"))
+          }
+        >
           Not approved{sr}
         </Button>
       </>
     );
     back = (
-      <Button variant="text" size="sm" disabled={pending} onClick={() => run(() => setApplicationStage(scholarshipId, "preparing"))}>
+      <Button
+        variant="text"
+        size="sm"
+        disabled={pending}
+        onClick={() =>
+          run(() => setApplicationStage(scholarshipId, "preparing"))
+        }
+      >
         Not sent yet{sr}
       </Button>
     );
   } else {
     back = (
-      <Button variant="text" size="sm" disabled={pending} onClick={() => run(() => setApplicationResult(applicationId, "pending"))}>
+      <Button
+        variant="text"
+        size="sm"
+        disabled={pending}
+        onClick={() =>
+          run(() => setApplicationResult(applicationId, "pending"))
+        }
+      >
         Change result{sr}
       </Button>
     );
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+    <div className="flex flex-wrap items-center gap-2">
       {next}
       {back}
       {stage !== "submitted" ? (
-        <Button variant="text" size="sm" className="text-ink-secondary!" disabled={pending} onClick={() => setConfirming(true)}>
+        <Button
+          variant="text"
+          size="sm"
+          className="text-ink-secondary!"
+          disabled={pending}
+          onClick={() => setConfirming(true)}
+        >
           Remove{sr}
         </Button>
       ) : null}

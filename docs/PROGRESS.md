@@ -8,7 +8,7 @@
 | 8 Polish/QA | Done and deployed |
 | 9 Tests + docs | Done and deployed (2026-11-08); see `docs/REPORT.md` |
 | Privacy note and `/privacy` | Done and deployed (`7ebb48a`) |
-| Team-leader revisions (groups A–F) | In progress: A–C pushed (`e061464`); D committed |
+| Team-leader revisions (groups A–F) | In progress: A–D pushed (`35ce96c`); E committed |
 
 ## Team-leader revisions (started 2026-11-08)
 
@@ -80,7 +80,7 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
 - **Tests:** lint and typecheck clean, unit 52 of 52, pgTAP 281 of 281, E2E 91 of 91 on a reset DB. New `e2e/revisions-c.spec.ts` includes axe with the bell menu and the delete dialog open.
 - **Screenshots:** `docs/screenshots/revisions-c/`.
 
-### Group D: Announcements (committed, not pushed)
+### Group D: Announcements (pushed, `35ce96c`)
 - **Public `/announcements`** (`src/app/announcements/`, data in `lib/data/announcements.ts`):
   - A searchable list with "General announcements" first, then each scholarship with announcements, newest first.
   - The selected entry's posts sit beside the list from 1000px (`lg`). Below that, the list is the page and an entry opens in the shared drawer (`?a=key&d=1`, Back closes it).
@@ -93,9 +93,31 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
   - Scholarship details show "N announcements from the scholarship office" (`announcements(count)` in the detail query). Posting or deleting an announcement now revalidates the scholarships tag and `/announcements`.
   - The dashboard section links "All announcements", and each announcement links to its entry.
 - **Breakpoint fix:** `WIDE_QUERY` in `drawer.tsx` (1000px, Tailwind `lg`) replaces a hard-coded 1024px. Between 1000 and 1023px, /explore (since group B) and the board opened the drawer and hid the side panel.
-- **Critique:** dual-agent, 26/40 before fixes; snapshot in `.impeccable/critique/`. Fixed: deep links on phones, the breakpoint, urgency in the header, the banned left-bar selection, the vague sender, the empty-search dead end, focusable scrolling regions. Left: links to single posts, "new since last visit", grouping closed scholarships. Announcement alerts still open the dashboard; pointing them at the board needs a migration.
+- **Critique:** dual-agent, 26/40 before fixes; snapshot in `.impeccable/critique/`. Fixed: deep links on phones, the breakpoint, urgency in the header, the banned left-bar selection, the vague sender, the empty-search dead end, focusable scrolling regions. Left: links to single posts, "new since last visit" (the user said skip both for now), grouping closed scholarships. Announcement alerts now open the board (group E migration).
 - **Tests:** lint and typecheck clean, unit 52 of 52, pgTAP 281 of 281, E2E 102 of 102 on a reset DB. New `e2e/revisions-d.spec.ts`; axe on `/announcements` and its drawer.
 - **Screenshots:** `docs/screenshots/revisions-d/`.
+
+### Group E: My applications (committed, not pushed)
+- **Migration `20261108130000_announcement_links.sql`** (ships with group E; push it with `--remote` before the code):
+  - `notify_announcement()` links alerts to `/announcements?a={slug}`, or `?a=general` for general posts. The bell, `/alerts`, email and push all follow `notifications.link`.
+  - Existing announcement alerts are backfilled the same way; alerts whose announcement was deleted link to `/announcements`. A slug that later goes non-public lands on the board's "no public announcements" notice.
+  - pgTAP `80_notifications` has 2 new assertions (283 in total).
+- **Two-pane My applications** (`src/app/(student)/applications/`):
+  - Left, "Tracking list" (`tracking-list.tsx`): search (by scholarship or provider, within the tab), the Saved / Preparing / Submitted / Results tabs as filters, and rows with name, provider, stage dot and label, deadline, "Closes in N days" in its urgency colour, and Eligibility (met/total, "Not checked" without answers) and Documents (ticked/total) bars.
+  - Right (`detail.tsx`): name, provider, verdict, type, "Source checked" (Sample listing instead for samples); applications open / deadline / last updated (the listing's); Official source and Share; the stage/result control (`row-control.tsx`) with the renewal note for approved; then the tickable document checklist with "where to get it", how to apply, and requirements.
+  - Below 1000px the list is the page and a row opens the details in the shared drawer (`?s=slug&d=1`, Back closes it).
+  - `SplitLinks` and `DetailDrawer` moved from `app/explore/filters.tsx` to `components/scholarship/split.tsx`; `Section` and `Steps` are exported from `detail-body.tsx`.
+  - Eligibility per row is one `evaluate_eligibility` call per application in the tab (`ponytail:` note in `page.tsx`).
+- **Critique:** dual-agent, 28/40 before fixes; snapshot in `.impeccable/critique/`. Detector: CLI clean; overlay flagged the single font (design-system choice) and bordered lists inside the panel (same as Explore). Fixed:
+  - The Eligibility bar carries the verdict in words and colour ("Not eligible right now" at 3/4 no longer reads as "almost there").
+  - The panel shows Unverified and the "Not yet verified" notice for unverified real listings.
+  - Days left under the name in the panel and drawer.
+  - Search spans every stage (the tabs step aside while searching).
+  - "N documents not ticked yet" beside Mark as submitted.
+  - Stage dots are neutral/blue so amber and red stay for deadlines; "Tracking list" is screen-reader-only on phones; "Not approved" offers open scholarships.
+  - Left, kept as the brief specifies: the control sits above the checklist and "Last updated" stays in the date row. Also left: the drawer's title link is 24px tall at 360 (the footer has a 44px "Open the full page").
+- **Tests:** new `e2e/revisions-e.spec.ts` (wide panel, cross-stage search, ticking moves the bar, phone drawer and Back, alert links, axe on the panel and the drawer); `student-journey` updated for the new layout. E2E runs need the CI env values from `.github/workflows/ci.yml` (fake Gmail, `EMAIL_DEV_SMTP`, `CRON_SECRET`) exported, or `4.7-notifications` times out.
+- **Screenshots:** `docs/screenshots/revisions-e/`.
 
 ## Phase 6: notifications (done)
 

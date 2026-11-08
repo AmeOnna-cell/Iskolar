@@ -74,8 +74,8 @@ export function DueText({
   return <span className={`${size === "sm" ? "text-sm" : "text-caption"} font-semibold ${DUE_TONE[urgency(s.status, s.days_left)]} ${className}`}>{dueText(s)}</span>;
 }
 
-/** Progress meter; turns green when complete. */
-export function Meter({ value, max, label }: { value: number; max: number; label: string }) {
+/** Progress meter; turns green when complete. `fill` overrides the colour (e.g. the eligibility verdict). */
+export function Meter({ value, max, label, fill }: { value: number; max: number; label: string; fill?: string }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
   return (
     <div
@@ -86,7 +86,7 @@ export function Meter({ value, max, label }: { value: number; max: number; label
       aria-valuenow={value}
       className="h-1.5 w-full overflow-hidden rounded-full border border-hairline bg-surface-subtle"
     >
-      <div className={`h-full transition-[width] duration-200 ${pct === 100 ? "bg-ok" : "bg-primary"}`} style={{ width: `${pct}%` }} />
+      <div className={`h-full transition-[width] duration-200 ${fill ?? (pct === 100 ? "bg-ok" : "bg-primary")}`} style={{ width: `${pct}%` }} />
     </div>
   );
 }

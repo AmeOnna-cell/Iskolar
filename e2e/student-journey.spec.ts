@@ -81,8 +81,9 @@ test("onboarding → results → checklist → dashboard → tracker", async ({ 
   // Tracker: preparing → submitted
   await page.goto("/applications?tab=preparing");
   await waitForHydration(page);
-  // The row names what's still missing, and offers one next move.
-  await expect(page.getByTestId("still-need")).toContainText("Still need: Certificate of Grades for last semester, Proof of income +2.");
+  // The tracking row shows document progress; the panel beside it holds the checklist and the next move.
+  await expect(page.getByRole("meter", { name: "Documents for Tulong Dunong Program" })).toHaveAttribute("aria-valuenow", "1");
+  await expect(page.getByRole("region", { name: "Application: Tulong Dunong Program" }).getByText("1 of 5 ready")).toBeVisible();
   // Remove asks first, because it would clear the ticked documents.
   await page.getByRole("button", { name: "Remove for Tulong Dunong Program" }).click();
   await expect(page.getByRole("dialog")).toContainText("The document you ticked will be cleared.");
@@ -91,8 +92,8 @@ test("onboarding → results → checklist → dashboard → tracker", async ({ 
   await page.getByRole("button", { name: "Mark as submitted for Tulong Dunong Program" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Marked as submitted" })).toBeVisible();
   await page.goto("/applications?tab=submitted");
-  await expect(page.getByRole("link", { name: "Tulong Dunong Program" })).toBeVisible();
-  await expect(page.getByText("Waiting for results", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Tulong Dunong Program" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Approved for Tulong Dunong Program", exact: true })).toBeVisible();
 
 });
 

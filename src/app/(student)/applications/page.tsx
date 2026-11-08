@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Icon } from "@/components/icons";
-import { DueText, Meter, Pill, ProviderMark } from "@/components/scholarship/bits";
+import { DetailDrawer } from "@/components/scholarship/split";
 import { ButtonLink } from "@/components/ui/button";
 import { requireRole } from "@/lib/auth/session";
-import { statusOf } from "@/lib/data/scholarships";
-import { listApplications } from "@/lib/data/student";
-import { shortProvider, todayPH } from "@/lib/format";
-import { RowControl } from "./row-control";
+import { getScholarshipDetail, statusOf } from "@/lib/data/scholarships";
+import { getEvaluation, listApplications } from "@/lib/data/student";
+import { dueText, formatDate, shortProvider, todayPH, urgency } from "@/lib/format";
+import { ApplicationDetail } from "./detail";
+import { TrackingList, type TrackRow } from "./tracking-list";
 
 export const metadata = { title: "My applications" };
 
@@ -18,9 +19,20 @@ const TABS = [
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
-export default async function ApplicationsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
-  await requireRole("student");
-  const { tab: rawTab } = await searchParams;
+const STAGE = {
+  // Amber and red stay for deadlines (Status Means Status); stages use neutral and blue.
+  saved: { label: "Saved", dot: "bg-ink-hint" },
+  preparing: { label: "Preparing", dot: "bg-primary" },
+  submitted: { label: "Submitted", dot: "bg-ink" },
+  approved: { label: "Approved", dot: "bg-ok" },
+  rejected: { label: "Not approved", dot: "bg-danger" },
+};
+
+type SP = Promise<{ tab?: string; s?: string; d?: string }>;
+
+export default async function ApplicationsPage({ searchParams }: { searchParams: SP }) {
+  const user = await requireRole("student");
+  const sp = await searchParams;
   const apps = await listApplications();
   const today = todayPH();
 
@@ -28,109 +40,101 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
     k === "results" ? a.stage === "submitted" && a.result !== "pending" : k === "submitted" ? a.stage === "submitted" && a.result === "pending" : a.stage === k;
   const counts = Object.fromEntries(TABS.map((t) => [t.key, apps.filter((a) => inTab(a, t.key)).length])) as Record<TabKey, number>;
   const tab: TabKey =
-    TABS.find((t) => t.key === rawTab)?.key ?? TABS.find((t) => t.key !== "saved" && counts[t.key])?.key ?? TABS.find((t) => counts[t.key])?.key ?? "saved";
+    TABS.find((t) => t.key === sp.tab)?.key ?? TABS.find((t) => t.key !== "saved" && counts[t.key])?.key ?? TABS.find((t) => counts[t.key])?.key ?? "saved";
   const meta = TABS.find((t) => t.key === tab)!;
-  const items = apps
-    .filter((a) => inTab(a, tab))
-    .sort((a, b) => (a.scholarship!.closes_on ?? "9999").localeCompare(b.scholarship!.closes_on ?? "9999"));
+  const tabOf = (a: (typeof apps)[number]) => TABS.find((t) => inTab(a, t.key))!.key;
+  // Every application (search looks across stages), closing soonest first.
+  const all = [...apps].sort((a, b) => (a.scholarship!.closes_on ?? "9999").localeCompare(b.scholarship!.closes_on ?? "9999"));
+
+  // ponytail: one evaluate_eligibility call per tracked application; a student tracks a handful.
+  // Move to one set-based RPC if lists grow past a few dozen rows.
+  const evals = await Promise.all(all.map((a) => getEvaluation(user.id, a.scholarship!.id)));
+  const rows: TrackRow[] = all.map((a, i) => {
+    const s = a.scholarship!;
+    const st = statusOf(s, today);
+    const ids = new Set(s.documents.map((d) => d.id));
+    const e = evals[i];
+    return {
+      tab: tabOf(a),
+      slug: s.slug,
+      name: s.name,
+      provider: shortProvider(s.provider!.name),
+      stage: STAGE[a.stage === "submitted" && a.result !== "pending" ? a.result : a.stage],
+      deadline: s.closes_on ? `Deadline ${formatDate(s.closes_on)}` : "No deadline yet",
+      due: { text: st.status === "closed" ? "Closed" : dueText({ ...st, opens_on: s.opens_on, closes_on: s.closes_on }), tone: urgency(st.status, st.days_left) },
+      eligibility: e && e.verdict !== "none" ? { met: e.met, total: e.total, verdict: e.verdict } : null,
+      docs: { done: a.checked.filter((c) => ids.has(c.document_id)).length, total: s.documents.length },
+    };
+  });
+
+  // The selection may come from a search across stages, so look in every application; default to the tab's first.
+  const picked = all.findIndex((a) => a.scholarship!.slug === sp.s);
+  const index = picked >= 0 ? picked : all.findIndex((a) => inTab(a, tab));
+  const app = all[index];
+  const empty = counts[tab] === 0;
+  const s = app ? await getScholarshipDetail(app.scholarship!.slug) : null;
+  const inDrawer = sp.d === "1" && Boolean(s) && sp.s === s?.slug;
+  const detail = s && app ? <ApplicationDetail s={s} app={app} evaluation={evals[index] ?? null} /> : null;
+
+  const tabs = (
+    // Inset hairline instead of a border + -mb-px overlap: the overlap made the row overflow vertically (stray scrollbar).
+    <nav aria-label="Application stages" className="mb-3 flex gap-1 overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_var(--hairline)] [scrollbar-width:none] max-sm:pr-12 max-sm:[mask-image:linear-gradient(to_right,#000_80%,transparent)]">
+      {TABS.map((t) => (
+        <Link
+          key={t.key}
+          href={`/applications?tab=${t.key}`}
+          aria-current={t.key === tab ? "page" : undefined}
+          className={`flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm font-semibold whitespace-nowrap no-underline ${
+            t.key === tab ? "border-primary text-primary" : "border-transparent text-ink-secondary hover:text-ink"
+          }`}
+        >
+          {t.label}
+          {counts[t.key] ? <span className="tnum rounded-full border border-hairline bg-surface-subtle px-2 text-caption text-ink-secondary">{counts[t.key]}</span> : null}
+        </Link>
+      ))}
+    </nav>
+  );
 
   return (
     <div className="page-container py-6 sm:py-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-headline-sm font-bold tracking-tight text-ink sm:text-headline">My applications</h1>
-          <p className="mt-2 text-ink-secondary">Track what you&apos;ve saved, what you&apos;re preparing, and what you&apos;ve sent.</p>
+          <p className="mt-1 text-ink-secondary">Track what you&apos;ve saved, what you&apos;re preparing, and what you&apos;ve sent.</p>
         </div>
         <ButtonLink href="/explore" variant="outline">
           <Icon name="search" size={18} /> Find more
         </ButtonLink>
       </div>
 
-      {/* Inset hairline instead of a border + -mb-px overlap: the overlap made the row overflow vertically (stray scrollbar). */}
-      <nav aria-label="Application stages" className="mt-6 mb-4 flex gap-1 overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_var(--hairline)] [scrollbar-width:none] max-sm:pr-12 max-sm:[mask-image:linear-gradient(to_right,#000_80%,transparent)]">
-        {TABS.map((t) => (
-          <Link
-            key={t.key}
-            href={`/applications?tab=${t.key}`}
-            aria-current={t.key === tab ? "page" : undefined}
-            className={`flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm font-semibold whitespace-nowrap no-underline sm:px-4 ${
-              t.key === tab ? "border-primary text-primary" : "border-transparent text-ink-secondary hover:text-ink"
-            }`}
+      <div className="mt-5 grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)]">
+        <section aria-labelledby="tracking-h">
+          {/* On phones the list is the page, so its heading would only repeat the h1. */}
+          <h2 id="tracking-h" className="mb-3 text-title-sm font-[650] text-ink max-lg:sr-only">Tracking list</h2>
+          <TrackingList rows={rows} tab={tab} selected={app?.scholarship!.slug ?? null} tabs={tabs} />
+          {empty ? (
+            <div className="rounded-md border border-hairline bg-surface px-6 py-10 text-center shadow-rest">
+              <h3 className="text-title-sm font-[650] text-ink">{meta.empty[0]}</h3>
+              <p className="mx-auto mt-2 max-w-[44ch] text-ink-secondary">{meta.empty[1]}</p>
+              <ButtonLink href="/explore" className="mt-6">Find scholarships</ButtonLink>
+            </div>
+          ) : null}
+        </section>
+        {detail && !inDrawer ? (
+          <section
+            tabIndex={0}
+            aria-label={`Application: ${s!.name}`}
+            className="sticky top-20 hidden max-h-[calc(100dvh-6rem)] overflow-auto rounded-md border border-hairline bg-surface shadow-rest lg:block"
           >
-            {t.label}
-            {counts[t.key] ? <span className="tnum rounded-full border border-hairline bg-surface-subtle px-2 text-caption text-ink-secondary">{counts[t.key]}</span> : null}
-          </Link>
-        ))}
-      </nav>
-
-      <div className="overflow-hidden rounded-md border border-hairline bg-surface shadow-rest">
-        {items.length === 0 ? (
-          <div className="px-6 py-12 text-center">
-            <h2 className="text-title-sm font-[650] text-ink">{meta.empty[0]}</h2>
-            <p className="mx-auto mt-2 max-w-[44ch] text-ink-secondary">{meta.empty[1]}</p>
-            <ButtonLink href="/explore" className="mt-6">Find scholarships</ButtonLink>
-          </div>
-        ) : (
-          <ul>
-            {items.map((a) => {
-              const s = a.scholarship!;
-              const st = statusOf(s, today);
-              const ids = new Set(s.documents.map((d) => d.id));
-              const done = a.checked.filter((c) => ids.has(c.document_id)).length;
-              const checked = new Set(a.checked.map((c) => c.document_id));
-              const missing = [...s.documents].sort((x, y) => x.position - y.position).filter((d) => !checked.has(d.id)).map((d) => d.name.split(":")[0]!);
-              return (
-                <li key={a.id} className="grid grid-cols-[44px_minmax(0,1fr)] gap-x-4 gap-y-3 border-t border-hairline px-4 py-4 first:border-t-0 sm:px-6 lg:grid-cols-[44px_minmax(0,1fr)_240px_auto] lg:items-center">
-                  <ProviderMark abbr={s.provider!.abbr} color={s.provider!.color} />
-                  <div className="min-w-0">
-                    <Link href={`/s/${s.slug}`} className="-my-3 inline-flex min-h-11 items-center font-semibold text-ink no-underline hover:underline">{s.name}</Link>
-                    <p className="text-sm text-ink-secondary">{shortProvider(s.provider!.name)}</p>
-                    <DueText s={{ ...st, opens_on: s.opens_on, closes_on: s.closes_on }} />
-                  </div>
-                  <div className="col-start-2 text-sm text-ink-secondary lg:col-start-auto">
-                    {a.stage === "submitted" ? (
-                      a.result === "approved" ? (
-                        <Pill tone="ok" icon="yes">Approved</Pill>
-                      ) : a.result === "rejected" ? (
-                        <Pill tone="danger" icon="no">Not approved</Pill>
-                      ) : (
-                        <Pill>Waiting for results</Pill>
-                      )
-                    ) : a.stage === "saved" ? (
-                      // No progress meter before work starts: just what's ahead.
-                      `${s.documents.length} ${s.documents.length === 1 ? "document" : "documents"} to prepare`
-                    ) : (
-                      <>
-                        <div className="mb-1">
-                          <Meter value={done} max={s.documents.length} label={`Documents ready for ${s.name}`} />
-                        </div>
-                        {done} of {s.documents.length} documents ready
-                        {missing.length ? (
-                          <span className="mt-1 block" data-testid="still-need">
-                            Still need: {missing.slice(0, 2).join(", ")}
-                            {missing.length > 2 ? ` +${missing.length - 2}` : ""}.{" "}
-                            <Link href={`/s/${s.slug}#documents-${s.slug}`} className="font-semibold">
-                              Continue checklist
-                            </Link>
-                          </span>
-                        ) : null}
-                      </>
-                    )}
-                  </div>
-                  <div className="col-start-2 lg:col-start-auto">
-                    <RowControl applicationId={a.id} scholarshipId={s.id} name={s.name} stage={a.stage} result={a.result} docsDone={done} />
-                  </div>
-                  {a.result === "approved" && s.renewal ? (
-                    <p className="col-start-2 rounded-sm bg-ok-wash px-3 py-2 text-sm text-ok lg:col-span-3">
-                      To keep it: {s.renewal} We&apos;ll remind you when renewal opens.
-                    </p>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-        )}
+            {detail}
+          </section>
+        ) : null}
       </div>
+      {detail && inDrawer ? (
+        <DetailDrawer slug={s!.slug} name={s!.name}>
+          {detail}
+        </DetailDrawer>
+      ) : null}
     </div>
   );
 }

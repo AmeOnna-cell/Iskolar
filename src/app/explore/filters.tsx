@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Icon } from "@/components/icons";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
-import { Drawer, useUrlPanel, WIDE_QUERY } from "@/components/ui/drawer";
+import { Drawer, useUrlPanel } from "@/components/ui/drawer";
 import { inputClass } from "@/components/ui/field";
 import type { SearchParams } from "@/lib/data/scholarships";
 import { FIELD_OPTIONS, PROVIDER_TYPES, REGION_OPTIONS } from "@/lib/reference";
@@ -282,53 +282,5 @@ export function ExploreFilters({ params, canFilterMine, hasProfile }: { params: 
         <FilterForm key={cleared} initial={cleared ? NONE : current} canFilterMine={canFilterMine && hasProfile} onChange={(f) => (draft.current = f)} />
       </Drawer>
     </div>
-  );
-}
-
-/**
- * A card click opens the scholarship without leaving the list: in the side panel on wide screens
- * (≥1000px, ?s=slug), in a details drawer on narrower ones (?s=slug&d=1, so Back closes it and the
- * list keeps its scroll position). Modified clicks open the full page as usual.
- */
-export function SplitLinks({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const drawer = useUrlPanel("d");
-  const [pending, start] = useTransition();
-  return (
-    <div
-      aria-busy={pending || undefined}
-      className={pending ? "opacity-70 transition-opacity" : undefined}
-      onClick={(e) => {
-        const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[data-slug]");
-        if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-        e.preventDefault();
-        const slug = a.dataset.slug!;
-        if (matchMedia(WIDE_QUERY).matches) start(() => router.replace(drawer.hrefWith({ s: slug, d: null }), { scroll: false }));
-        else start(() => drawer.open("1", { s: slug }, a));
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-/** The selected scholarship in a drawer over the list (narrow screens). */
-export function DetailDrawer({ slug, name, children }: { slug: string; name: string; children: React.ReactNode }) {
-  const drawer = useUrlPanel("d");
-  return (
-    <Drawer
-      open={drawer.isOpen}
-      onClose={drawer.close}
-      title={name}
-      titleHidden
-      width="wide"
-      footer={
-        <Link href={`/s/${slug}`} className="inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-3">
-          Open the full page
-        </Link>
-      }
-    >
-      {children}
-    </Drawer>
   );
 }

@@ -110,6 +110,12 @@ insert into public.announcements (title, body, posted_as) values ('Forms at wind
 select results_eq($$ select title, payload ->> 'from' from public.notifications where user_id = (select ana from ids) and kind = 'announce' $$,
   $$ values ('Forms at window 3', 'City Scholarship Office') $$, 'Announcements reach every student');
 select is(pg_temp.n((select carla from ids), 'announce'), 0, 'Not staff');
+select is((select link from public.notifications where user_id = (select ana from ids) and title = 'Forms at window 3'),
+  '/announcements?a=general', 'A general announcement opens General announcements');
+insert into public.announcements (title, body, scholarship_id)
+  select 'Interview schedule', 'Room 2.', id from public.scholarships where slug = 'notify-match';
+select is((select link from public.notifications where user_id = (select ana from ids) and title = 'Interview schedule'),
+  '/announcements?a=notify-match', 'A scholarship announcement opens that scholarship''s posts');
 
 -- ---------- Delivery ----------
 

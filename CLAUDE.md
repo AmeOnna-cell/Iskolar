@@ -53,11 +53,11 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
   - Stage 2, group 4 (staff and admin screens): done and pushed (`a1604dc`).
 - **Phase 9 (tests and docs):** done and pushed (`50a572d`, CI green); see `docs/REPORT.md`.
 - **Privacy note and `/privacy`:** done and pushed (`7ebb48a`).
-- **Team-leader revisions** (brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md`, groups A–F): A and B pushed (`976d79d`); C pushed (`e061464`); group D (Announcements) committed, not pushed. Details and rules are in `docs/PROGRESS.md` under "Team-leader revisions".
+- **Team-leader revisions** (brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md`, groups A–F): A and B pushed (`976d79d`); C pushed (`e061464`); D pushed (`35ce96c`); group E (My applications two-pane, plus the announcement-link migration) committed, not pushed. Push order for E: `db push --remote` first, then `git push`, asking the user before each. Details and rules are in `docs/PROGRESS.md` under "Team-leader revisions".
 - **Branch:** `main`. No work-in-progress branch.
 
 ## Remaining work
-Team-leader revisions, groups E–F, in order (see `docs/PROGRESS.md`). For each group: build, test on a reset DB, take screenshots, run one critique, commit, update this file and PROGRESS, then ask before pushing.
+Team-leader revisions: push group E (after asking), then group F (see `docs/PROGRESS.md`). For each group: build, test on a reset DB, take screenshots, run one critique, commit, update this file and PROGRESS, then ask before pushing.
 
 Also waiting on the user:
 - The deferred P2/P3 items in `docs/REPORT.md`, if they want them.

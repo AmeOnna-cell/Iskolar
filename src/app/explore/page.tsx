@@ -9,7 +9,8 @@ import { getStudentProfile } from "@/lib/data/student";
 import { plural } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { activeFilters } from "./filter-labels";
-import { DetailDrawer, ExploreFilters, SortSelect, SplitLinks } from "./filters";
+import { DetailDrawer, SplitLinks } from "@/components/scholarship/split";
+import { ExploreFilters, SortSelect } from "./filters";
 
 export const metadata = { title: "Find scholarships" };
 

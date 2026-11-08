@@ -22,7 +22,7 @@ The database decides who is told what: `supabase/migrations/20261103170000_notif
 | Deadline moved | A deadline change on a published listing | Students tracking it (saved or preparing), if "changes" is on | `change:{listing}:deadline:{new date}` |
 | Requirements updated | Criteria or document list edited on a published listing | Same; at most one per listing per day | `change:{listing}:requirements:{day}` |
 | New scholarship | A listing becomes published | Students whose eligibility verdict is yes or maybe, if "new matches" is on | `new:{listing}` |
-| Announcement | An announcement is posted | Every active student | `announce:{id}` |
+| Announcement | An announcement is posted | Every active student | `announce:{id}`; links to `/announcements?a={slug}` or `?a=general` |
 
 `notify()` is the only place that reads preferences:
 - Topics switched off create nothing.

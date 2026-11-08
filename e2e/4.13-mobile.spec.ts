@@ -5,7 +5,7 @@ import { VIEWPORTS } from "../playwright.config";
 import { createUser, signIn, waitForHydration } from "./support";
 
 const SIZES = Object.values(VIEWPORTS);
-const PUBLIC = ["/", "/explore", "/s/tulong-dunong-program", "/help", "/login", "/signup"];
+const PUBLIC = ["/", "/explore", "/s/tulong-dunong-program", "/announcements", "/help", "/login", "/signup"];
 const STUDENT = ["/dashboard", "/check?step=1", "/applications", "/alerts", "/profile", "/s/tulong-dunong-program"];
 const STAFF = ["/staff", "/staff/listings", "/staff/listings/new", "/staff/inquiries", "/staff/announcements", "/admin/users", "/admin/audit"];
 

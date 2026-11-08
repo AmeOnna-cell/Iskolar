@@ -45,8 +45,8 @@ Brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md` (outside the repo). Gro
   - Location (wraps; it can carry eligibility, e.g. "(city residents)") and a provider-type tag.
   - Verdict and trust pills.
   - A rule, then the deadline in its urgency colour and "Posted …".
-  - The selected ring shows only from 1024px, where the side panel is.
-- **Details drawer below 1024px:** a card tap pushes `?s=slug&d=1` and opens the details over the list. Back closes it with the scroll position and focus kept. The dialog is named by the scholarship, with a floating close button and an "Open the full page" link. From 1024px the side panel stays (DESIGN.md updated from 1000).
+  - The selected ring shows only from 1000px (`lg`), where the side panel is.
+- **Details drawer below 1000px:** a card tap pushes `?s=slug&d=1` and opens the details over the list. Back closes it with the scroll position and focus kept. The dialog is named by the scholarship, with a floating close button and an "Open the full page" link. From 1000px (`lg`, `WIDE_QUERY` in `drawer.tsx`) the side panel stays.
 - **Fixes from the critique** (dual-agent, 27/40 before fixes, snapshot in `.impeccable/critique/`):
   - 7px of sideways scroll at 360 on `/explore` and `/`: the results grid had no column template below lg, so it sized to the cards' min-content.
   - Applied filters were invisible.
@@ -143,7 +143,7 @@ Phase 6 was confirmed on the cloud by the user: both cron jobs are active, and t
   - Both files now re-anchor the sample dates to today inside their own transaction.
   - 247 of 247 pass on a fresh DB and on DBs aged 7 and 30 days; 20 repeated runs also passed.
 - **E2E coverage review:** there is now one spec per §4 concern. New: 4.4 (validation and question rate limit), 4.9 (caching), 4.11 (44px touch targets), 4.12 (one-column dashboard) and 4.13 (four sizes, tab bar, cards, sheets). Also new: signed-in visits to `/login` and `/signup` go home (4.8).
-  - The new specs found two real bugs: `/staff/listings` scrolled sideways at 768 (the table now starts at 1024), and the "Rows" select and sort links were 36px on phones.
+  - The new specs found two real bugs: `/staff/listings` scrolled sideways at 768 (the table now starts at 1000, `lg`), and the "Rows" select and sort links were 36px on phones.
 - **Docs:** README (run, scripts, deploy, layout, docs index), the SETUP checklist (cron/Vault, VAPID, Vercel variables, smoke test) and `docs/REPORT.md`.
 - **Tests:** lint and typecheck clean, unit 50 of 50, pgTAP 247 of 247, E2E 69 of 69 on a reset DB.
 

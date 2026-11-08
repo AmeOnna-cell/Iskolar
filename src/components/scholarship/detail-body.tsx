@@ -97,6 +97,13 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
       </Notice>
     </div>
   ) : null;
+  const newsCount = s.announcements?.[0]?.count ?? 0;
+  const news = newsCount ? (
+    <Link href={`/announcements?a=${s.slug}`} className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold nav:min-h-0">
+      <Icon name="mega" size={16} />
+      {newsCount === 1 ? "1 announcement" : `${newsCount} announcements`} from the scholarship office
+    </Link>
+  ) : null;
   const header = (
     <>
       <div className="flex items-start gap-4">
@@ -143,6 +150,7 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
           </div>
           <div className="px-4 pb-6 sm:px-6 [&>dl]:mt-0 [&>dl]:border-t-0">
             {dates}
+            {news}
             {notice}
           </div>
         </>
@@ -151,6 +159,7 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
           {header}
           {dates}
           {actions}
+          {news}
           {notice}
         </div>
       )}

@@ -62,7 +62,7 @@ export async function getRecentAnnouncements(limit = 3) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("announcements")
-    .select("id, title, body, posted_as, published_at")
+    .select("id, title, body, posted_as, published_at, scholarship:scholarships ( slug )")
     .order("published_at", { ascending: false })
     .limit(limit);
   return data ?? [];

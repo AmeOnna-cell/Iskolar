@@ -261,7 +261,7 @@ The spatial model is a **centered reading column inside a centered page containe
 
 - **Page container:** max 1200px, side gutter 24px (16px below 640px).
 - **Reading column:** 760px for the student dashboard (single column, priority-ordered), 720px for the eligibility wizard and forms, 70ch for prose.
-- **Explore:** list (≤440px) + sticky detail panel at ≥1024px. Below that, a single list; a card opens its details in a drawer over the list (bottom sheet under 640px), and the full page stays for shared links. Filters live in a drawer behind a filter button, with the applied ones listed under the search box.
+- **Explore:** list (≤440px) + sticky detail panel at ≥1000px (`lg`). Below that, a single list; a card opens its details in a drawer over the list (bottom sheet under 640px), and the full page stays for shared links. Filters live in a drawer behind a filter button, with the applied ones listed under the search box.
 - **Detail page:** body column + 320px sticky aside at ≥1000px. The aside drops below the body under that width.
 - **Staff tables:** full container width. Below 768px they become stacked row-cards, and bulk actions move into a sticky bottom action bar.
 

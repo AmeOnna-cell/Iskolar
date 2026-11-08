@@ -34,7 +34,9 @@ export function HeaderNav({ items }: { items: NavItem[] }) {
 }
 
 /** Mobile bottom tab bar (<900px): five equal tabs, 24px icons over 12px labels, safe-area padding. */
-export function TabBar({ items, unread = 0 }: { items: NavItem[]; unread?: number }) {
+export function TabBar({ items: all, unread = 0 }: { items: NavItem[]; unread?: number }) {
+  // Five equal tabs (DESIGN.md): Help lives in the header's "?" button at every width.
+  const items = all.filter((i) => i.href !== "/help");
   const pathname = usePathname();
   return (
     <nav
@@ -80,13 +82,13 @@ export function SignedOutLinks() {
     );
   }
   return (
-    <div className="ml-2 flex items-center gap-2">
+    <div className="ml-1 flex items-center gap-2 sm:ml-2">
       <Link href="/login" className={`hidden sm:inline-flex ${quiet}`}>
         Sign in
       </Link>
       <Link
         href="/signup"
-        className="inline-flex h-11 items-center rounded-sm bg-primary px-3 text-sm font-semibold text-on-primary no-underline transition-colors duration-150 hover:bg-primary-hover nav:h-9"
+        className="inline-flex h-11 items-center rounded-sm bg-primary px-3 text-sm font-semibold whitespace-nowrap text-on-primary no-underline transition-colors duration-150 hover:bg-primary-hover nav:h-9"
       >
         Create account
       </Link>

@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Icon } from "@/components/icons";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
-import { Drawer, useUrlPanel } from "@/components/ui/drawer";
+import { Drawer, useUrlPanel, WIDE_QUERY } from "@/components/ui/drawer";
 import { inputClass } from "@/components/ui/field";
 import type { SearchParams } from "@/lib/data/scholarships";
 import { FIELD_OPTIONS, PROVIDER_TYPES, REGION_OPTIONS } from "@/lib/reference";
@@ -287,7 +287,7 @@ export function ExploreFilters({ params, canFilterMine, hasProfile }: { params: 
 
 /**
  * A card click opens the scholarship without leaving the list: in the side panel on wide screens
- * (≥1024px, ?s=slug), in a details drawer on narrower ones (?s=slug&d=1, so Back closes it and the
+ * (≥1000px, ?s=slug), in a details drawer on narrower ones (?s=slug&d=1, so Back closes it and the
  * list keeps its scroll position). Modified clicks open the full page as usual.
  */
 export function SplitLinks({ children }: { children: React.ReactNode }) {
@@ -303,7 +303,7 @@ export function SplitLinks({ children }: { children: React.ReactNode }) {
         if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
         e.preventDefault();
         const slug = a.dataset.slug!;
-        if (matchMedia("(min-width: 1024px)").matches) start(() => router.replace(drawer.hrefWith({ s: slug, d: null }), { scroll: false }));
+        if (matchMedia(WIDE_QUERY).matches) start(() => router.replace(drawer.hrefWith({ s: slug, d: null }), { scroll: false }));
         else start(() => drawer.open("1", { s: slug }, a));
       }}
     >

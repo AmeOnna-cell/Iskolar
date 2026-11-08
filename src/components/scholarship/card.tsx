@@ -58,7 +58,7 @@ export function ScholarshipCard({
     <article
       data-testid="scholarship-card"
       className={`relative rounded-md border bg-surface p-4 shadow-rest transition-colors duration-150 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary sm:p-5 ${
-        // The selected ring marks the card shown in the side panel, which exists only from 1024px.
+        // The selected ring marks the card shown in the side panel, which exists only from 1000px (lg).
         selected ? "border-hairline hover:border-hairline-strong lg:border-primary lg:ring-1 lg:ring-primary" : "border-hairline hover:border-hairline-strong"
       }`}
     >

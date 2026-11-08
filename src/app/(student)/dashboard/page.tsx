@@ -236,7 +236,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             )}
           </Section>
 
-          <Section id="news-h" title="Announcements and alerts" link={{ href: "/alerts", label: "All alerts" }}>
+          <Section id="news-h" title="Announcements and alerts" link={{ href: "/announcements", label: "All announcements" }}>
             {announcements.length || alerts.length ? (
               <ul className="overflow-hidden rounded-md border border-hairline bg-surface shadow-rest">
                 {alerts.map((n) => (
@@ -252,8 +252,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   </li>
                 ))}
                 {announcements.map((a) => (
-                  <li key={a.id} className="border-t border-hairline px-4 py-4 first:border-t-0 sm:px-6">
-                    <p className="font-semibold text-ink">{a.title}</p>
+                  <li key={a.id} className="relative border-t border-hairline px-4 py-4 first:border-t-0 hover:bg-surface-hover sm:px-6">
+                    <p className="font-semibold text-ink">
+                      <Link href={`/announcements?a=${a.scholarship?.slug ?? "general"}`} className="text-ink no-underline after:absolute after:inset-0">
+                        {a.title}
+                      </Link>
+                    </p>
                     <p className="mt-1 line-clamp-3 max-w-[70ch] text-sm text-ink-secondary">{a.body}</p>
                     <p className="mt-1 text-caption text-ink-hint">
                       {a.posted_as}, {ago(a.published_at)}

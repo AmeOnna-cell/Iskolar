@@ -13,6 +13,8 @@ const PUBLIC = [
   "/s/city-educational-assistance",
   "/help",
   "/privacy",
+  "/announcements",
+  "/announcements?a=general&d=1", // feed drawer open
   "/login",
   "/signup",
   "/forgot-password",

@@ -34,12 +34,15 @@ export function Header({ viewer, userId, unread = 0, signOut }: Props) {
           </Link>
           <HeaderNav items={primaryNav(viewer)} />
           <div className="ml-auto flex items-center gap-1">
-            <ThemeToggle />
+            {/* Signed-out phones: no room beside "Create account"; the system theme still applies. */}
+            <span className={viewer ? "contents" : "contents max-sm:hidden"}>
+              <ThemeToggle />
+            </span>
             <Link
               href="/help"
               aria-label="Help"
               title="Help"
-              className="hidden size-11 place-items-center rounded-full text-ink-secondary hover:bg-surface-hover hover:text-ink nav:grid"
+              className="grid size-11 place-items-center rounded-full text-ink-secondary hover:bg-surface-hover hover:text-ink"
             >
               <Icon name="help" size={20} />
             </Link>

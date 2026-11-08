@@ -145,6 +145,8 @@ export async function saveAnnouncement(_prev: AnnouncementState, fd: FormData): 
   if (error) return { status: "error", message: "We couldn't save the announcement. You can only edit your own." };
   revalidatePath("/staff/announcements");
   revalidatePath("/dashboard");
+  revalidatePath("/announcements");
+  revalidateTag(SCHOLARSHIPS_TAG); // the "N announcements" link on scholarship details
   return { status: "success", message: id ? "Announcement updated" : "Announcement posted. Students see it on their dashboard." };
 }
 
@@ -156,5 +158,7 @@ export async function deleteAnnouncement(id: string): Promise<{ ok: boolean; mes
   if (error || !count) return { ok: false, message: "We couldn't delete it. You can only delete your own announcements." };
   revalidatePath("/staff/announcements");
   revalidatePath("/dashboard");
+  revalidatePath("/announcements");
+  revalidateTag(SCHOLARSHIPS_TAG);
   return { ok: true, message: "Announcement deleted" };
 }

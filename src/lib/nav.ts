@@ -38,6 +38,7 @@ export function primaryNav(viewer: Viewer): NavItem[] {
     { href: "/explore", label: "Find scholarships", short: "Search", icon: "search" },
     { href: "/check", label: "Eligibility check", short: "Eligibility", icon: "check" },
     { href: "/applications", label: "My applications", short: "Applications", icon: "brief" },
+    { href: "/announcements", label: "Announcements", short: "News", icon: "mega" },
     { href: "/help", label: "Help", short: "Help", icon: "help" },
   ];
 }

@@ -131,7 +131,7 @@ export function ListingsTable({ rows, isAdmin }: { rows: ListingRow[]; isAdmin: 
         </div>
       ) : null}
 
-      {/* Table from 1024px (seven columns need it); stacked cards below */}
+      {/* Table from 1000px (lg; seven columns need it); stacked cards below */}
       <div className="max-lg:hidden">
         <table className="w-full text-sm">
           <caption className="sr-only">Scholarship listings</caption>

@@ -4,6 +4,9 @@ import * as D from "@radix-ui/react-dialog";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@/components/icons";
 
+/** Where side panels appear (Tailwind `lg`, set to 1000px in globals.css); below it, details open in a drawer. */
+export const WIDE_QUERY = "(min-width: 1000px)";
+
 // URLs this tab pushed to open a panel. Closing one of those goes Back (so the history entry is
 // consumed); a panel opened from a shared link closes by dropping its parameter instead.
 const pushed = new Set<string>();

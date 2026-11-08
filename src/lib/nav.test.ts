@@ -18,6 +18,7 @@ describe("nav", () => {
     expect(coord).not.toContain("/admin/users");
     const admin = primaryNav({ name: null, email: "a@x.ph", role: "admin" }).map((i) => i.href);
     expect(admin).toContain("/admin/users");
-    expect(primaryNav(null)).toHaveLength(5);
+    // Visitors and students: five tabs on phones plus Help (in the header "?" at every width).
+    expect(primaryNav(null).map((i) => i.href)).toEqual(["/", "/explore", "/check", "/applications", "/announcements", "/help"]);
   });
 });

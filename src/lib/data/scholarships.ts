@@ -149,7 +149,8 @@ const DETAIL_SELECT = `
   benefits:scholarship_benefits ( position, text ),
   documents:scholarship_documents ( id, position, name, where_to_get ),
   steps:scholarship_steps ( position, title, detail ),
-  notes:scholarship_notes ( position, text )
+  notes:scholarship_notes ( position, text ),
+  announcements ( count )
 `;
 
 async function fetchDetail(slug: string) {

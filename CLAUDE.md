@@ -56,15 +56,14 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
 
 ## Remaining work
 All nine phases are done. Waiting on the user:
-- The contact email for `/privacy` (replaces `[CONTACT EMAIL]`, the `CONTACT` constant in `src/app/privacy/page.tsx`).
 - The deferred P2/P3 items in `docs/REPORT.md`, if they want them.
 
 ## Open issues
-- **Privacy page:** the user's sign-up wording, plus a question-context clause; `[CONTACT EMAIL]` placeholder until the user gives an address.
+- **Privacy page:** the user's sign-up wording, plus a question-context clause and contact iskolar.notifications@gmail.com.
 - **`npm audit`:** clean, via `overrides` in package.json. Drop the `next.postcss` override on Next 16.4.5+.
 - **pgTAP:** tests 40 and 60 re-anchor the seed dates (the seed is relative to the reset day), so they pass on an old local DB. E2E still expects a recently reset DB.
 
 ## First step next session
-Read `docs/REPORT.md`. If the user has sent the privacy contact email, set `CONTACT` in `src/app/privacy/page.tsx`, run the 4.1 and a11y specs, commit and ask before pushing.
+Read `docs/REPORT.md`. Push the privacy page if the user hasn't yet (ask first).
 
 **E2E on this machine:** run E2E against a production build (`npm run build`, then `CI=1 npx playwright test`) on a reset DB. Stop any `next dev` or `next start` first, because a server writing to `.next` during a build corrupts it.

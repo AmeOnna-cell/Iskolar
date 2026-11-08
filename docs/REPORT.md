@@ -57,9 +57,6 @@ Status on 2026-11-08: all nine build phases are done. Live at <https://iskolar-o
 
 ## Deferred, and why
 
-**Waiting on you**
-- **Privacy contact:** `/privacy` shows the placeholder `[CONTACT EMAIL]` (the `CONTACT` constant in `src/app/privacy/page.tsx`) until you give the address.
-
 **Can't be tested automatically**
 - **Web push:** headless Chromium has no push service, so neither subscribing nor delivery is covered end to end. The sending logic, including clean-up of expired subscriptions, is unit-tested.
 - **Sign-in rate limits:** the limit is per IP address, and the whole E2E suite signs in from one address, so a test would trip it for later tests. The same rate-limit helper is exercised through the question limit (4.4).
@@ -83,7 +80,7 @@ Status on 2026-11-08: all nine build phases are done. Live at <https://iskolar-o
 
 ## What you still need to do by hand
 
-1. **Privacy contact:** give the address that replaces `[CONTACT EMAIL]` on `/privacy`. Account deletion requests go there.
+1. **Privacy requests:** account deletion and data-rights requests arrive at iskolar.notifications@gmail.com (`/privacy`). An admin handles them from `/admin/users`.
 2. **Real listings:**
    - Coordinators and admins enter real scholarships and verify each one against its official source.
    - Then archive or delete the nine sample listings.

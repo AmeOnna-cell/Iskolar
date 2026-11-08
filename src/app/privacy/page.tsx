@@ -2,8 +2,7 @@ import Link from "next/link";
 
 export const metadata = { title: "How we handle your data" };
 
-// Fill in before launch; shown as-is until then.
-const CONTACT = "[CONTACT EMAIL]";
+const CONTACT = <a href="mailto:iskolar.notifications@gmail.com">iskolar.notifications@gmail.com</a>;
 
 const h2 = "text-title-sm font-[650] text-ink sm:text-title";
 const list = "mt-3 flex list-disc flex-col gap-2 pl-5 [&_a]:underline";

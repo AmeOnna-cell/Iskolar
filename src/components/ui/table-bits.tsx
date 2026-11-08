@@ -91,7 +91,7 @@ export function SortLinks({
             key={column}
             href={withParams(pathname, sp, { sort: column, dir: next, page: null })}
             aria-current={isActive ? "true" : undefined}
-            className={`inline-flex min-h-9 items-center gap-1 no-underline ${isActive ? "font-semibold text-ink" : "text-ink-secondary hover:text-ink"}`}
+            className={`inline-flex min-h-11 items-center gap-1 no-underline nav:min-h-9 ${isActive ? "font-semibold text-ink" : "text-ink-secondary hover:text-ink"}`}
           >
             {label}
             {isActive ? (

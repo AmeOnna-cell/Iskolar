@@ -32,3 +32,12 @@ test("sign in → dashboard → sign out → Back shows the login page and no pr
   await page.goto("/dashboard");
   await expect(page).toHaveURL(/\/login\?next=%2Fdashboard/);
 });
+
+test("signed-in people who open /login or /signup go to their home instead", async ({ page }) => {
+  const student = await createUser("student", "signed-in-login");
+  await signIn(page, student.email);
+  for (const path of ["/login", "/signup"]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\/dashboard$/);
+  }
+});

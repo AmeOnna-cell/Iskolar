@@ -131,8 +131,8 @@ export function ListingsTable({ rows, isAdmin }: { rows: ListingRow[]; isAdmin: 
         </div>
       ) : null}
 
-      {/* Desktop table */}
-      <div className="max-md:hidden">
+      {/* Table from 1024px (seven columns need it); stacked cards below */}
+      <div className="max-lg:hidden">
         <table className="w-full text-sm">
           <caption className="sr-only">Scholarship listings</caption>
           <thead>
@@ -188,7 +188,7 @@ export function ListingsTable({ rows, isAdmin }: { rows: ListingRow[]; isAdmin: 
       </div>
 
       {/* Phone: stacked cards */}
-      <ul className="md:hidden">
+      <ul className="lg:hidden">
         {rows.map((r) => (
           <li key={r.id} className={`flex gap-3 border-b border-hairline px-4 py-4 last:border-b-0 ${selected.has(r.id) ? "bg-primary-wash" : ""}`}>
             {pickable.length ? (

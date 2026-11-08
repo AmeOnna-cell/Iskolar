@@ -17,7 +17,7 @@ export function PageSizeSelect({ sizes, value }: { sizes: number[]; value: numbe
           u.delete("page");
           router.replace(`${pathname}?${u.toString()}`, { scroll: false });
         }}
-        className="h-9 rounded-sm border border-hairline-strong bg-surface px-2 text-sm text-ink"
+        className="h-11 rounded-sm border border-hairline-strong bg-surface px-2 text-sm text-ink nav:h-9"
       >
         {sizes.map((s) => (
           <option key={s} value={s}>

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Pill } from "@/components/scholarship/bits";
 import { Button } from "@/components/ui/button";
+import { CheckCell } from "@/components/ui/check-cell";
 import { Dialog } from "@/components/ui/dialog";
 import { inputClass } from "@/components/ui/field";
 import { useToast } from "@/components/ui/toast";
@@ -19,30 +20,98 @@ export type UserRow = {
 };
 
 const STATUS_TONE = { active: "ok", deactivated: "warn", deleted: "neutral" } as const;
+const ROLE_LABEL = { student: "Student", coordinator: "Coordinator", admin: "Admin" } as const;
+const ROLES = Object.keys(ROLE_LABEL) as Array<UserRow["role"]>;
+const ROLE_CAN: Record<UserRow["role"], string> = {
+  student: "Uses the student side only: eligibility check, applications and alerts.",
+  coordinator: "Edits listings assigned to them, replies to questions and posts announcements.",
+  admin: "Everything a coordinator can do, plus verifying and publishing listings, managing accounts and reading the audit log.",
+};
+// Shared column template so status, role, joined and actions line up from row to row.
+const COLS = "grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 lg:grid-cols-[auto_minmax(0,1fr)_7rem_7rem_7rem_19rem]";
 
-function RowActions({ u, onResult }: { u: UserRow; onResult: (r: AdminResult) => void }) {
+/** Role changes sign the person out and change what they can do, so they're confirmed in a dialog. */
+function RoleDialog({ u, open, onOpenChange, onResult }: { u: UserRow; open: boolean; onOpenChange: (o: boolean) => void; onResult: (r: AdminResult) => void }) {
+  const [role, setRole] = useState<UserRow["role"]>(u.role);
+  const [pending, start] = useTransition();
+  const close = (o: boolean) => {
+    onOpenChange(o);
+    setRole(u.role);
+  };
+  return (
+    <Dialog open={open} onOpenChange={close} title="Change role" description={<span className="break-all">{u.name} · {u.email}</span>}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          start(async () => {
+            const res = await setUserRole(u.id, role);
+            onResult(res);
+            if (res.ok) close(false);
+          });
+        }}
+        className="flex flex-col gap-4"
+      >
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-2 text-sm font-semibold text-ink">New role</legend>
+          {ROLES.map((r) => (
+            <label key={r} className="flex cursor-pointer gap-3 rounded-sm border border-hairline px-3 py-3 has-[:checked]:border-primary has-[:checked]:bg-primary-wash">
+              <input type="radio" name="role" value={r} checked={role === r} onChange={() => setRole(r)} className="mt-0.5 size-[18px] shrink-0 accent-[var(--primary)]" />
+              <span>
+                <span className="font-semibold text-ink">
+                  {ROLE_LABEL[r]}
+                  {r === u.role ? <span className="font-normal text-ink-hint"> (current)</span> : null}
+                </span>
+                <span className="block text-sm text-ink-secondary">{ROLE_CAN[r]}</span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+        {role !== u.role ? (
+          <p className="text-sm text-ink">They&apos;ll be signed out everywhere and get the new role when they sign in again. This goes in the audit log.</p>
+        ) : null}
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button type="button" variant="outline" onClick={() => close(false)}>
+            Cancel
+          </Button>
+          <Button type="submit" loading={pending} disabled={role === u.role}>
+            {role === u.role ? "Choose a new role" : `Make ${ROLE_LABEL[role].toLowerCase()}`}
+          </Button>
+        </div>
+      </form>
+    </Dialog>
+  );
+}
+
+function RowActions({ u, onResult, onDeactivated }: { u: UserRow; onResult: (r: AdminResult) => void; onDeactivated: (ids: string[]) => void }) {
   const [pending, start] = useTransition();
   const [deleting, setDeleting] = useState(false);
+  const [changingRole, setChangingRole] = useState(false);
   const [typed, setTyped] = useState("");
   const [error, setError] = useState<string | null>(null);
   if (u.status === "deleted") return <span className="text-caption text-ink-hint">Deleted</span>;
   if (u.isSelf) return <span className="text-caption text-ink-hint">This is you</span>;
+  const active = u.status === "active";
   return (
-    <div className="flex flex-wrap items-center justify-end gap-2">
-      <label className="sr-only" htmlFor={`role-${u.id}`}>Role for {u.email}</label>
-      <select
-        id={`role-${u.id}`}
-        value={u.role}
-        disabled={pending || u.status !== "active"}
-        onChange={(e) => start(async () => onResult(await setUserRole(u.id, e.target.value)))}
-        className="h-9 rounded-sm border border-hairline-strong bg-surface px-2 text-sm text-ink disabled:opacity-50"
+    <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+      {active ? (
+        <Button variant="outline" size="sm" onClick={() => setChangingRole(true)}>
+          Change role<span className="sr-only"> for {u.email}</span>
+        </Button>
+      ) : null}
+      <RoleDialog u={u} open={changingRole} onOpenChange={setChangingRole} onResult={onResult} />
+      <Button
+        variant="outline"
+        size="sm"
+        loading={pending}
+        onClick={() =>
+          start(async () => {
+            const res = await setUsersStatus([u.id], active ? "deactivated" : "active");
+            if (active && res.ok) onDeactivated([u.id]);
+            else onResult(res);
+          })
+        }
       >
-        <option value="student">Student</option>
-        <option value="coordinator">Coordinator</option>
-        <option value="admin">Admin</option>
-      </select>
-      <Button variant="outline" size="sm" loading={pending} onClick={() => start(async () => onResult(await setUsersStatus([u.id], u.status === "active" ? "deactivated" : "active")))}>
-        {u.status === "active" ? "Deactivate" : "Reactivate"}
+        {active ? "Deactivate" : "Reactivate"}
         <span className="sr-only"> {u.email}</span>
       </Button>
       <Button variant="outline-danger" size="sm" onClick={() => setDeleting(true)}>
@@ -114,10 +183,21 @@ export function UsersTable({ rows }: { rows: UserRow[] }) {
     toast(res.message, res.ok ? "ok" : "danger");
     setFailures(res.ok ? null : res);
   };
+  // Deactivating is reversible, so it runs at once and is offered back as Undo instead of asking first.
+  const onDeactivated = (ids: string[]) => {
+    setFailures(null);
+    const who = ids.length === 1 ? (emails.get(ids[0]!) ?? "Account") : `${ids.length} accounts`;
+    toast(`${who} deactivated and signed out.`, "ok", {
+      label: "Undo",
+      run: () => start(async () => onResult(await setUsersStatus(ids, "active"))),
+    });
+  };
   const bulk = (status: "active" | "deactivated") =>
     start(async () => {
       const res = await setUsersStatus([...selected], status);
-      onResult(res);
+      const changed = (res.results ?? []).filter((r) => r.ok).map((r) => r.id);
+      if (status === "deactivated" && res.ok && changed.length) onDeactivated(changed);
+      else onResult(res);
       setSelected(new Set((res.results ?? []).filter((r) => !r.ok).map((r) => r.id)));
     });
   const toggle = (id: string) =>
@@ -143,24 +223,36 @@ export function UsersTable({ rows }: { rows: UserRow[] }) {
         </div>
       ) : null}
       <ul>
-        <li className="flex items-center gap-3 border-b border-hairline px-4 py-2 text-caption text-ink-secondary sm:px-5">
-          <input type="checkbox" aria-label="Select all accounts on this page" checked={allOnPage} disabled={!selectable.length} onChange={() => setSelected(allOnPage ? new Set() : new Set(selectable.map((r) => r.id)))} className="size-[18px] accent-[var(--primary)]" />
-          Select all on this page
+        <li className={`${COLS} items-center border-b border-hairline px-4 py-1 text-caption text-ink-secondary sm:px-5`}>
+          <CheckCell label="Select all accounts on this page" checked={allOnPage} disabled={!selectable.length} onChange={() => setSelected(allOnPage ? new Set() : new Set(selectable.map((r) => r.id)))} />
+          <span>
+            <span className="lg:hidden">Select all on this page</span>
+            <span className="max-lg:hidden">Name and email</span>
+          </span>
+          <span className="max-lg:hidden">Status</span>
+          <span className="max-lg:hidden">Role</span>
+          <span className="max-lg:hidden">Joined</span>
+          <span className="max-lg:hidden" />
         </li>
         {rows.map((u) => (
-          <li key={u.id} className={`grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 border-b border-hairline px-4 py-4 last:border-b-0 sm:px-5 lg:grid-cols-[auto_minmax(0,1.4fr)_minmax(0,0.6fr)_auto] lg:items-center ${selected.has(u.id) ? "bg-primary-wash" : ""}`}>
-            <input type="checkbox" aria-label={`Select ${u.email}`} checked={selected.has(u.id)} disabled={u.isSelf || u.status === "deleted"} onChange={() => toggle(u.id)} className="mt-1 size-[18px] accent-[var(--primary)] lg:mt-0" />
+          <li key={u.id} className={`${COLS} items-start gap-y-2 border-b border-hairline px-4 py-4 last:border-b-0 sm:px-5 lg:items-center ${selected.has(u.id) ? "bg-primary-wash" : ""}`}>
+            <CheckCell label={`Select ${u.email}`} checked={selected.has(u.id)} disabled={u.isSelf || u.status === "deleted"} onChange={() => toggle(u.id)} />
             <div className="min-w-0">
-              <p className="truncate font-semibold text-ink">{u.name}</p>
-              <p className="truncate text-sm text-ink-secondary">{u.email}</p>
+              <p className="font-semibold text-ink lg:truncate">{u.name}</p>
+              <p className="text-sm break-all text-ink-secondary">{u.email}</p>
             </div>
-            <div className="col-start-2 flex flex-wrap items-center gap-2 text-caption text-ink-hint lg:col-start-auto">
-              <Pill tone={STATUS_TONE[u.status]}>{u.status === "active" ? "Active" : u.status === "deactivated" ? "Deactivated" : "Deleted"}</Pill>
-              <span className="capitalize">{u.role}</span>
-              <span>· joined {u.joined}</span>
+            <div className="col-start-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-caption text-ink-secondary lg:contents">
+              <span>
+                <Pill tone={STATUS_TONE[u.status]}>{u.status === "active" ? "Active" : u.status === "deactivated" ? "Deactivated" : "Deleted"}</Pill>
+              </span>
+              <span className="text-ink lg:text-sm">{ROLE_LABEL[u.role]}</span>
+              <span className="tnum">
+                <span className="lg:hidden">· joined </span>
+                {u.joined}
+              </span>
             </div>
             <div className="col-start-2 lg:col-start-auto">
-              <RowActions u={u} onResult={onResult} />
+              <RowActions u={u} onResult={onResult} onDeactivated={onDeactivated} />
             </div>
           </li>
         ))}

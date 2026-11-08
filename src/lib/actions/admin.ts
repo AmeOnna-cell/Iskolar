@@ -60,7 +60,8 @@ export async function setUserRole(userId: string, role: string): Promise<AdminRe
   await createAdminClient().rpc("revoke_user_sessions", { p_user: parsed.data.id });
   await logAuth(admin.id, "user.sign_out_after_role_change", parsed.data.id, { role: parsed.data.role });
   revalidatePath("/admin/users");
-  return { ok: true, message: `Role changed to ${parsed.data.role}. They'll need to sign in again.` };
+  const label = { student: "Student", coordinator: "Coordinator", admin: "Admin" }[parsed.data.role];
+  return { ok: true, message: `Role changed to ${label}. They'll need to sign in again.` };
 }
 
 /**

@@ -16,7 +16,7 @@ test("deactivate blocks sign-in, reactivate restores it, both are audited", asyn
   await page.goto(`/admin/users?q=${encodeURIComponent(student.email)}`);
   await waitForHydration(page);
   await page.getByRole("button", { name: `Deactivate ${student.email}` }).click();
-  await expect(page.getByRole("status").filter({ hasText: "1 account deactivated." })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: `${student.email} deactivated and signed out.` })).toBeVisible();
 
   // Signed out everywhere right away, and can't sign back in.
   await otherPage.goto("/dashboard");
@@ -38,6 +38,35 @@ test("deactivate blocks sign-in, reactivate restores it, both are audited", asyn
   for (const action of ["user.deactivate", "user.ban_and_sign_out", "user.reactivate", "user.unban"]) {
     await expect(audit.getByText(action, { exact: true })).toBeVisible();
   }
+});
+
+test("role changes are confirmed in a dialog; deactivate offers Undo", async ({ page }) => {
+  const admin = await createUser("admin", "role-admin");
+  const student = await createUser("student", "role-student");
+  await signIn(page, admin.email);
+  await page.goto(`/admin/users?q=${encodeURIComponent(student.email)}`);
+  await waitForHydration(page);
+
+  // Nothing changes until the dialog is confirmed; Cancel leaves the role alone.
+  await page.getByRole("button", { name: `Change role for ${student.email}` }).click();
+  const dialog = page.getByRole("dialog", { name: "Change role" });
+  await expect(dialog.getByRole("button", { name: "Choose a new role" })).toBeDisabled();
+  await dialog.getByRole("radio", { name: /Coordinator/ }).check();
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  const role = async () => (await adminClient().from("profiles").select("role").eq("id", student.id).single()).data?.role;
+  expect(await role()).toBe("student");
+
+  await page.getByRole("button", { name: `Change role for ${student.email}` }).click();
+  await dialog.getByRole("radio", { name: /Coordinator/ }).check();
+  await dialog.getByRole("button", { name: "Make coordinator" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Role changed to Coordinator." })).toBeVisible();
+  expect(await role()).toBe("coordinator");
+
+  // Undo on the deactivate toast puts the account back.
+  await page.getByRole("button", { name: `Deactivate ${student.email}` }).click();
+  await page.getByRole("status").getByRole("button", { name: "Undo" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "1 account reactivated." })).toBeVisible();
+  expect((await adminClient().from("profiles").select("status").eq("id", student.id).single()).data?.status).toBe("active");
 });
 
 test("an admin can't act on their own account", async ({ page }) => {

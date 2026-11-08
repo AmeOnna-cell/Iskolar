@@ -5,8 +5,8 @@
 | 1 Foundation, 1b Email pipeline, 2 Database, 3 Auth, 4 Student, 5 Staff/admin | Done and deployed |
 | 6 Notifications | Done and deployed |
 | 7 Performance | Done and deployed |
-| 8 Polish/QA | In progress: stage 1 and stage 2 groups 1–3 done; group 4 next |
-| 9 Tests + docs | To do |
+| 8 Polish/QA | Done and deployed |
+| 9 Tests + docs | Done (2026-11-08), committed; see `docs/REPORT.md` |
 
 ## Phase 6: notifications (done)
 
@@ -48,11 +48,30 @@ Details and setup are in `docs/notifications.md`.
 - Local Vault needs `iskolar_app_url = http://host.docker.internal:3000` and `iskolar_cron_secret` (see `docs/notifications.md`).
 - `npm audit --omit=dev`: 1 high and 1 moderate in the `postcss` bundled inside Next.js. This was already on main and is not from Phase 6. The offered fix needs `--force`; revisit when upgrading Next.
 
-## Phase 9 additions (from the user)
+## Phase 9: tests and docs (done 2026-11-08)
 
-- Investigate the one-off pgTAP failure seen during Phase 6 (not reproduced; see above).
-- Upgrade Next.js to clear the `postcss` audit warning from its bundled copy.
-- Phase 6 confirmed on the cloud by the user: both cron jobs active, and the dispatch job runs (skipping the HTTP call when nothing is pending).
+Phase 6 was confirmed on the cloud by the user: both cron jobs are active, and the dispatch job runs (it skips the HTTP call when nothing is pending).
+
+- **Back button in the listing editor:**
+  - Back and Forward ask before leaving unsaved edits.
+  - Next's popstate listener runs first in registration order, so an inline `<head>` hook (`src/lib/head-scripts.ts`) registers before hydration and asks the editor first.
+- **Theme script:**
+  - The saved theme was never applied before load. The `<head>` script had been a syntax error since Phase 1, because its string came from a `"use client"` module and the server saw a client reference.
+  - It now lives in `head-scripts.ts`. `e2e/theme.spec.ts` checks it with the app bundles blocked.
+- **Group 3 P3s:** the new-password page has no sign-up band (`AuthShell band={false}`), and the email gets its own line.
+- **Privacy note on sign-up:** the `PRIVACY_NOTE` slot in `(auth)/forms.tsx` renders nothing until the user gives the wording.
+- **npm audit, now 0:**
+  - Next goes to 15.5.29. Every 15.x release pins postcss 8.4.31, so `overrides.next.postcss ^8.5.32` lifts it. Drop the override on Next 16.4.5+.
+  - typescript-estree's minimatch is overridden to ^11.0.5. `npm audit fix` would have downgraded typescript-eslint to 6.15, which breaks ESLint 9.
+- **One-off pgTAP failure, found:**
+  - The seed's dates are relative to the reset day. From 3 days after a reset, `40_eligibility_search` #7 and `60_student_reads` #1 and #3 fail.
+  - Reproduced by ageing the seeded rows (dates and `created_at`).
+  - Both files now re-anchor the sample dates to today inside their own transaction.
+  - 247 of 247 pass on a fresh DB and on DBs aged 7 and 30 days; 20 repeated runs also passed.
+- **E2E coverage review:** there is now one spec per §4 concern. New: 4.4 (validation and question rate limit), 4.9 (caching), 4.11 (44px touch targets), 4.12 (one-column dashboard) and 4.13 (four sizes, tab bar, cards, sheets). Also new: signed-in visits to `/login` and `/signup` go home (4.8).
+  - The new specs found two real bugs: `/staff/listings` scrolled sideways at 768 (the table now starts at 1024), and the "Rows" select and sort links were 36px on phones.
+- **Docs:** README (run, scripts, deploy, layout, docs index), the SETUP checklist (cron/Vault, VAPID, Vercel variables, smoke test) and `docs/REPORT.md`.
+- **Tests:** lint and typecheck clean, unit 50 of 50, pgTAP 247 of 247, E2E 69 of 69 on a reset DB.
 
 ## Phase 7: performance (done and live)
 
@@ -204,12 +223,13 @@ Details are in `docs/performance.md`. The dataset was 5,009 listings, 2,085 stud
      - Staff footer links.
      - A browser Back guard in the editor.
    - Screenshots: `docs/screenshots/phase8-g4-before/` and `docs/screenshots/phase8-g4-after/`.
-7. **Next: Phase 9.**
+7. **Phase 8 is done.**
 
 ## Open issues
 
 - **GitHub Actions CI failure (fixed 2026-11-05):** the audit CSV/paging E2E test assumed more than one page of audit rows, which a fresh CI database doesn't have. The test now seeds 26 rows. CI is split into static, database and e2e jobs, on the Node 24 v7 actions.
-- **One-off pgTAP failure from Phase 6:** not reproduced. Listed for Phase 9.
-- **`npm audit`:** reports `postcss` bundled in Next.js (high). Needs a Next upgrade, listed for Phase 9.
+- **One-off pgTAP failure from Phase 6:** fixed in Phase 9 (seed dates vs. test day).
+- **`npm audit`:** clean, via overrides. Remove the `postcss` override when moving to Next 16.
+- **Privacy note on sign-up:** waiting for the user's wording.
 - **E2E on this machine:** clear `.next/cache/fetch-cache` before full runs. Tests can time out under memory pressure from other apps, so rerun before treating a failure as real.
 - **Detector agents:** deleting a test auth user leaves its profile tombstone, which is by design. Critique agents now also delete those profile rows.

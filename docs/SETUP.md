@@ -63,8 +63,51 @@ With `.env.local` pointing at the cloud project (`NEXT_PUBLIC_SUPABASE_URL` and 
 npm run seed:admin -- you@example.com "Your Name"
 ```
 
-### Still to come (later phases)
+### 6. Scheduled reminders (`pg_cron` + `pg_net`)
 
-- `pg_cron` + `pg_net` and the reminder Edge Function, with its secrets (Phase 6)
-- VAPID keys for web push (Phase 6)
-- Vercel environment variables (Phase 9)
+The migrations enable both extensions and create two jobs: `iskolar-daily-reminders` queues deadline reminders at 07:00 Manila time (pg_cron runs in UTC, so it's scheduled `0 23 * * *`), and `iskolar-dispatch` runs every 10 minutes. The dispatch job calls the app's `/api/cron/dispatch` route (a Next.js route handler, the brief's alternative to an Edge Function), which sends the email and push. The jobs need two Vault secrets. Until those exist, they do nothing.
+
+1. Pick a long random `CRON_SECRET` (16+ characters) and set it in Vercel (step 8).
+2. In the Supabase SQL editor:
+   ```sql
+   select vault.create_secret('https://<your-vercel-domain>', 'iskolar_app_url');
+   select vault.create_secret('<same value as CRON_SECRET>', 'iskolar_cron_secret');
+   ```
+3. Check: `select jobname, schedule, active from cron.job;` lists both jobs. Details, troubleshooting and limits are in `docs/notifications.md`.
+
+### 7. Web push (VAPID keys)
+
+`npx web-push generate-vapid-keys` prints a key pair. Set `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` in Vercel. Without them, the push option shows as unavailable and everything else works.
+
+### 8. Vercel
+
+1. Import the GitHub repo as a Vercel project (framework: Next.js; no build settings to change). Every push to `main` deploys.
+2. **Settings → Environment Variables** (Production, and Preview if you use it). The names are in `.env.example`:
+
+   | Variable | Value |
+   |---|---|
+   | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase → Project settings → API Keys |
+   | `SUPABASE_SECRET_KEY` | Same page. Server only; never expose it in client code |
+   | `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `EMAIL_FROM_NAME` | `docs/setup-smtp.md` |
+   | `APP_URL` | `https://<your-vercel-domain>` (links in emails) |
+   | `CRON_SECRET` | Step 6 |
+   | `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Step 7 |
+   | `EMAIL_DAILY_LIMIT` | Optional. Default 450 (Gmail allows about 500 a day; Google Workspace 2,000) |
+
+   Don't set `EMAIL_DEV_SMTP` in Vercel. It's for local testing only.
+3. Add the Vercel domain to Supabase **Authentication → URL Configuration** (Site URL and Redirect URLs). See `docs/setup-smtp.md`.
+4. Redeploy after changing variables. They're read at build and start.
+
+## Checklist
+
+Tick these off for a new environment. Steps 2–4 must be done before anyone signs in.
+
+- [ ] Supabase project created; migrations and seed applied (step 1)
+- [ ] Custom Access Token hook enabled (step 2)
+- [ ] Gmail App Password, SMTP settings, the three email templates, Site URL and Redirect URLs (step 3, `docs/setup-smtp.md`)
+- [ ] Confirm email on; password rules set (step 4)
+- [ ] First admin created (step 5)
+- [ ] Vault secrets for the cron jobs; both jobs listed in `cron.job` (step 6)
+- [ ] VAPID key pair (step 7)
+- [ ] Vercel project and environment variables; Vercel domain in Supabase URL Configuration (step 8)
+- [ ] Smoke test: sign up with a real address, confirm by email, finish the eligibility check; sign in as the admin and open `/admin/audit`

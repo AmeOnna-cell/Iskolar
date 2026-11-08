@@ -50,22 +50,21 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
   - Stage 2, group 1 (landing, scholarship detail, help): done and pushed (`ee3de05`).
   - Stage 2, group 2 (eligibility check, results, My applications, alerts, settings hub): done and pushed (`90c0ff1`). 57 of 57 E2E pass.
   - Stage 2, group 3 (sign-in pages): done and pushed (`972d71d`). 57 of 57 E2E pass on a reset DB. CI green.
-  - Stage 2, group 4 (staff and admin screens): done and committed (2026-11-08). 58 of 58 E2E pass on a reset DB. Not pushed yet unless the user said so.
+  - Stage 2, group 4 (staff and admin screens): done and pushed (`a1604dc`).
+- **Phase 9 (tests and docs):** done and committed (2026-11-08); see `docs/REPORT.md`. Not pushed unless the user said so.
 - **Branch:** `main`. No work-in-progress branch.
 
-## Remaining work, in order
-1. **Phase 9:**
-   - The remaining E2E specs from the brief (4.1–4.13 coverage review).
-   - README, SETUP checklist, final report.
-   - Investigate the one-off pgTAP failure seen in Phase 6.
-   - Upgrade Next.js to clear the bundled `postcss` audit warning.
+## Remaining work
+All nine phases are done. Waiting on the user:
+- The wording of the sign-up privacy note, which goes in `PRIVACY_NOTE` in `src/app/(auth)/forms.tsx`.
+- The deferred P2/P3 items in `docs/REPORT.md`, if they want them.
 
 ## Open issues
-- **GitHub Actions CI failure (fixed 2026-11-05):** since Phase 7, the "audit log exports as CSV" E2E test (`e2e/4.5-admin-users.spec.ts`) failed on CI's fresh database, because "Older entries" needs more than 25 audit rows. The test now seeds 26 rows itself. It was verified after `npx supabase db reset` (57 of 57 pass). `ci.yml` is now split into three jobs (static, database, e2e) and uses the Node 24 v7 actions. The user confirms the green run on GitHub. Always verify E2E fixes against a reset DB, because the local DB builds up rows that hide this kind of bug.
-- **The one-off pgTAP failure from Phase 6:** never reproduced.
-- **`npm audit`:** reports `postcss` inside Next.js (high). It needs a Next upgrade.
+- **Privacy note:** waiting for the user's wording.
+- **`npm audit`:** clean, via `overrides` in package.json. Drop the `next.postcss` override on Next 16.4.5+.
+- **pgTAP:** tests 40 and 60 re-anchor the seed dates (the seed is relative to the reset day), so they pass on an old local DB. E2E still expects a recently reset DB.
 
 ## First step next session
-Read `docs/PROGRESS.md`. Push group 4 if the user hasn't yet (ask first). Then start Phase 9: the E2E coverage review against brief §4.1–4.13, README, SETUP checklist, final report, the pgTAP investigation, and the Next.js upgrade. The group 4 skipped items are listed in PROGRESS.
+Read `docs/REPORT.md`. Push Phase 9 if the user hasn't yet (ask first). If the user has sent the privacy wording, put it in `PRIVACY_NOTE`, run the 4.1 spec, commit and ask before pushing.
 
-**E2E on this machine:** run E2E against a production build (`npm run build`, then `CI=1 npx playwright test`). Dev mode compiles routes on first hit, and the long workflow test can then pass its 30 s limit. Stop any `next dev` or `next start` first, because a server writing to `.next` during a build corrupts it.
+**E2E on this machine:** run E2E against a production build (`npm run build`, then `CI=1 npx playwright test`) on a reset DB. Stop any `next dev` or `next start` first, because a server writing to `.next` during a build corrupts it.

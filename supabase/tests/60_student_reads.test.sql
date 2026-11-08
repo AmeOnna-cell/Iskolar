@@ -2,6 +2,16 @@ begin;
 create extension if not exists pgtap with schema extensions;
 select no_plan();
 
+-- The seed writes its dates relative to the day of `supabase db reset`. Re-anchor them to today, inside
+-- this test's transaction (rolled back at the end), so the results don't depend on how old the local
+-- database is: three days after a reset, an open sample listing closes and the counts change.
+-- Triggers are paused for this one statement so it adds no audit or deadline-change rows.
+set local session_replication_role = replica;
+update public.scholarships s set opens_on = s.opens_on + x.d, closes_on = s.closes_on + x.d
+  from (select public.today_ph() - min((created_at at time zone 'Asia/Manila')::date) as d from public.scholarships where is_sample) x
+ where s.is_sample and x.d <> 0;
+set local session_replication_role = origin;
+
 select set_config('request.jwt.claims', '{"role":"anon"}', true);
 set local role anon;
 select is(

@@ -60,7 +60,7 @@ test("batch actions run per row and report what didn't change", async ({ page })
   await page.getByRole("region", { name: "Batch actions" }).getByRole("button", { name: "Archive" }).click();
   const report = page.getByRole("alert").filter({ hasText: "2 listings archived, 1 not changed." });
   await expect(report).toBeVisible();
-  await expect(report).toContainText(`${drafts[0]!.name}: Not changed`);
+  await expect(report).toContainText(`${drafts[0]!.name}: Already archived.`);
 
   // One audit row per item
   const { count } = await adminClient().from("audit_logs").select("id", { count: "exact", head: true }).eq("action", "scholarship.verify").in("entity_id", drafts.map((d) => d.id));
@@ -68,15 +68,19 @@ test("batch actions run per row and report what didn't change", async ({ page })
 });
 
 test("coordinators only get the actions their role allows", async ({ page }) => {
-  await makeDrafts(1, "coordactions");
+  const [theirs, other] = await makeDrafts(2, "coordactions");
   const coordinator = await createUser("coordinator", "coordactions");
+  await adminClient().from("scholarships").update({ assigned_coordinator_id: coordinator.id }).eq("id", theirs!.id);
   await signIn(page, coordinator.email);
-  await page.goto("/staff/listings?q=E2E%20coordactions");
+  await page.goto("/staff/listings?q=E2E%20coordactions&sort=name&dir=asc");
   await waitForHydration(page);
-  await page.getByRole("checkbox", { name: /^Select E2E coordactions/ }).check();
+  // Only their own drafts can be selected: nothing else has an action for them.
+  await expect(page.locator("table").getByRole("checkbox", { name: `Select ${other!.name}` })).toBeDisabled();
+  await page.locator("table").getByRole("checkbox", { name: `Select ${theirs!.name}` }).check();
   const bar = page.getByRole("region", { name: "Batch actions" });
   await expect(bar.getByRole("button", { name: "Send for verification" })).toBeVisible();
   for (const name of ["Verify", "Publish", "Archive", "Delete"]) await expect(bar.getByRole("button", { name, exact: true })).toHaveCount(0);
   // Not assigned to this coordinator: they can view it but not edit it.
-  await expect(page.getByRole("link", { name: /^Edit/ })).toHaveCount(0);
+  await expect(page.locator("table").getByRole("link", { name: `Edit ${other!.name}` })).toHaveCount(0);
+  await expect(page.locator("table").getByRole("link", { name: `View ${other!.name}` })).toBeVisible();
 });

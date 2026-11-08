@@ -21,11 +21,14 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
   const { sort, dir } = pickSort(sp, LISTING_SORTS, "closes_on");
   const status = STATUSES.find((s) => s === one(sp.status)) ?? null;
   const verification = one(sp.verification) === "verified" || one(sp.verification) === "unverified" ? (one(sp.verification) as "verified" | "unverified") : null;
+  const today = todayPH();
+  const in7 = new Date(Date.parse(`${today}T00:00:00Z`) + 7 * 86_400_000).toISOString().slice(0, 10);
   const query: ListingQuery = {
     q: (one(sp.q) ?? "").trim().slice(0, 100),
     status,
     verification,
     mine: one(sp.mine) === "1",
+    closing: one(sp.closing) === "7" ? { from: today, to: in7 } : null,
     sort,
     dir: dir ?? (sort === "updated_at" ? ("desc" as const) : ("asc" as const)),
     page,
@@ -33,7 +36,6 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
   };
   const { rows, total } = await listListings(query, user.id);
   const names = await getStaffNames([...new Set(rows.map((r) => r.assigned_coordinator_id).filter(Boolean) as string[])]);
-  const today = todayPH();
   const isAdmin = user.role === "admin";
 
   const tableRows: ListingRow[] = rows.map((r) => {
@@ -92,9 +94,13 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
           <input type="checkbox" name="mine" value="1" defaultChecked={query.mine} className="size-[18px] accent-[var(--primary)]" />
           Assigned to me
         </label>
+        <label className="flex min-h-11 items-center gap-2 text-sm text-ink">
+          <input type="checkbox" name="closing" value="7" defaultChecked={!!query.closing} className="size-[18px] accent-[var(--primary)]" />
+          Closing within 7 days
+        </label>
         <input type="hidden" name="size" value={pageSize} />
         <button type="submit" className={buttonClass("outline")}>Apply</button>
-        {query.q || status || verification || query.mine ? (
+        {query.q || status || verification || query.mine || query.closing ? (
           <Link href={pathname} className="inline-flex min-h-11 items-center px-2 text-sm font-semibold">
             Clear
           </Link>

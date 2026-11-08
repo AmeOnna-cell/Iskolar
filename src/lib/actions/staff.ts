@@ -19,6 +19,16 @@ const ACTION_WORD: Record<string, string> = {
   submit: "sent for verification",
 };
 
+// The RPC reports every no-op the same way; say what actually applies to this action.
+const NOT_CHANGED: Record<string, string> = {
+  verify: "Not found, or not allowed for you.",
+  publish: "Already published.",
+  unpublish: "Only published listings can be unpublished.",
+  archive: "Already archived.",
+  delete: "Not found, or not allowed for you.",
+  submit: "Only drafts assigned to you can be sent for verification.",
+};
+
 function refreshListings() {
   revalidateTag(SCHOLARSHIPS_TAG);
   revalidatePath("/staff", "layout");
@@ -36,6 +46,7 @@ export async function batchListings(action: string, ids: string[]): Promise<Batc
   const { data, error } = await supabase.rpc("batch_scholarships", { p_action: parsed.data.action, p_ids: parsed.data.ids });
   if (error) return { ok: false, message: "That didn't work. Refresh and try again." };
   refreshListings();
+  for (const r of data) if (!r.ok && r.error?.startsWith("Not changed:")) r.error = NOT_CHANGED[parsed.data.action]!;
   const done = data.filter((r) => r.ok).length;
   const failed = data.length - done;
   return {

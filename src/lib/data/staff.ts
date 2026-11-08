@@ -20,6 +20,8 @@ export type ListingQuery = {
   status: Enums["listing_status"] | null;
   verification: Enums["verification_status"] | null;
   mine: boolean;
+  /** Published, open, and closing within 7 days: the same rule as the overview's "Closing in 7 days". */
+  closing: { from: string; to: string } | null;
   sort: (typeof LISTING_SORTS)[number];
   dir: "asc" | "desc";
   page: number;
@@ -38,6 +40,10 @@ export async function listListings(p: ListingQuery, userId: string) {
   if (p.status) q = q.eq("listing_status", p.status);
   if (p.verification) q = q.eq("verification", p.verification);
   if (p.mine) q = q.eq("assigned_coordinator_id", userId);
+  if (p.closing) {
+    const { from: today, to } = p.closing;
+    q = q.eq("listing_status", "published").gte("closes_on", today).lte("closes_on", to).or(`opens_on.is.null,opens_on.lte.${today}`);
+  }
   const from = (p.page - 1) * p.pageSize;
   const { data, count, error } = await q
     .order(p.sort, { ascending: p.dir === "asc", nullsFirst: false })

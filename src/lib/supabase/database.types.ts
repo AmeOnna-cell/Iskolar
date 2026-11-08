@@ -471,6 +471,9 @@ isOneToOne: true
 "admin_soft_delete_user":
 { Args: { "p_user": string }; Returns: undefined
                            },
+"anonymize_account":
+{ Args: { "p_actor": string,"p_user": string }; Returns: undefined
+                           },
 "assert_admin":
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
@@ -524,6 +527,9 @@ isOneToOne: true
                            },
 "days_text":
 { Args: { "p_days": number }; Returns: string
+                           },
+"delete_my_account":
+{ Args: { "p_email": string,"p_password": string }; Returns: string
                            },
 "eligibility_codes":
 { Args: { "c": Omit<Database["public"]['Tables']["scholarship_criteria"]['Row'], Database["public"]['Tables']["scholarship_criteria"]['ComputedFields']>,"sp": Omit<Database["public"]['Tables']["student_profiles"]['Row'], Database["public"]['Tables']["student_profiles"]['ComputedFields']> }; Returns: (number)[]

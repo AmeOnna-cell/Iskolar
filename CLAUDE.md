@@ -57,10 +57,10 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
 - **Team-leader revisions** (brief: `C:\Users\TUF DASH\Downloads\REVISIONS_PROMPT.md`, groups A–F): all built.
   - A–E pushed: A `77783d7`, B `976d79d`, C `e061464`, D `35ce96c`, E `6646248` plus follow-ups `a60e479`.
   - Migrations `20261108120000_self_delete` and `20261108130000_announcement_links` are live; local and cloud match.
-  - Group F (`cc70fa8`) and the final summary docs are committed, not pushed.
+  - Group F (`cc70fa8`) and the final summary docs are pushed.
   - Final run on a fresh reset: unit 52, pgTAP 283, E2E 107, all pass.
   - The summary table is at the top of "Team-leader revisions" in `docs/PROGRESS.md`.
-- **Branch:** `main`. No work-in-progress branch.
+- **Branch:** `main` (FAQ work merged from `faq-wip`).
 
 ## Progress (2026-11-10): FAQ suggestions
 - Rule-based FAQ suggestions are built and merged into main. The details are in "FAQ suggestions" in `docs/PROGRESS.md`; the scoring rules are in `docs/faq-search.md`.

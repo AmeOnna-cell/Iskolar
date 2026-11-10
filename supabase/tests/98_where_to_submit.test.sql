@@ -29,8 +29,10 @@ grant all on box to authenticated;
 -- ---------- Columns ----------
 select col_is_null('public', 'scholarships', c, c || ' is optional')
 from unnest(array['submission_method', 'submission_place', 'submission_address', 'submission_hours', 'submission_url', 'submission_note']) c;
-select is((select count(*)::int from public.scholarships where is_sample and submission_method is not null), 9,
-  'All nine sample listings have a submission method');
+select is((select count(*)::int from public.scholarships where is_sample and coalesce(submission_method::text, submission_note) is not null), 9,
+  'All nine sample listings have where-to-submit details');
+select is((select count(*)::int from public.scholarships s where is_sample and submission_method is distinct from 'online' and submission_url = s.source_url), 0,
+  'No sample listing repeats its Source link as a "Website" row');
 select is((select count(*)::int from public.scholarships where submission_method = 'online' and submission_url is null), 0,
   'Every online listing has a link');
 

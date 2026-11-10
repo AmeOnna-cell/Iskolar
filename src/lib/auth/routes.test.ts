@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accessFor, safeNextPath } from "./routes";
+import { accessFor, destinationOf, safeNextPath } from "./routes";
 
 describe("accessFor", () => {
   it("classifies routes by group", () => {
@@ -16,6 +16,17 @@ describe("accessFor", () => {
     expect(accessFor("/applications")).toEqual({ kind: "roles", roles: ["student"] });
     expect(accessFor("/announcements")).toEqual({ kind: "signed-in" });
     expect(accessFor("/help")).toEqual({ kind: "public" });
+  });
+});
+
+describe("destinationOf", () => {
+  it("names the gated pages, ignoring the query", () => {
+    expect(destinationOf("/announcements?a=general")).toEqual({ name: "Announcements", purpose: "read announcements" });
+    expect(destinationOf("/applications?tab=preparing&s=tdp")?.name).toBe("My applications");
+    expect(destinationOf("/check/results")?.purpose).toBe("check your eligibility");
+    expect(destinationOf("/checklist")).toBeNull();
+    expect(destinationOf("/dashboard")).toBeNull();
+    expect(destinationOf(undefined)).toBeNull();
   });
 });
 

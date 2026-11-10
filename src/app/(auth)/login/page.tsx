@@ -1,5 +1,6 @@
 import { AuthShell } from "@/components/shell/auth-shell";
 import { Notice } from "@/components/ui/notice";
+import { destinationOf } from "@/lib/auth/routes";
 import { LoginForm } from "../forms";
 
 export const metadata = { title: "Sign in" };
@@ -14,7 +15,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     ) : sp.signedOut ? (
       <Notice tone="ok">You&apos;re signed out.</Notice>
     ) : sp.next ? (
-      <Notice>Sign in to continue.</Notice>
+      <Notice>{destinationOf(sp.next) ? `Sign in or create an account to ${destinationOf(sp.next)!.purpose}.` : "Sign in to continue."}</Notice>
     ) : null;
   return (
     <AuthShell title="Sign in" lead="Use the email and password you signed up with.">

@@ -85,6 +85,9 @@ export async function signUp(_prev: FormState, fd: FormData): Promise<FormState>
   const parsed = signUpSchema.safeParse({ ...values, password: str(fd, "password") });
   if (!parsed.success) return { status: "error", fieldErrors: fieldErrorsOf(parsed.error), values };
   const { fullName, email, password } = parsed.data;
+  // Where they were headed (checked again when used); kept on the account so it survives
+  // confirming the email on another device. Onboarding comes first, then /continue sends them there.
+  const next = safeNextPath(str(fd, "next"), "");
 
   const ip = await ipKey();
   if (!(await rateLimitAll([[`signup:ip:${ip}`, 30, 3600], [`signup:email:${email}`, 3, 3600]]))) {
@@ -95,7 +98,7 @@ export async function signUp(_prev: FormState, fd: FormData): Promise<FormState>
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName }, emailRedirectTo: `${emailAppUrl()}/auth/confirm` },
+    options: { data: { full_name: fullName, ...(next && next !== "/" ? { next } : {}) }, emailRedirectTo: `${emailAppUrl()}/auth/confirm` },
   });
   if (error) {
     if (error.code === "weak_password") {

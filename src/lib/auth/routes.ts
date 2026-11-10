@@ -51,3 +51,19 @@ export function safeNextPath(next: string | null | undefined, fallback = "/"): s
     return fallback;
   }
 }
+
+/** Cookie holding where a new account was headed, set when the email is confirmed (auth/confirm)
+ * and used once onboarding is done or skipped (/continue). */
+export const NEXT_COOKIE = "iskolar_next";
+
+/** What a ?next= path leads to, in words: the sign-in notice and "Continue to …" after onboarding. */
+export function destinationOf(path: string | null | undefined): { name: string; purpose: string } | null {
+  const p = (path ?? "").split(/[?#]/)[0] ?? "";
+  const is = (prefix: string) => p === prefix || p.startsWith(prefix + "/");
+  if (is("/announcements")) return { name: "Announcements", purpose: "read announcements" };
+  if (is("/applications")) return { name: "My applications", purpose: "track your applications" };
+  if (is("/check")) return { name: "the eligibility check", purpose: "check your eligibility" };
+  if (p.startsWith("/s/")) return { name: "the scholarship", purpose: "save and track this scholarship" };
+  if (is("/help")) return { name: "Help", purpose: "ask the scholarship office" };
+  return null;
+}

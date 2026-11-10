@@ -348,42 +348,56 @@ export function ListingForm({
         <ListEditor name="documents" items={v.documents} setItems={(documents) => set({ documents })} fields={[{ key: "name", label: "Document", max: 200 }, { key: "where_to_get", label: "Where to get it", max: 300 }]} addLabel="Add a document" errors={errors} />
       </Fieldset>
 
-      <Fieldset legend="How to apply">
-        <ListEditor name="steps" items={v.steps} setItems={(steps) => set({ steps })} fields={[{ key: "title", label: "Step", max: 200 }, { key: "detail", label: "Detail", max: 600 }]} addLabel="Add a step" errors={errors} />
-      </Fieldset>
-
       <Fieldset legend="Where to submit" hint="Students see only what you fill in. With nothing set, they're told to confirm with the provider.">
         <div className="grid gap-5 sm:grid-cols-2">
-          <L label="How students submit" htmlFor="w-method" optional error={errors.submission_method}>
-            <select id="w-method" value={v.submission_method ?? ""} onChange={(e) => set({ submission_method: e.target.value })} className={field}>
+          <L label="How students submit" hint="Choose Online to add the submission link." htmlFor="w-method" optional error={errors.submission_method}>
+            <select
+              id="w-method"
+              value={v.submission_method ?? ""}
+              onChange={(e) => {
+                set({ submission_method: e.target.value });
+                // The link is only required for Online; don't leave that error showing.
+                if (e.target.value !== "online")
+                  setErrors((er) => {
+                    const rest = { ...er };
+                    delete rest.submission_url;
+                    return rest;
+                  });
+              }}
+              className={field}
+            >
               <option value="">Not set</option>
               {SUBMISSION_METHODS.map(([m, l]) => (
                 <option key={m} value={m}>{l}</option>
               ))}
             </select>
           </L>
+          <L
+            label="Online link"
+            hint={v.submission_method === "online" ? "Needed for online submission: the form or portal, starting with https://." : "The form or portal, if there is one, starting with https://."}
+            htmlFor="w-url"
+            optional={v.submission_method !== "online"}
+            error={errors.submission_url}
+          >
+            <input id="w-url" type="url" value={v.submission_url ?? ""} maxLength={500} onChange={(e) => set({ submission_url: e.target.value })} className={field} />
+          </L>
           <L label="Office or place" hint="e.g. Student Center, or City Scholarship Office" htmlFor="w-place" optional error={errors.submission_place}>
             <input id="w-place" value={v.submission_place ?? ""} maxLength={160} onChange={(e) => set({ submission_place: e.target.value })} className={field} />
-          </L>
-          <L label="Address" hint="Building, room and street, so students can find it" htmlFor="w-address" optional error={errors.submission_address}>
-            <input id="w-address" value={v.submission_address ?? ""} maxLength={300} onChange={(e) => set({ submission_address: e.target.value })} className={field} />
           </L>
           <L label="Office hours" hint="e.g. Monday to Friday, 8:00 AM to 5:00 PM" htmlFor="w-hours" optional error={errors.submission_hours}>
             <input id="w-hours" value={v.submission_hours ?? ""} maxLength={160} onChange={(e) => set({ submission_hours: e.target.value })} className={field} />
           </L>
         </div>
-        <L
-          label="Online link"
-          hint={v.submission_method === "online" ? "Needed for online submission. A full https:// address." : "A full https:// address, if there's a portal or form."}
-          htmlFor="w-url"
-          optional={v.submission_method !== "online"}
-          error={errors.submission_url}
-        >
-          <input id="w-url" type="url" value={v.submission_url ?? ""} maxLength={500} onChange={(e) => set({ submission_url: e.target.value })} className={field} />
+        <L label="Address" hint="Building, room and street, so students can find it" htmlFor="w-address" optional error={errors.submission_address}>
+          <input id="w-address" value={v.submission_address ?? ""} maxLength={300} onChange={(e) => set({ submission_address: e.target.value })} className={field} />
         </L>
-        <L label="Note for students" hint="e.g. Bring the originals and one photocopy of each document." htmlFor="w-note" optional error={errors.submission_note}>
+        <L label="Note for students" hint="About handing it in, e.g. bring the originals and one photocopy. Don't repeat the How to apply steps." htmlFor="w-note" optional error={errors.submission_note}>
           <textarea id="w-note" rows={2} value={v.submission_note ?? ""} maxLength={600} onChange={(e) => set({ submission_note: e.target.value })} className={`${field} py-2`} />
         </L>
+      </Fieldset>
+
+      <Fieldset legend="How to apply">
+        <ListEditor name="steps" items={v.steps} setItems={(steps) => set({ steps })} fields={[{ key: "title", label: "Step", max: 200 }, { key: "detail", label: "Detail", max: 600 }]} addLabel="Add a step" errors={errors} />
       </Fieldset>
 
       <div className="sticky bottom-[calc(64px+env(safe-area-inset-bottom))] z-20 flex items-center justify-end gap-3 rounded-md border border-hairline bg-surface p-3 shadow-overlay nav:bottom-4 sm:p-4">

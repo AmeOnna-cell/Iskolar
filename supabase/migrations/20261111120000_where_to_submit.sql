@@ -191,24 +191,28 @@ begin
     submission_url = v.url,
     submission_note = v.note
   from (values
-    ('tulong-dunong-program', 'through_school', 'Your school''s scholarship coordinator', null, null, null,
-     'Your school checks your documents and forwards complete applications to the CHED regional office.'),
-    ('tertiary-education-subsidy', 'through_school', 'Your school''s scholarship or registrar''s office', null, null, null,
-     'Your school encodes your application in the UniFAST portal. Ask them for their own cut-off date.'),
-    ('ched-merit-scholarship', 'online', null, null, null, 'https://ched.gov.ph',
-     'CHED regional offices post the application link when the period opens. Upload clear scans.'),
-    ('dost-sei-junior-level-science', 'online', 'DOST-SEI online portal', null, null, 'https://www.sei.dost.gov.ph',
-     'Bring your printed exam permit and a valid ID to the qualifying exam.'),
-    ('owwa-ofw-dependents-scholarship', 'in_person', 'OWWA Regional Welfare Office for your region', null, 'Monday to Friday, 8:00 AM to 5:00 PM', 'https://owwa.gov.ph',
-     'Bring originals and photocopies. Some regional offices also accept online submission.'),
+    -- Notes are about handing the application in; they don't repeat the How to apply steps.
+    -- Links are where to submit, never just the agency homepage (that's already the Source).
+    ('tulong-dunong-program', 'through_school', 'scholarship coordinator''s office', null, null, null,
+     'Ask for your school''s own cut-off date. It''s usually earlier than CHED''s.'),
+    ('tertiary-education-subsidy', 'through_school', 'scholarship or registrar''s office', null, null, null,
+     'Some schools also want a printed copy of your application. Ask your registrar.'),
+    -- No method yet: CHED posts where to apply when the period opens.
+    ('ched-merit-scholarship', null, null, null, null, null,
+     'CHED regional offices post where and how to apply when the period opens. Check your regional office''s page.'),
+    ('dost-sei-junior-level-science', 'online', null, null, null, 'https://www.sei.dost.gov.ph',
+     'Use the email you registered with, and keep the confirmation email after you submit.'),
+    ('owwa-ofw-dependents-scholarship', 'in_person', 'OWWA Regional Welfare Office for your region', null, 'Monday to Friday, 8:00 AM to 5:00 PM', null,
+     'Go early: regional offices get busy near the deadline.'),
     ('city-educational-assistance', 'in_person', 'City Scholarship Office (sample)', 'Ground floor, City Hall, Sample City (sample address)', 'Monday to Friday, 8:00 AM to 5:00 PM',
      null, 'Bring the originals and one photocopy of each document.'),
     ('provincial-allied-health-grant', 'in_person', 'Provincial Scholarship Office (sample)', 'Provincial Capitol compound, Sample Province (sample address)', 'Monday to Friday, 8:00 AM to 4:00 PM',
-     null, 'You can also submit through your school''s scholarship office.'),
-    ('bayani-foundation-engineering-grant', 'mail', 'Bayani Foundation Scholarship Committee (sample)', 'Sample Building, 123 Sample Street, Quezon City (sample address)', null,
-     null, 'Send your essay and documents by courier. Write the scholarship name on the envelope.'),
+     null, 'You can also hand it in at your school''s scholarship office.'),
+    -- example.org: a reserved example address, since this sample sponsor has no real form.
+    ('bayani-foundation-engineering-grant', 'online', null, null, null, 'https://example.org/bayani-foundation-apply',
+     'Sample link: this example sponsor has no real application form.'),
     ('presidents-academic-award', 'through_school', 'Office of Student Affairs, Sample State University (sample)', 'Student Center, 2nd floor (sample address)', 'Monday to Friday, 8:00 AM to 5:00 PM',
-     null, 'Your college nominates you first. Then confirm your slot here.')
+     null, 'Bring your nomination letter and school ID.')
   ) as v (slug, method, place, address, hours, url, note)
   where s.slug = v.slug and s.is_sample;
   perform set_config('iskolar.skip_audit', 'off', true);

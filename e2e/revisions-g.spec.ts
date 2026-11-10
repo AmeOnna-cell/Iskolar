@@ -3,7 +3,7 @@
 // 2. Visitors don't see Eligibility check, My applications or Announcements; those need sign-in.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { adminClient, createUser, signIn, waitForHydration } from "./support";
+import { PASSWORD, adminClient, confirmLink, createUser, signIn, uniqueEmail, waitForEmail, waitForHydration } from "./support";
 
 const CITY = "city-educational-assistance";
 
@@ -23,6 +23,14 @@ test("signed out: the nav, tab bar and footer show only public pages", async ({ 
   const footer = page.getByRole("navigation", { name: "Footer" });
   await expect(footer.getByRole("link", { name: "Find scholarships" })).toBeVisible();
   await expect(footer.getByRole("link", { name: "Eligibility check" })).toHaveCount(0);
+
+  const banner = page.getByRole("banner");
+  await expect(banner.getByRole("link", { name: "Sign in" })).toBeVisible();
+  await expect(banner.getByRole("link", { name: "Create an account to check eligibility" })).toBeVisible();
+  // 640–899px: one "Sign in" (the tab bar's), not two.
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await expect(banner.getByRole("link", { name: "Sign in" })).toBeHidden();
+  await expect(banner.getByRole("link", { name: "Create account" })).toBeVisible();
 
   await page.setViewportSize({ width: 360, height: 740 });
   const tabs = page.getByRole("navigation", { name: "Main navigation" }).getByRole("link");
@@ -44,7 +52,9 @@ test("signed out: scholarship details offer an account instead of the announceme
   await admin.from("announcements").insert({ title: `Visitor prompt ${Date.now()}`, body: "Bring your COR.", posted_as: "Provincial Scholarship Office", scholarship_id: s!.id });
   await page.goto(`/s/${slug}`);
   await expect(page.getByText(/announcements? from the scholarship office\./)).toBeVisible();
-  await expect(page.getByRole("link", { name: "Create an account to read them" })).toHaveAttribute("href", "/signup");
+  const next = encodeURIComponent(`/announcements?a=${slug}`);
+  await expect(page.getByRole("link", { name: "Create an account", exact: true })).toHaveAttribute("href", `/signup?next=${next}`);
+  await expect(page.getByRole("link", { name: "sign in", exact: true })).toHaveAttribute("href", `/login?next=${next}`);
 });
 
 for (const path of ["/check", "/applications?tab=preparing", "/announcements?a=general"]) {
@@ -65,8 +75,8 @@ for (const path of ["/check", "/applications?tab=preparing", "/announcements?a=g
 test("details show where to submit: full page, side panel and phone drawer", async ({ page }) => {
   await page.goto(`/s/${CITY}`);
   const block = submitBlock(page);
-  await expect(block.getByText("In person")).toBeVisible();
-  await expect(block.getByText("City Scholarship Office (sample)")).toBeVisible();
+  await expect(block.getByTestId("submit-lead")).toHaveText("In person at City Scholarship Office (sample)");
+  await expect(block.getByRole("link", { name: /Open in Maps/ })).toHaveCount(0); // sample address
   await expect(block.getByText("Monday to Friday, 8:00 AM to 5:00 PM")).toBeVisible();
   await expect(block.getByText("Bring the originals and one photocopy of each document.")).toBeVisible();
   await expectNoViolations(page);
@@ -75,13 +85,13 @@ test("details show where to submit: full page, side panel and phone drawer", asy
   await page.goto("/explore?s=dost-sei-junior-level-science");
   const panel = page.getByRole("complementary", { name: "Selected scholarship" });
   const where = panel.getByRole("region", { name: "Where to submit" });
-  await expect(where.getByText("Submit online at")).toBeVisible();
+  await expect(where.getByTestId("submit-lead")).toHaveText(/^Online at sei\.dost\.gov\.ph/);
   await expect(where.getByRole("link", { name: /sei\.dost\.gov\.ph/ })).toHaveAttribute("href", "https://www.sei.dost.gov.ph");
 
   await page.setViewportSize({ width: 360, height: 740 });
   await page.goto("/explore?s=tulong-dunong-program&d=1");
   const drawer = page.getByRole("dialog");
-  await expect(drawer.getByRole("region", { name: "Where to submit" }).getByText("Through your school")).toBeVisible();
+  await expect(drawer.getByRole("region", { name: "Where to submit" }).getByTestId("submit-lead")).toHaveText("Through your school: scholarship coordinator's office");
 });
 
 test("a listing with nothing set says to confirm with the provider", async ({ page }) => {
@@ -97,6 +107,24 @@ test("a listing with nothing set says to confirm with the provider", async ({ pa
   await expect(submitBlock(page).getByTestId("where-to-submit")).toHaveCount(0);
 });
 
+test("a real address gets a Maps link; a link on an in-person listing is a Website", async ({ page }) => {
+  const admin = adminClient();
+  const { data: p } = await admin.from("providers").select("id").eq("abbr", "CHED").single();
+  const slug = `e2e-maps-${Date.now()}`;
+  const { error } = await admin.from("scholarships").insert({
+    slug, provider_id: p!.id, name: `Maps check ${slug}`, amount_text: "₱1,000", source_label: "E2E", listing_status: "published",
+    submission_method: "in_person", submission_place: "Student Center", submission_address: "Room 101, Main Building",
+    submission_url: "https://example.org/forms",
+  });
+  expect(error).toBeNull();
+  await page.goto(`/s/${slug}`);
+  const block = submitBlock(page);
+  await expect(block.getByTestId("submit-lead")).toHaveText("In person at Student Center");
+  await expect(block.getByRole("link", { name: /Open in Maps/ })).toHaveAttribute("href", /google\.com\/maps\/search\/\?api=1&query=Student%20Center%2C%20Room%20101/);
+  await expect(block.getByText("Website")).toBeVisible();
+  await expect(block.getByText("Online", { exact: true })).toHaveCount(0);
+});
+
 test("My applications shows where to submit next to the checklist", async ({ page }) => {
   const student = await createUser("student", "submit-apps");
   const admin = adminClient();
@@ -108,7 +136,10 @@ test("My applications shows where to submit next to the checklist", async ({ pag
   const panel = page.getByTestId("panel-header").locator("..");
   const sections = panel.getByRole("heading", { level: 3 });
   await expect(sections).toContainText(["Documents to prepare", "Where to submit", "How to apply"]);
-  await expect(panel.getByRole("region", { name: "Where to submit" })).toContainText("Your school's scholarship coordinator");
+  await expect(panel.getByRole("region", { name: "Where to submit" })).toContainText("Through your school: scholarship coordinator's office");
+  // The short answer sits with the stage control, linking to the details.
+  await expect(panel.getByTestId("submit-summary")).toContainText("Submit: Through your school: scholarship coordinator's office.");
+  await expect(panel.getByTestId("submit-summary").getByRole("link", { name: "Details" })).toHaveAttribute("href", "#a-submit-tulong-dunong-program");
 });
 
 test("the listing editor needs a link when students submit online", async ({ page }) => {
@@ -118,10 +149,40 @@ test("the listing editor needs a link when students submit online", async ({ pag
   await waitForHydration(page);
   await page.locator("table").getByRole("link", { name: "Edit Tulong Dunong Program" }).click();
   const section = page.getByRole("region", { name: "Where to submit" });
-  await expect(section.getByLabel("Office or place")).toHaveValue("Your school's scholarship coordinator");
+  await expect(section.getByLabel("Office or place")).toHaveValue("scholarship coordinator's office");
   await section.getByLabel("How students submit").selectOption("online");
   await section.getByLabel("Online link").fill("");
   await page.getByRole("button", { name: "Save changes" }).click();
   await expect(page.getByText("Online link: add where students submit online.")).toBeVisible();
   await expect(section.getByLabel("Online link")).toBeFocused();
+  // Choosing another method clears that error at once.
+  await section.getByLabel("How students submit").selectOption("in_person");
+  await expect(page.getByText("Online link: add where students submit online.")).toHaveCount(0);
+  await expect(section.getByLabel("Online link")).not.toHaveAttribute("aria-invalid", "true");
+});
+
+test("signing up from a gated page: onboarding first, then back to where they were going", async ({ page }) => {
+  await page.goto("/announcements?a=general");
+  await expect(page.getByText("Sign in or create an account to read announcements.")).toBeVisible();
+  await waitForHydration(page);
+  await page.getByRole("link", { name: "Create an account", exact: true }).click();
+  await expect(page).toHaveURL((u) => u.pathname === "/signup" && u.searchParams.get("next") === "/announcements?a=general");
+
+  const email = uniqueEmail("gate-signup");
+  const started = Date.now() - 1000;
+  await waitForHydration(page);
+  await page.getByLabel("Full name").fill("Ana Reyes");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page).toHaveURL(/\/check-email/);
+
+  const mail = await waitForEmail(email, "Confirm your Iskolar account", started);
+  await page.goto(confirmLink(mail.html));
+  await expect(page).toHaveURL(/\/check\?welcome=1/);
+  await page.getByRole("link", { name: "skip for now and go to Announcements" }).click();
+  await expect(page).toHaveURL((u) => u.pathname + u.search === "/announcements?a=general");
+  // Used once: the results page is back to "Go to my dashboard".
+  await page.goto("/check/results");
+  await expect(page.getByRole("link", { name: "Go to my dashboard" })).toBeVisible();
 });

@@ -46,7 +46,7 @@ export const listingSchema = z
     submission_place: opt(160, "Office or place"),
     submission_address: opt(300, "Address"),
     submission_hours: opt(160, "Office hours"),
-    submission_url: z.union([z.literal(""), z.url({ protocol: /^https?$/, error: "Online link: a full http(s) address." })]),
+    submission_url: z.union([z.literal(""), z.url({ protocol: /^https$/, error: "Online link: a full address starting with https://." })]),
     submission_note: opt(600, "Note"),
     criteria: z.object({
       income_max: z.union([z.literal(""), z.coerce.number().int().positive("Income limit: more than 0.")]),

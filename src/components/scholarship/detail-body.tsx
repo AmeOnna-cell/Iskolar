@@ -124,12 +124,17 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
       {newsLabel}
     </Link>
   ) : (
-    <p className="mt-4 flex flex-wrap items-center gap-x-2 text-sm text-ink-secondary">
-      <Icon name="mega" size={16} />
-      {newsLabel}.
-      <Link href="/signup" className="inline-flex min-h-11 items-center font-semibold nav:min-h-0">
-        Create an account to read them
-      </Link>
+    <p className="mt-4 text-sm text-ink-secondary">
+      <Icon name="mega" size={16} className="mr-2 inline align-[-3px]" />
+      {newsLabel}.{" "}
+      <Link href={`/signup?next=${encodeURIComponent(`/announcements?a=${s.slug}`)}`} className="inline-flex min-h-11 items-center font-semibold nav:min-h-0">
+        Create an account
+      </Link>{" "}
+      or{" "}
+      <Link href={`/login?next=${encodeURIComponent(`/announcements?a=${s.slug}`)}`} className="inline-flex min-h-11 items-center font-semibold nav:min-h-0">
+        sign in
+      </Link>{" "}
+      to read them.
     </p>
   );
   const header = (

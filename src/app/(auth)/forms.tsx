@@ -91,7 +91,7 @@ export function LoginForm({ next, notice }: { next?: string; notice?: React.Reac
         Sign in
       </Button>
       <p className="text-sm text-ink-secondary">
-        New to Iskolar? <Link href="/signup" className="font-semibold">Create an account</Link>
+        New to Iskolar? <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="font-semibold">Create an account</Link>
       </p>
     </form>
   );
@@ -99,12 +99,14 @@ export function LoginForm({ next, notice }: { next?: string; notice?: React.Reac
 
 // ---------- Sign up ----------
 
-export function SignupForm() {
+/** `next`: where the person was headed; after confirming and onboarding they're sent there. */
+export function SignupForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(signUp, idle);
   const ref = useFocusResult<HTMLFormElement>(state);
   return (
     <form ref={ref} action={action} noValidate className="flex flex-col gap-6">
       <FormMessage state={state} />
+      <input type="hidden" name="next" value={next ?? ""} />
       <TextField
         label="Full name"
         name="fullName"
@@ -131,7 +133,7 @@ export function SignupForm() {
         Create account
       </Button>
       <p className="text-sm text-ink-secondary">
-        Already have an account? <Link href="/login" className="font-semibold">Sign in</Link>
+        Already have an account? <Link href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="font-semibold">Sign in</Link>
       </p>
     </form>
   );

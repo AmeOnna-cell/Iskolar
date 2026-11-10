@@ -4,6 +4,8 @@ import { Icon } from "@/components/icons";
 import { Pill } from "@/components/scholarship/bits";
 import { ScholarshipCard } from "@/components/scholarship/card";
 import { ButtonLink } from "@/components/ui/button";
+import { cookies } from "next/headers";
+import { NEXT_COOKIE, destinationOf } from "@/lib/auth/routes";
 import { requireRole } from "@/lib/auth/session";
 import { parseSearchParams, searchScholarships } from "@/lib/data/scholarships";
 import { getStudentProfile } from "@/lib/data/student";
@@ -17,6 +19,8 @@ export const metadata = { title: "Your eligibility results" };
 export default async function ResultsPage() {
   const user = await requireRole("student");
   const sp = await getStudentProfile(user.id);
+  // A new account that signed up on the way somewhere: offer to go there now.
+  const headed = destinationOf((await cookies()).get(NEXT_COOKIE)?.value);
   if (!sp) redirect("/check");
 
   // ponytail: one page of 50 listings, sorted by deadline. Add a verdict filter to the RPC if a
@@ -82,9 +86,13 @@ export default async function ResultsPage() {
           <ButtonLink href="/check?step=1" variant="outline">
             <Icon name="edit" size={18} /> Edit answers
           </ButtonLink>
-          <ButtonLink href="/dashboard" variant="text">
-            Go to my dashboard
-          </ButtonLink>
+          {headed ? (
+            <ButtonLink href="/continue">Continue to {headed.name}</ButtonLink>
+          ) : (
+            <ButtonLink href="/dashboard" variant="text">
+              Go to my dashboard
+            </ButtonLink>
+          )}
         </div>
       </div>
 

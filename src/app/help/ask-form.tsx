@@ -17,17 +17,17 @@ export function AskForm({ options, about }: { options: Array<{ id: string; name:
   const field = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (state.status === "success") {
-      form.current?.reset();
-      setQuestion("");
-    }
+    if (state.status === "success") form.current?.reset();
   }, [state]);
 
   // "Ask the scholarship office" from a search with no matches: carry the words over.
   useEffect(() => {
     const onAsk = (e: Event) => {
       const text = (e as CustomEvent<string>).detail;
-      if (text) setQuestion(text);
+      if (text && field.current) {
+        field.current.value = text;
+        setQuestion(text);
+      }
       field.current?.focus({ preventScroll: true });
     };
     window.addEventListener(ASK_EVENT, onAsk);
@@ -35,7 +35,9 @@ export function AskForm({ options, about }: { options: Array<{ id: string; name:
   }, []);
 
   return (
-    <form ref={form} action={action} noValidate className="flex flex-col gap-4">
+    // The textarea stays uncontrolled: React resets the form's DOM after each action, and a controlled
+    // value would drift from it. `question` mirrors the text for suggestions; onReset clears it.
+    <form ref={form} action={action} onReset={() => setQuestion("")} noValidate className="flex flex-col gap-4">
       {state.message ? (
         <Notice tone={state.status === "success" ? "ok" : "danger"} live>
           {state.message}
@@ -54,7 +56,6 @@ export function AskForm({ options, about }: { options: Array<{ id: string; name:
           required
           maxLength={2000}
           rows={4}
-          value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="e.g. Can I apply if my COR isn’t released yet?"
           aria-invalid={state.fieldError ? true : undefined}

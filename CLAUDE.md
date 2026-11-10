@@ -63,8 +63,8 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
 - **Branch:** `main` (FAQ work merged from `faq-wip`).
 
 ## Progress (2026-11-10): FAQ suggestions
-- Rule-based FAQ suggestions are built and merged into main. The details are in "FAQ suggestions" in `docs/PROGRESS.md`; the scoring rules are in `docs/faq-search.md`.
-- Migration `20261110120000_faqs` is not yet on the cloud. Push it with `db push --remote` before the code, and ask first.
+- Rule-based FAQ suggestions are built, merged into main and pushed. The details are in "FAQ suggestions" in `docs/PROGRESS.md`; the scoring rules are in `docs/faq-search.md`.
+- Migration `20261110120000_faqs` is live; local and cloud match.
 - Run the suite in steps (reset, then lint/typecheck/unit, then pgTAP, then build, then E2E with `--workers=1`). Check for stray `node` processes first: a "killed" background job once kept running and shared the DB and `.next`.
 
 ## Remaining work

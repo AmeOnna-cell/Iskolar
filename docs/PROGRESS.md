@@ -9,13 +9,13 @@
 | 9 Tests + docs | Done and deployed (2026-11-08); see `docs/REPORT.md` |
 | Privacy note and `/privacy` | Done and deployed (`7ebb48a`) |
 | Team-leader revisions (groups A–F) | Done and pushed |
-| FAQ suggestions (rule-based, no AI) | Merged into main; migration `20261110120000_faqs` not yet pushed |
+| FAQ suggestions (rule-based, no AI) | Done and pushed (2026-11-10) |
 
 ## FAQ suggestions (2026-11-10)
 
 Rule-based FAQ suggestions with PostgreSQL full-text search and pg_trgm. How the scoring works is in `docs/faq-search.md`, written for the defense. Built on the branch `faq-wip`, then merged into main.
 
-- **Migration `20261110120000_faqs.sql`** (not pushed yet):
+- **Migration `20261110120000_faqs.sql`** (pushed with `--remote` before the code; the remote migration list matches):
   - **Table:** `faqs` with question, answer (plain text, `[text](/link)` links), keywords and an optional scholarship.
   - **Statuses and stamps:** draft, approved or archived. The database sets `created_by`, `approved_by` and `approved_at`.
   - **Slug:** set once from the question, so it never changes.

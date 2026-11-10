@@ -278,3 +278,6 @@ insert into public.inquiries (question, student_context, scholarship_id, created
    (select id from public.scholarships where slug = 'dost-sei-junior-level-science'), now() - interval '2 days');
 
 reset iskolar.skip_audit;
+
+-- "Where to submit" for the sample listings (values live in migration 20261111120000_where_to_submit).
+select public.fill_sample_submission();

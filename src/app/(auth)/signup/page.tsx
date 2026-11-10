@@ -3,13 +3,14 @@ import { SignupForm } from "../forms";
 
 export const metadata = { title: "Create an account" };
 
-export default function SignupPage() {
+export default async function SignupPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const { next } = await searchParams;
   return (
     <AuthShell
       title="Create your account"
       lead="Free for every college student. Next, confirm your email, then answer a few questions about your studies to see what you qualify for."
     >
-      <SignupForm />
+      <SignupForm next={next} />
     </AuthShell>
   );
 }

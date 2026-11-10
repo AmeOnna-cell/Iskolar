@@ -5,6 +5,7 @@ import { DocumentChecklist } from "@/components/scholarship/checklist";
 import { CriteriaList } from "@/components/scholarship/criteria";
 import { Section, Steps } from "@/components/scholarship/detail-body";
 import { ShareButton } from "@/components/scholarship/share-button";
+import { WhereToSubmit, submissionSummary } from "@/components/scholarship/where-to-submit";
 import { buttonClass } from "@/components/ui/button";
 import { Notice } from "@/components/ui/notice";
 import { statusOf, type ScholarshipDetail } from "@/lib/data/scholarships";
@@ -22,6 +23,7 @@ export function ApplicationDetail({ s, app, evaluation }: { s: ScholarshipDetail
   const sid = (part: string) => `a-${part}-${s.slug}`;
   const st = statusOf(s, todayPH());
   const date = (iso: string | null) => (iso ? formatDate(iso.slice(0, 10), true) : "To be announced");
+  const whereTo = submissionSummary(s);
 
   return (
     <>
@@ -76,6 +78,15 @@ export function ApplicationDetail({ s, app, evaluation }: { s: ScholarshipDetail
         <div className="mt-4 rounded-md bg-surface-subtle px-3 py-3">
           <p className="mb-2 text-caption text-ink-hint">Your application</p>
           <RowControl applicationId={app.id} scholarshipId={s.id} name={s.name} stage={app.stage} result={app.result} docsDone={docsDone} docsTotal={s.documents.length} />
+          {app.stage !== "submitted" ? (
+            // The answer to "where do I bring this?" next to the control, with the details below.
+            <p className="mt-3 text-sm text-ink-secondary" data-testid="submit-summary">
+              {whereTo ? <>Submit: <span className="font-semibold text-ink">{whereTo}</span>. </> : null}
+              <a href={`#${sid("submit")}`} className="inline-flex min-h-11 items-center font-semibold nav:min-h-0">
+                {whereTo ? "Details" : "Where to submit"}
+              </a>
+            </p>
+          ) : null}
           {app.result === "approved" && s.renewal ? (
             <p className="mt-3 rounded-sm bg-ok-wash px-3 py-2 text-sm text-ok">To keep it: {s.renewal} We&apos;ll remind you when renewal opens.</p>
           ) : app.result === "rejected" ? (
@@ -99,6 +110,10 @@ export function ApplicationDetail({ s, app, evaluation }: { s: ScholarshipDetail
           <DocumentChecklist scholarshipId={s.id} slug={s.slug} docs={s.documents} checked={checked} canTrack tracked />
         </Section>
       ) : null}
+
+      <Section title="Where to submit" compact id={sid("submit")}>
+        <WhereToSubmit s={s} />
+      </Section>
 
       {s.steps.length ? (
         <Section title="How to apply" compact id={sid("steps")}>

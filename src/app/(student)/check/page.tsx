@@ -1,4 +1,7 @@
+import Link from "next/link";
+import { cookies } from "next/headers";
 import { Notice } from "@/components/ui/notice";
+import { NEXT_COOKIE, destinationOf } from "@/lib/auth/routes";
 import { requireRole } from "@/lib/auth/session";
 import { getStudentProfile } from "@/lib/data/student";
 import { Wizard } from "./wizard";
@@ -11,13 +14,23 @@ export default async function CheckPage({ searchParams }: { searchParams: Promis
   const step = ([1, 2, 3, 4] as const).find((n) => String(n) === rawStep) ?? 1;
   const sp = await getStudentProfile(user.id);
   const first = user.fullName?.trim().split(/\s+/)[0];
+  // Signed up on the way somewhere: onboarding comes first, but they can skip to it.
+  const headed = destinationOf((await cookies()).get(NEXT_COOKIE)?.value);
 
   return (
     <div className="page-container py-6 sm:py-8">
       <div className="mx-auto w-full max-w-[720px]">
         {welcome ? (
           <div className="mb-4 sm:mb-6">
-            <Notice tone="ok">Your email is confirmed{first ? `, ${first}` : ""}. Welcome to Iskolar.</Notice>
+            <Notice tone="ok">
+              Your email is confirmed{first ? `, ${first}` : ""}. Welcome to Iskolar.
+              {headed ? (
+                <>
+                  {" "}
+                  Answer a few questions to see what you qualify for, or <Link href="/continue">skip for now and go to {headed.name}</Link>.
+                </>
+              ) : null}
+            </Notice>
           </div>
         ) : null}
         {/* Phones: the page heading is a small label with the step count, so the step title is the one

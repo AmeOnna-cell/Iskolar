@@ -81,6 +81,7 @@ const EDIT_SELECT = `
   id, slug, name, summary, amount_text, amount_num, opens_on, closes_on, location_label, source_label, source_url,
   duration, renewal, obligations, listing_status, verification, last_verified_at, assigned_coordinator_id, provider_id,
   is_sample, updated_at,
+  submission_method, submission_place, submission_address, submission_hours, submission_url, submission_note,
   criteria:scholarship_criteria ( income_max, gwa_max, year_levels, fields, regions, requires_ofw, requires_four_ps ),
   benefits:scholarship_benefits ( id, position, text ),
   documents:scholarship_documents ( id, position, name, where_to_get ),

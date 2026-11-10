@@ -1,13 +1,17 @@
-// Team-leader revisions, group D: the public Announcements page, its place in the navigation, and the
-// links to it from scholarship details and the dashboard.
-import { expect, test } from "@playwright/test";
+// Team-leader revisions, group D: the Announcements page, its place in the navigation, and the
+// links to it from scholarship details and the dashboard. Since 2026-11-11 it needs an account
+// (revisions-g covers the visitor side), so these run as a signed-in student.
+import { expect, test, type Page } from "@playwright/test";
 import { adminClient, createUser, pickOption, signIn, waitForHydration } from "./support";
 
 const SLUG = "city-educational-assistance";
 let stamp = "";
+let studentEmail = "";
+const asStudent = (page: Page) => signIn(page, studentEmail);
 
 test.beforeAll(async () => {
   stamp = String(Date.now());
+  studentEmail = (await createUser("student", "board")).email;
   const admin = adminClient();
   const { data: s } = await admin.from("scholarships").select("id").eq("slug", SLUG).single();
   const { error } = await admin.from("announcements").insert([
@@ -18,8 +22,9 @@ test.beforeAll(async () => {
 });
 
 test("Announcements is in the main navigation; the phone tab bar stays at five with Help in the header", async ({ page }) => {
+  await asStudent(page);
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto("/");
+  await page.goto("/dashboard");
   await expect(page.getByRole("navigation", { name: "Main", exact: true }).getByRole("link", { name: "Announcements" })).toBeVisible();
   await page.setViewportSize({ width: 360, height: 740 });
   const tabs = page.getByRole("navigation", { name: "Main navigation" }).getByRole("link");
@@ -29,6 +34,7 @@ test("Announcements is in the main navigation; the phone tab bar stays at five w
 });
 
 test("wide screens: General first, search, and a scholarship's posts with its dates beside the list", async ({ page }) => {
+  await asStudent(page);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/announcements");
   await waitForHydration(page);
@@ -53,6 +59,7 @@ test("wide screens: General first, search, and a scholarship's posts with its da
 });
 
 test("phones: the list is the page; an entry opens in a drawer that Back closes", async ({ page }) => {
+  await asStudent(page);
   await page.setViewportSize({ width: 360, height: 740 });
   await page.goto("/announcements");
   await waitForHydration(page);
@@ -87,6 +94,7 @@ test("posting about a scholarship links its details to the board (the details ca
 });
 
 test("arriving with ?a= on a phone opens that entry; Back returns to the list", async ({ page }) => {
+  await asStudent(page);
   await page.setViewportSize({ width: 360, height: 740 });
   await page.goto(`/announcements?a=${SLUG}`);
   const drawer = page.getByRole("dialog", { name: "Announcements: City Educational Assistance" });
@@ -99,6 +107,7 @@ test("arriving with ?a= on a phone opens that entry; Back returns to the list", 
 });
 
 test("from 1000px (lg) both boards use the side panel, never the drawer", async ({ page }) => {
+  await asStudent(page);
   await page.setViewportSize({ width: 1010, height: 800 });
   await page.goto("/announcements");
   await waitForHydration(page);
@@ -116,6 +125,7 @@ test("from 1000px (lg) both boards use the side panel, never the drawer", async 
 });
 
 test("an unknown or non-public entry says so and shows the general announcements", async ({ page }) => {
+  await asStudent(page);
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/announcements?a=no-such-scholarship");
   await expect(page.getByText("That scholarship has no public announcements right now.")).toBeVisible();

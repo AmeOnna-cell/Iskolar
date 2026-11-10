@@ -1,5 +1,6 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
+import { NEXT_COOKIE, safeNextPath } from "@/lib/auth/routes";
 import { createClient } from "@/lib/supabase/server";
 
 // Email links land here: /auth/confirm?token_hash=…&type=email|recovery|email_change
@@ -29,12 +30,18 @@ export async function GET(request: NextRequest) {
   if (!tokenHash || !type || !TYPES.has(type) || tokenHash.length > 200) return fail("invalid");
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+  const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
   if (error) {
     // Supabase reports both "expired" and "already used" as otp_expired.
     const reason = error.code === "otp_expired" ? "expired" : "invalid";
     if (reason === "invalid") console.error(JSON.stringify({ event: "auth.confirm_failed", code: error.code, type }));
     return fail(reason);
   }
-  return NextResponse.redirect(new URL(DESTINATION[type] ?? "/", request.url));
+  const res = NextResponse.redirect(new URL(DESTINATION[type] ?? "/", request.url));
+  // A new account that was headed somewhere (sign-up ?next=): remember it for after onboarding.
+  const next = type === "recovery" || type === "email_change" ? "" : safeNextPath(data.user?.user_metadata?.next, "");
+  if (next && next !== "/") {
+    res.cookies.set(NEXT_COOKIE, next, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 86_400, secure: request.nextUrl.protocol === "https:" });
+  }
+  return res;
 }

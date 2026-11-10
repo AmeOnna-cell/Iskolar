@@ -9,6 +9,7 @@ import { DUE_TONE, MatchPill, Pill, ProviderMark, SamplePill } from "./bits";
 import { DocumentChecklist } from "./checklist";
 import { CriteriaList } from "./criteria";
 import { DetailActions } from "./detail-actions";
+import { WhereToSubmit } from "./where-to-submit";
 
 type Props = {
   s: ScholarshipDetail;
@@ -115,12 +116,27 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
     </div>
   ) : null;
   const newsCount = s.announcements?.[0]?.count ?? 0;
-  const news = newsCount ? (
+  const newsLabel = `${newsCount === 1 ? "1 announcement" : `${newsCount} announcements`} from the scholarship office`;
+  // Announcements need an account: visitors get the count and a sign-up prompt instead of a link.
+  const news = !newsCount ? null : viewer.signedIn ? (
     <Link href={`/announcements?a=${s.slug}`} className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold nav:min-h-0">
       <Icon name="mega" size={16} />
-      {newsCount === 1 ? "1 announcement" : `${newsCount} announcements`} from the scholarship office
+      {newsLabel}
     </Link>
-  ) : null;
+  ) : (
+    <p className="mt-4 text-sm text-ink-secondary">
+      <Icon name="mega" size={16} className="mr-2 inline align-[-3px]" />
+      {newsLabel}.{" "}
+      <Link href={`/signup?next=${encodeURIComponent(`/announcements?a=${s.slug}`)}`} className="inline-flex min-h-11 items-center font-semibold nav:min-h-0">
+        Create an account
+      </Link>{" "}
+      or{" "}
+      <Link href={`/login?next=${encodeURIComponent(`/announcements?a=${s.slug}`)}`} className="inline-flex min-h-11 items-center font-semibold nav:min-h-0">
+        sign in
+      </Link>{" "}
+      to read them.
+    </p>
+  );
   const header = (
     <>
       <div className="flex items-start gap-4">
@@ -239,6 +255,10 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
           />
         </Section>
       ) : null}
+
+      <Section title="Where to submit" compact={compact} id={sid("submit")}>
+        <WhereToSubmit s={s} />
+      </Section>
 
       {s.steps.length ? (
         <Section title="How to apply" compact={compact} id={sid("steps")}>

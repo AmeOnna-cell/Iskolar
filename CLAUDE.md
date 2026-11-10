@@ -67,6 +67,11 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
 - Migration `20261110120000_faqs` is live; local and cloud match.
 - Run the suite in steps (reset, then lint/typecheck/unit, then pgTAP, then build, then E2E with `--workers=1`). Check for stray `node` processes first: a "killed" background job once kept running and shared the DB and `.next`.
 
+## Progress (2026-11-11): revisions group G
+- "Where to submit" for each listing, and sign-in for `/announcements` (and visitors' nav without Eligibility check, My applications or Announcements). Merged into main; details in "Revisions group G" in `docs/PROGRESS.md`.
+- Migration `20261111120000_where_to_submit` is not yet on the cloud. Push it with `db push --remote` before the code, and ask first.
+- When stopping servers, stop only the Iskolar `next start`/`next dev` process (match its command line), never every node process.
+
 ## Remaining work
 - Waiting on the user: the deferred P2/P3 items in `docs/REPORT.md`, and the items left by choice in PROGRESS ("Summary: all revision groups").
 

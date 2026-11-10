@@ -2,6 +2,14 @@
 import type { Database } from "@/lib/supabase/database.types";
 
 type Enums = Database["public"]["Enums"];
+/** How students hand in an application ("Where to submit"). */
+export const SUBMISSION_METHODS = [
+  ["in_person", "In person"],
+  ["online", "Online"],
+  ["mail", "By mail or courier"],
+  ["through_school", "Through your school"],
+] as const;
+
 export type CourseField = Enums["course_field"];
 export type Region = Enums["region"];
 export type IncomeBracket = Enums["income_bracket"];

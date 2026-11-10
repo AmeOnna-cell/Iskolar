@@ -11,7 +11,7 @@ export function HeaderNav({ items }: { items: NavItem[] }) {
   return (
     <nav aria-label="Main" className="hidden h-full gap-1 nav:flex">
       {items
-        .filter((i) => i.href !== "/help")
+        .filter((i) => i.href !== "/help" && i.only !== "phone")
         .map((item) => {
           const active = isActive(pathname, item.href);
           return (
@@ -36,7 +36,7 @@ export function HeaderNav({ items }: { items: NavItem[] }) {
 /** Mobile bottom tab bar (<900px): five equal tabs, 24px icons over 12px labels, safe-area padding. */
 export function TabBar({ items: all, unread = 0 }: { items: NavItem[]; unread?: number }) {
   // Five equal tabs (DESIGN.md): Help lives in the header's "?" button at every width.
-  const items = all.filter((i) => i.href !== "/help" && i.phone !== false);
+  const items = all.filter((i) => i.href !== "/help" && i.only !== "wide");
   const pathname = usePathname();
   return (
     <nav
@@ -75,22 +75,26 @@ export function SignedOutLinks() {
   const pathname = usePathname();
   if (AUTH_PAGES.includes(pathname)) {
     const [href, label] = pathname === "/login" ? ["/signup", "Create account"] : ["/login", "Sign in"];
+    // Below 900px the tab bar has its own "Sign in" tab.
     return (
-      <Link href={href} className={`ml-2 inline-flex ${quiet}`}>
+      <Link href={href} className={`ml-2 ${href === "/login" ? "hidden nav:inline-flex" : "inline-flex"} ${quiet}`}>
         {label}
       </Link>
     );
   }
   return (
     <div className="ml-1 flex items-center gap-2 sm:ml-2">
-      <Link href="/login" className={`hidden sm:inline-flex ${quiet}`}>
+      {/* Below 900px the tab bar has its own "Sign in" tab. */}
+      <Link href="/login" className={`hidden nav:inline-flex ${quiet}`}>
         Sign in
       </Link>
       <Link
         href="/signup"
         className="inline-flex h-11 items-center rounded-sm bg-primary px-3 text-sm font-semibold whitespace-nowrap text-on-primary no-underline transition-colors duration-150 hover:bg-primary-hover nav:h-9"
       >
-        Create account
+        {/* Eligibility check isn't in a visitor's nav, so the wide-screen button says what an account unlocks. */}
+        <span className="nav:hidden">Create account</span>
+        <span className="hidden nav:inline">Create an account to check eligibility</span>
       </Link>
     </div>
   );

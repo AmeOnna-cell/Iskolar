@@ -144,6 +144,7 @@ export const getScholarshipOptions = unstable_cache(
 const DETAIL_SELECT = `
   id, slug, name, summary, amount_text, opens_on, closes_on, location_label, source_label, source_url,
   duration, renewal, obligations, verification, last_verified_at, updated_at, published_at, is_sample,
+  submission_method, submission_place, submission_address, submission_hours, submission_url, submission_note,
   provider:providers ( name, short_name, abbr, color, type ),
   criteria:scholarship_criteria ( fields, year_levels, gwa_max, income_max, requires_four_ps, requires_ofw, regions ),
   benefits:scholarship_benefits ( position, text ),

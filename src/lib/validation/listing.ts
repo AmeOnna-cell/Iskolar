@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FIELDS, PROVIDER_TYPES, REGIONS } from "@/lib/reference";
+import { FIELDS, PROVIDER_TYPES, REGIONS, SUBMISSION_METHODS } from "@/lib/reference";
 
 const date = z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use a full date.")]);
 const opt = (max: number, label: string) => z.string().trim().max(max, `${label}: use ${max} characters or fewer.`);
@@ -42,6 +42,12 @@ export const listingSchema = z
     renewal: opt(600, "Renewal"),
     obligations: opt(600, "Obligations"),
     assigned_coordinator_id: id,
+    submission_method: z.union([z.literal(""), z.enum(SUBMISSION_METHODS.map(([v]) => v) as [string, ...string[]])]),
+    submission_place: opt(160, "Office or place"),
+    submission_address: opt(300, "Address"),
+    submission_hours: opt(160, "Office hours"),
+    submission_url: z.union([z.literal(""), z.url({ protocol: /^https$/, error: "Online link: a full address starting with https://." })]),
+    submission_note: opt(600, "Note"),
     criteria: z.object({
       income_max: z.union([z.literal(""), z.coerce.number().int().positive("Income limit: more than 0.")]),
       gwa_max: z.union([z.literal(""), z.coerce.number().min(1, "GWA: between 1.00 and 5.00.").max(5, "GWA: between 1.00 and 5.00.")]),
@@ -62,6 +68,10 @@ export const listingSchema = z
     path: ["closes_on"],
     message: "The deadline must be on or after the opening date.",
   })
-  .refine((v) => v.provider_id || v.new_provider, { path: ["provider_id"], message: "Choose a provider, or add a new one." });
+  .refine((v) => v.provider_id || v.new_provider, { path: ["provider_id"], message: "Choose a provider, or add a new one." })
+  .refine((v) => v.submission_method !== "online" || v.submission_url, {
+    path: ["submission_url"],
+    message: "Online link: add where students submit online.",
+  });
 
 export type ListingInput = z.input<typeof listingSchema>;

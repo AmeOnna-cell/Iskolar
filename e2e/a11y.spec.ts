@@ -13,8 +13,6 @@ const PUBLIC = [
   "/s/city-educational-assistance",
   "/help",
   "/privacy",
-  "/announcements",
-  "/announcements?a=general&d=1", // feed drawer open
   "/login",
   "/signup",
   "/forgot-password",
@@ -23,7 +21,7 @@ const PUBLIC = [
   "/403",
 ];
 const STAFF = ["/staff", "/staff/listings", "/staff/listings/new", "/staff/inquiries", "/staff/faqs", "/staff/faqs?status=approved", "/staff/faqs/new", "/staff/announcements", "/admin/users", "/admin/audit"];
-const STUDENT = ["/dashboard", "/check?step=1", "/check?step=3", "/applications", "/alerts", "/profile", "/help", "/s/tulong-dunong-program"];
+const STUDENT = ["/dashboard", "/check?step=1", "/check?step=3", "/applications", "/announcements", "/announcements?a=general&d=1", "/alerts", "/profile", "/help", "/s/tulong-dunong-program"];
 
 async function expectNoViolations(page: Page, route: string) {
   await page.goto(route);

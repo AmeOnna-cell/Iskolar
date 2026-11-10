@@ -21,8 +21,14 @@ describe("nav", () => {
     expect(admin).toContain("/staff/faqs");
     // Five tabs on phones for every role: FAQs is reached from Questions there.
     expect(admin.filter((h) => h !== "/staff/faqs")).toHaveLength(5);
-    expect(primaryNav({ name: null, email: "a@x.ph", role: "admin" }).filter((i) => i.phone !== false)).toHaveLength(5);
-    // Visitors and students: five tabs on phones plus Help (in the header "?" at every width).
-    expect(primaryNav(null).map((i) => i.href)).toEqual(["/", "/explore", "/check", "/applications", "/announcements", "/help"]);
+    expect(primaryNav({ name: null, email: "a@x.ph", role: "admin" }).filter((i) => i.only !== "wide")).toHaveLength(5);
+    // Students: five tabs on phones plus Help (in the header "?" at every width).
+    const student = primaryNav({ name: null, email: "s@x.ph", role: "student" }).map((i) => i.href);
+    expect(student).toEqual(["/dashboard", "/explore", "/check", "/applications", "/announcements", "/help"]);
+    // Visitors: only public pages; no Eligibility check, My applications or Announcements.
+    const visitor = primaryNav(null);
+    expect(visitor.map((i) => i.href)).toEqual(["/", "/explore", "/help", "/login"]);
+    expect(visitor.filter((i) => i.only !== "phone" && i.href !== "/help").map((i) => i.label)).toEqual(["Home", "Find scholarships"]);
+    expect(visitor.filter((i) => i.only !== "wide" && i.href !== "/help").map((i) => i.short)).toEqual(["Home", "Search", "Sign in"]);
   });
 });

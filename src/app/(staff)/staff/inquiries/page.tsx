@@ -29,7 +29,9 @@ export default async function InquiriesPage({ searchParams }: { searchParams: Pr
     <div className="page-container py-8">
       <div className="reading-column">
         <h1 className="text-headline-sm font-bold tracking-tight text-ink sm:text-headline">Student questions</h1>
-        <p className="mt-2 text-ink-secondary">Students see your reply on their Help page. Aim to reply within 2 school days.</p>
+        <p className="mt-2 text-ink-secondary">
+          Students see your reply on their Help page. Aim to reply within 2 school days. Turn answers you give often into <Link href="/staff/faqs">FAQs</Link>, so students find them while they type.
+        </p>
 
         <nav aria-label="Question status" className="mt-6 mb-4 flex gap-1 overflow-x-auto border-b border-hairline">
           {TABS.map(([key, label]) => (
@@ -70,6 +72,11 @@ export default async function InquiriesPage({ searchParams }: { searchParams: Pr
                     </p>
                   ))}
                   <InquiryActions id={q.id} status={q.status} />
+                  {q.replies.length ? (
+                    <Link href={`/staff/faqs/new?from=${q.id}`} className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold">
+                      Save as FAQ<span className="sr-only">: {q.question}</span>
+                    </Link>
+                  ) : null}
                 </li>
               ))}
             </ul>

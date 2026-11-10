@@ -22,7 +22,7 @@ const PUBLIC = [
   "/auth/error?reason=expired&type=email",
   "/403",
 ];
-const STAFF = ["/staff", "/staff/listings", "/staff/listings/new", "/staff/inquiries", "/staff/announcements", "/admin/users", "/admin/audit"];
+const STAFF = ["/staff", "/staff/listings", "/staff/listings/new", "/staff/inquiries", "/staff/faqs", "/staff/faqs?status=approved", "/staff/faqs/new", "/staff/announcements", "/admin/users", "/admin/audit"];
 const STUDENT = ["/dashboard", "/check?step=1", "/check?step=3", "/applications", "/alerts", "/profile", "/help", "/s/tulong-dunong-program"];
 
 async function expectNoViolations(page: Page, route: string) {

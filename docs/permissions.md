@@ -18,6 +18,9 @@ Iskolar has exactly three roles, stored in `public.profiles.role` (`student`, `c
 | Assign a coordinator to a listing | — | — | ✅ |
 | Reply to inquiries, close or reopen them | — | ✅ | ✅ |
 | Post announcements; edit or delete their own | — | ✅ | ✅ (anyone's) |
+| Read approved FAQs and search them (`search_faqs`) | ✅ | ✅ | ✅ (visitors too) |
+| Create and edit FAQ drafts (and "Save as FAQ" from an answered question) | — | ✅ | ✅ |
+| Approve, archive or edit approved FAQs | — | — | ✅ |
 | See deadline change history | — | ✅ | ✅ |
 | Manage users: list, change role, deactivate, reactivate, delete | — | — | ✅ |
 | View the audit log | — | — | ✅ |
@@ -55,3 +58,4 @@ The brief suggests reading the role from the JWT in RLS to avoid a query. Iskola
 | `20_staff_permissions.test.sql` | Coordinators are limited to assigned listings and can't publish, verify, reassign, delete, touch users or read the audit log; admins can; every staff mutation is audited, one row per item |
 | `30_admin_users.test.sql` | Self and last-admin guards, batch deactivate/reactivate, soft delete, audit entries, the auth hook |
 | `40_eligibility_search.test.sql` | Explainable eligibility (met / not met / unknown) and server-side search, filters, sorting and paging |
+| `97_faqs.test.sql` | FAQ search scoring ([faq-search.md](faq-search.md)), approved-only results, RLS for visitors, students, coordinators and admins, admin-only approval, audit entries, the search rate limit |

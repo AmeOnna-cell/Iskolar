@@ -141,6 +141,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"faqs": {
+                  Row: {
+                    "answer": string,"approved_at": string | null,"approved_by": string | null,"created_at": string,"created_by": string | null,"id": string,"keywords": (string)[],"question": string,"scholarship_id": string | null,"search": unknown,"slug": string,"status": Database["public"]['Enums']["faq_status"],"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "answer": string,"approved_at"?: string | null,"approved_by"?: string | null,"created_at"?: string,"created_by"?: string | null,"id"?: string,"keywords"?: (string)[],"question": string,"scholarship_id"?: string | null,"search"?: never,"slug"?: string,"status"?: Database["public"]['Enums']["faq_status"],"updated_at"?: string
+                  }
+                  Update: {
+                    "answer"?: string,"approved_at"?: string | null,"approved_by"?: string | null,"created_at"?: string,"created_by"?: string | null,"id"?: string,"keywords"?: (string)[],"question"?: string,"scholarship_id"?: string | null,"search"?: never,"slug"?: string,"status"?: Database["public"]['Enums']["faq_status"],"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "faqs_approved_by_fkey"
+      columns: ["approved_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "faqs_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "faqs_scholarship_id_fkey"
+      columns: ["scholarship_id"]
+isOneToOne: false
+      referencedRelation: "scholarships"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"inquiries": {
                   Row: {
                     "created_at": string,"id": string,"question": string,"scholarship_id": string | null,"status": Database["public"]['Enums']["inquiry_status"],"student_context": string | null,"student_id": string | null,"updated_at": string
@@ -556,6 +588,12 @@ isOneToOne: true
 "evaluate_eligibility":
 { Args: { "p_scholarship": string,"p_student": string }; Returns: Json
                            },
+"faq_query_words":
+{ Args: { "p": string }; Returns: (string)[]
+                           },
+"faq_search_doc":
+{ Args: { "p_answer": string,"p_keywords": (string)[],"p_question": string }; Returns: unknown
+                           },
 "income_bracket_max":
 { Args: { "b": Database["public"]['Enums']["income_bracket"] }; Returns: number
                            },
@@ -647,6 +685,11 @@ isOneToOne: true
 "scholarship_status":
 { Args: { "p_closes": string,"p_opens": string }; Returns: string
                            },
+"search_faqs":
+{ Args: { "p_limit"?: number,"p_query": string }; Returns: {
+              "answer": string,"id": string,"question": string,"score": number,"slug": string,"snippet": string
+            }[]
+                           },
 "search_scholarships":
 { Args: { "p_eligible_only"?: boolean,"p_field"?: Database["public"]['Enums']["course_field"],"p_page"?: number,"p_page_size"?: number,"p_q"?: string,"p_region"?: Database["public"]['Enums']["region"],"p_sort"?: string,"p_status"?: string,"p_type"?: Database["public"]['Enums']["provider_type"],"p_year"?: number }; Returns: {
               "amount_num": number,"amount_text": string,"closes_on": string,"days_left": number,"days_to_open": number,"first_gap": Json,"id": string,"is_sample": boolean,"last_verified_at": string,"location_label": string,"name": string,"not_met_count": number,"opens_on": string,"provider_abbr": string,"provider_color": string,"provider_name": string,"provider_short_name": string,"provider_type": Database["public"]['Enums']["provider_type"],"published_at": string,"slug": string,"status": string,"summary": string,"total_count": number,"unknown_count": number,"verdict": string,"verification": Database["public"]['Enums']["verification_status"]
@@ -672,7 +715,7 @@ isOneToOne: true
                            }
           }
           Enums: {
-            "account_status": "active"|"deactivated"|"deleted","app_role": "student"|"coordinator"|"admin","application_result": "pending"|"approved"|"rejected","application_stage": "saved"|"preparing"|"submitted","course_field": "science_math"|"engineering"|"it_cs"|"agriculture_fisheries"|"health_sciences"|"education"|"business_accountancy"|"arts_humanities_social","delivery_status": "skipped"|"pending"|"sent"|"failed","income_bracket": "below_150k"|"150k_250k"|"250k_400k"|"400k_800k"|"above_800k","inquiry_status": "open"|"answered"|"closed","listing_status": "draft"|"in_review"|"published"|"archived","notification_kind": "deadline"|"change"|"new"|"announce","provider_type": "government"|"local_government"|"private"|"school","region": "ncr"|"car"|"ilocos"|"cagayan_valley"|"central_luzon"|"calabarzon"|"mimaropa"|"bicol"|"western_visayas"|"central_visayas"|"eastern_visayas"|"zamboanga_peninsula"|"northern_mindanao"|"davao"|"soccsksargen"|"caraga"|"barmm","tri_answer": "yes"|"no"|"unsure","verification_status": "unverified"|"verified"
+            "account_status": "active"|"deactivated"|"deleted","app_role": "student"|"coordinator"|"admin","application_result": "pending"|"approved"|"rejected","application_stage": "saved"|"preparing"|"submitted","course_field": "science_math"|"engineering"|"it_cs"|"agriculture_fisheries"|"health_sciences"|"education"|"business_accountancy"|"arts_humanities_social","delivery_status": "skipped"|"pending"|"sent"|"failed","faq_status": "draft"|"approved"|"archived","income_bracket": "below_150k"|"150k_250k"|"250k_400k"|"400k_800k"|"above_800k","inquiry_status": "open"|"answered"|"closed","listing_status": "draft"|"in_review"|"published"|"archived","notification_kind": "deadline"|"change"|"new"|"announce","provider_type": "government"|"local_government"|"private"|"school","region": "ncr"|"car"|"ilocos"|"cagayan_valley"|"central_luzon"|"calabarzon"|"mimaropa"|"bicol"|"western_visayas"|"central_visayas"|"eastern_visayas"|"zamboanga_peninsula"|"northern_mindanao"|"davao"|"soccsksargen"|"caraga"|"barmm","tri_answer": "yes"|"no"|"unsure","verification_status": "unverified"|"verified"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -792,7 +835,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "account_status": ["active", "deactivated", "deleted"],"app_role": ["student", "coordinator", "admin"],"application_result": ["pending", "approved", "rejected"],"application_stage": ["saved", "preparing", "submitted"],"course_field": ["science_math", "engineering", "it_cs", "agriculture_fisheries", "health_sciences", "education", "business_accountancy", "arts_humanities_social"],"delivery_status": ["skipped", "pending", "sent", "failed"],"income_bracket": ["below_150k", "150k_250k", "250k_400k", "400k_800k", "above_800k"],"inquiry_status": ["open", "answered", "closed"],"listing_status": ["draft", "in_review", "published", "archived"],"notification_kind": ["deadline", "change", "new", "announce"],"provider_type": ["government", "local_government", "private", "school"],"region": ["ncr", "car", "ilocos", "cagayan_valley", "central_luzon", "calabarzon", "mimaropa", "bicol", "western_visayas", "central_visayas", "eastern_visayas", "zamboanga_peninsula", "northern_mindanao", "davao", "soccsksargen", "caraga", "barmm"],"tri_answer": ["yes", "no", "unsure"],"verification_status": ["unverified", "verified"]
+            "account_status": ["active", "deactivated", "deleted"],"app_role": ["student", "coordinator", "admin"],"application_result": ["pending", "approved", "rejected"],"application_stage": ["saved", "preparing", "submitted"],"course_field": ["science_math", "engineering", "it_cs", "agriculture_fisheries", "health_sciences", "education", "business_accountancy", "arts_humanities_social"],"delivery_status": ["skipped", "pending", "sent", "failed"],"faq_status": ["draft", "approved", "archived"],"income_bracket": ["below_150k", "150k_250k", "250k_400k", "400k_800k", "above_800k"],"inquiry_status": ["open", "answered", "closed"],"listing_status": ["draft", "in_review", "published", "archived"],"notification_kind": ["deadline", "change", "new", "announce"],"provider_type": ["government", "local_government", "private", "school"],"region": ["ncr", "car", "ilocos", "cagayan_valley", "central_luzon", "calabarzon", "mimaropa", "bicol", "western_visayas", "central_visayas", "eastern_visayas", "zamboanga_peninsula", "northern_mindanao", "davao", "soccsksargen", "caraga", "barmm"],"tri_answer": ["yes", "no", "unsure"],"verification_status": ["unverified", "verified"]
           }
         }
 } as const

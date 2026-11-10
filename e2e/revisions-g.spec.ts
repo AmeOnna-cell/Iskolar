@@ -74,8 +74,9 @@ test("details show where to submit: full page, side panel and phone drawer", asy
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/explore?s=dost-sei-junior-level-science");
   const panel = page.getByRole("complementary", { name: "Selected scholarship" });
-  await expect(panel.getByRole("region", { name: "Where to submit" }).getByText("Submit online at")).toBeVisible();
-  await expect(panel.getByRole("link", { name: /sei\.dost\.gov\.ph/ })).toHaveAttribute("href", "https://www.sei.dost.gov.ph");
+  const where = panel.getByRole("region", { name: "Where to submit" });
+  await expect(where.getByText("Submit online at")).toBeVisible();
+  await expect(where.getByRole("link", { name: /sei\.dost\.gov\.ph/ })).toHaveAttribute("href", "https://www.sei.dost.gov.ph");
 
   await page.setViewportSize({ width: 360, height: 740 });
   await page.goto("/explore?s=tulong-dunong-program&d=1");

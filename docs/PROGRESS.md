@@ -54,7 +54,7 @@ Two more team-leader revisions, built on the branch `revisions-g` and then merge
 - **Tests:**
   - Unit 57 of 57 (`destinationOf`).
   - pgTAP 348 of 348 (`98_where_to_submit`).
-  - E2E: new `e2e/revisions-g.spec.ts`. `revisions-d`, `a11y` and `4.13` now open the board as a signed-in student.
+  - E2E 118 of 118 (fresh reset, production build, one worker): new `e2e/revisions-g.spec.ts`. `revisions-d`, `a11y` and `4.13` now open the board as a signed-in student.
 - **Screenshots:** `docs/screenshots/revisions-g/`.
 
 ## FAQ suggestions (2026-11-10)

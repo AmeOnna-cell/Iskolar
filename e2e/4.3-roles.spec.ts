@@ -7,7 +7,7 @@ test("signed out: protected pages go to login and come back after signing in", a
   const user = await createUser("student", "next");
   await page.goto("/applications?tab=preparing");
   await expect(page).toHaveURL(/\/login\?next=%2Fapplications%3Ftab%3Dpreparing/);
-  await expect(page.getByText("Sign in to continue.")).toBeVisible();
+  await expect(page.getByText("Sign in or create an account to track your applications.")).toBeVisible();
   await page.getByLabel("Email").fill(user.email);
   await page.getByLabel("Password", { exact: true }).fill(user.password);
   await page.getByRole("button", { name: "Sign in" }).click();

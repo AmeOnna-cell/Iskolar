@@ -19,6 +19,8 @@ Iskolar has exactly three roles, stored in `public.profiles.role` (`student`, `c
 | Reply to inquiries, close or reopen them | — | ✅ | ✅ |
 | Post announcements; edit or delete their own | — | ✅ | ✅ (anyone's) |
 | Read approved FAQs and search them (`search_faqs`) | ✅ | ✅ | ✅ (visitors too) |
+| Read the Announcements board (`/announcements`) | ✅ | ✅ | ✅ (signed in only since 2026-11-11; visitors are sent to sign in) |
+| See "Where to submit" on a published listing | ✅ | ✅ | ✅ (visitors too) |
 | Create and edit FAQ drafts (and "Save as FAQ" from an answered question) | — | ✅ | ✅ |
 | Approve, archive or edit approved FAQs | — | — | ✅ |
 | See deadline change history | — | ✅ | ✅ |
@@ -58,4 +60,5 @@ The brief suggests reading the role from the JWT in RLS to avoid a query. Iskola
 | `20_staff_permissions.test.sql` | Coordinators are limited to assigned listings and can't publish, verify, reassign, delete, touch users or read the audit log; admins can; every staff mutation is audited, one row per item |
 | `30_admin_users.test.sql` | Self and last-admin guards, batch deactivate/reactivate, soft delete, audit entries, the auth hook |
 | `40_eligibility_search.test.sql` | Explainable eligibility (met / not met / unknown) and server-side search, filters, sorting and paging |
+| `98_where_to_submit.test.sql` | Where-to-submit fields: optional, online needs an https link, `save_scholarship` saves and clears them, audit entries, the sample values, visitors can read them |
 | `97_faqs.test.sql` | FAQ search scoring ([faq-search.md](faq-search.md)), approved-only results, RLS for visitors, students, coordinators and admins, admin-only approval, audit entries, the search rate limit |

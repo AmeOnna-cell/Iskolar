@@ -10,6 +10,52 @@
 | Privacy note and `/privacy` | Done and deployed (`7ebb48a`) |
 | Team-leader revisions (groups A–F) | Done and pushed |
 | FAQ suggestions (rule-based, no AI) | Done and pushed (2026-11-10) |
+| Revisions group G (where to submit; sign-in for three pages) | Merged into main; migration `20261111120000_where_to_submit` not yet pushed |
+
+## Revisions group G (2026-11-11)
+
+Two more team-leader revisions, built on the branch `revisions-g` and then merged into main.
+
+- **Where to submit:**
+  - **Migration `20261111120000_where_to_submit.sql`** (not pushed yet):
+    - `submission_method` (in person, online, mail, through your school), plus the place, address, hours, link and note. All are optional.
+    - Checks: "online" needs a link, and links start with http(s). The app is stricter and only accepts https.
+    - `save_scholarship` saves the six fields. Changes are audit-logged by the existing `audit_row` trigger.
+    - `fill_sample_submission()` holds the values for the 9 sample listings (only rows marked `is_sample`, not audited). The migration runs it for the cloud and `seed.sql` runs it after local resets.
+  - **Students:** a "Where to submit" section after "Documents to prepare" on the full page, side panel, phone drawer and My applications.
+    - It leads with one line ("In person at …", "Online at …", "Through your school: …", "By mail or courier to …"), then Address (with "Open in Maps" for real addresses), Office hours, Website and Note.
+    - With nothing set: "Confirm with the provider where to submit.", plus a link to the official source if the listing has one.
+    - My applications also shows the short answer under the stage control, with a link to the details.
+  - **Editor:** a "Where to submit" section after "Documents to prepare". The method sits next to the online link, and the link becomes required when "Online" is chosen. The error clears when another method is chosen.
+- **Sign-in for three pages:**
+  - `/announcements` now needs an account (team-leader decision; it was public). `/check` and `/applications` already did. Each goes to `/login?next=…` and back.
+  - **Visitors' nav:** the header shows Home and Find scholarships. The phone tab bar shows Home, Search and Sign in. The header's own "Sign in" only shows from 900px, and its button reads "Create an account to check eligibility" there.
+  - **Footer:** "Eligibility check" is for students only.
+  - **Scholarship details:** visitors see "N announcements from the scholarship office. Create an account or sign in to read them."
+  - **Sign-in notice:** names the page, e.g. "Sign in or create an account to read announcements."
+  - **Sign-up from a gated page:**
+    1. `?next=` goes through sign-up and is stored in the account's metadata.
+    2. Confirming the email sets the short-lived `iskolar_next` cookie.
+    3. Onboarding stays first: the welcome offers "skip for now and go to …", and the results offer "Continue to …".
+    4. Both go through `/continue`, which uses the cookie once.
+    - Every step re-checks the path with `safeNextPath`.
+- **Critique:** dual-agent, 28/40 before fixes. The snapshot is in `.impeccable/critique/`.
+  - **Detector:** nothing new. axe is clean in about 60 runs. Every redirect returns to the exact URL.
+  - **Fixed:**
+    - Sample notes copied the steps, and links were just the agency homepage.
+    - The block had no lead line.
+    - The visitor prompt broke on phones, had no sign-in path, and lost `next` after sign-up.
+    - "Online" was ambiguous (now "Website").
+    - Editor order and the stale error; the http/https hint mismatch.
+    - 24px links; two "Sign in" links at 640–899px.
+    - Truncated links had no ellipsis.
+    - No summary in My applications; the empty state was a dead end; the sign-in notice was generic.
+  - **Added at the user's request:** the Maps link and the eligibility wording on the header button.
+- **Tests:**
+  - Unit 57 of 57 (`destinationOf`).
+  - pgTAP 348 of 348 (`98_where_to_submit`).
+  - E2E: new `e2e/revisions-g.spec.ts`. `revisions-d`, `a11y` and `4.13` now open the board as a signed-in student.
+- **Screenshots:** `docs/screenshots/revisions-g/`.
 
 ## FAQ suggestions (2026-11-10)
 

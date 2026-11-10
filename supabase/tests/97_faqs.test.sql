@@ -111,6 +111,17 @@ select results_eq($$ select action, actor_id from public.audit_logs where entity
             ('faq.approve', (select ada from ids)), ('faq.update', (select ada from ids)), ('faq.create', (select ada from ids)) $$,
   'Every FAQ change is audit-logged with its actor');
 
+-- ---------- Topic: the chosen scholarship's FAQs come first ----------
+select pg_temp.act_as((select ada from ids));
+insert into public.faqs (question, answer, status, scholarship_id)
+values ('Is a zebra permit needed for TES?', 'No.', 'approved', (select id from public.scholarships where slug = 'tertiary-education-subsidy'));
+reset role;
+select is(pg_temp.top('zebra crossing permit'), 'do-zebras-need-a-crossing-permit', 'Without a topic, the best text match is first');
+select is((select slug from public.search_faqs('zebra crossing permit', 3, (select id from public.scholarships where slug = 'tertiary-education-subsidy')) limit 1),
+  'is-a-zebra-permit-needed-for-tes', 'With a topic, that scholarship''s matching FAQ is first');
+select is_empty($$ select * from public.search_faqs('banana smoothie', 3, (select id from public.scholarships where slug = 'tertiary-education-subsidy')) $$,
+  'A topic never lets an unrelated FAQ through');
+
 -- ---------- Rate limit: 60 searches a minute per user ----------
 select pg_temp.act_as((select busy from ids));
 do $$ begin for i in 1..60 loop perform public.search_faqs('gwa'); end loop; end $$;

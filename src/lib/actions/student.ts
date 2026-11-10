@@ -102,14 +102,16 @@ const question = z.object({
   scholarshipId: z.union([z.uuid(), z.literal("")]),
 });
 
-export type AskState = { status: "idle" | "error" | "success"; message?: string; fieldError?: string };
+/** `values` echoes what was typed on errors, so the form can put it back after React resets it. */
+export type AskState = { status: "idle" | "error" | "success"; message?: string; fieldError?: string; values?: { question: string; scholarshipId: string } };
 
 export async function askQuestion(_prev: AskState, fd: FormData): Promise<AskState> {
   const user = await requireRole("student");
-  const parsed = question.safeParse({ question: fd.get("question") ?? "", scholarshipId: fd.get("scholarshipId") ?? "" });
-  if (!parsed.success) return { status: "error", fieldError: parsed.error.issues[0]?.message };
+  const values = { question: String(fd.get("question") ?? ""), scholarshipId: String(fd.get("scholarshipId") ?? "") };
+  const parsed = question.safeParse(values);
+  if (!parsed.success) return { status: "error", fieldError: parsed.error.issues[0]?.message, values };
   if (!(await rateLimitAll([[`inquiry:user:${user.id}`, 5, 3600]]))) {
-    return { status: "error", message: "You've sent 5 questions in the last hour. Wait a while before sending more." };
+    return { status: "error", message: "You've sent 5 questions in the last hour. Wait a while before sending more.", values };
   }
   const supabase = await createClient();
   const { data: sp } = await supabase.from("student_profiles").select("program, year_level").eq("user_id", user.id).maybeSingle();
@@ -122,7 +124,7 @@ export async function askQuestion(_prev: AskState, fd: FormData): Promise<AskSta
     scholarship_id: parsed.data.scholarshipId || null,
     student_context: context || null,
   });
-  if (error) return { status: "error", message: "We couldn't send your question. Try again." };
+  if (error) return { status: "error", message: "We couldn't send your question. Try again.", values };
   revalidatePath("/help");
   return { status: "success", message: "Question sent. The office usually replies within 2 school days." };
 }

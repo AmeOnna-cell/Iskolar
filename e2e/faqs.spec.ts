@@ -16,6 +16,12 @@ test("suggestions appear while a student types a question, and they can still se
   await waitForHydration(page);
 
   const ask = page.getByLabel("Your question", { exact: true });
+  // A validation error keeps what was typed (React resets the form after every send).
+  await ask.fill("Hi?");
+  await page.getByRole("button", { name: "Send question" }).click();
+  await expect(ask).toHaveAttribute("aria-invalid", "true");
+  await expect(ask).toHaveValue("Hi?");
+  await ask.fill("");
   await ask.pressSequentially("ba"); // under 3 characters: nothing yet
   await page.waitForTimeout(600);
   await expect(page.getByRole("heading", { name: "These answers might help" })).toHaveCount(0);
@@ -43,15 +49,17 @@ test("the FAQ list can be searched, typos included, and no matches offer the ask
   // Visitor: results and the signed-out ask link.
   await page.goto("/help#faq-gwa");
   await waitForHydration(page);
-  await expect(page.locator("#faq-gwa")).toBeAttached(); // old anchors still exist
+  await expect(page.locator("#faq-gwa")).toHaveAttribute("open", ""); // old anchors still work, and open the answer
   const faqs = page.getByRole("region", { name: "Common questions" });
   const search = page.getByLabel("Search the common questions");
   await search.fill("remnders");
   await expect(page.getByText("1 question matches “remnders”")).toBeVisible();
   await expect(faqs.getByText("How do reminders work?")).toBeVisible();
   await expect(faqs.getByText("What is GWA and where do I find mine?")).toHaveCount(0);
+  await expect(faqs.locator("#faq-reminders")).toHaveAttribute("open", ""); // a single result opens
   await faqs.getByRole("button", { name: "Show all questions" }).click();
   await expect(faqs.locator("details")).toHaveCount(7);
+  await expect(search).toBeFocused();
 
   await search.fill("banana smoothie recipe");
   await expect(faqs.getByRole("heading", { name: "No matches for “banana smoothie recipe”" })).toBeVisible();
@@ -82,6 +90,13 @@ test("a coordinator drafts an FAQ, an admin approves it, and students then find 
   await page.goto("/staff/faqs/new");
   await waitForHydration(page);
   await expect(page.getByRole("button", { name: "Approve and publish" })).toHaveCount(0);
+  // A validation error keeps what was typed.
+  await page.getByLabel("Question", { exact: true }).fill("Ok?");
+  await page.getByLabel("Answer", { exact: true }).fill("Kept after the error.");
+  await page.getByRole("button", { name: "Save draft" }).click();
+  await expect(page.getByText("Question: at least 5 characters.")).toBeVisible();
+  await expect(page.getByLabel("Question", { exact: true })).toBeFocused();
+  await expect(page.getByLabel("Answer", { exact: true })).toHaveValue("Kept after the error.");
   await page.getByLabel("Question", { exact: true }).fill(question);
   await page.getByLabel("Answer", { exact: true }).fill("Yes, if it fits in a bag. See [My profile](/profile) for reminders.");
   await page.getByLabel("Keywords").fill(`xylophone${stamp}, instrumento`);
@@ -103,9 +118,13 @@ test("a coordinator drafts an FAQ, an admin approves it, and students then find 
   const adminCtx = await browser.newContext();
   const aPage = await adminCtx.newPage();
   await signIn(aPage, admin.email);
+  await aPage.goto("/staff");
+  await expect(aPage.getByRole("link", { name: "Review FAQ drafts" })).toBeVisible();
   await aPage.goto(`/staff/faqs?status=draft&q=${stamp}`);
   await aPage.getByRole("link", { name: `Review ${question}` }).click();
   await expect(aPage.getByLabel("Question", { exact: true })).toHaveValue(question);
+  await expect(aPage.getByText("How students see it")).toBeVisible();
+  await expect(aPage.getByRole("link", { name: "My profile (opens in a new tab)" })).toHaveAttribute("href", "/profile");
   await waitForHydration(aPage);
   await aPage.getByRole("button", { name: "Approve and publish" }).click();
   await expect(aPage.getByText("FAQ approved. Students see it on the Help page and in suggestions.")).toBeVisible();

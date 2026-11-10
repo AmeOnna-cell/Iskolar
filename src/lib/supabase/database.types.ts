@@ -686,7 +686,7 @@ isOneToOne: true
 { Args: { "p_closes": string,"p_opens": string }; Returns: string
                            },
 "search_faqs":
-{ Args: { "p_limit"?: number,"p_query": string }; Returns: {
+{ Args: { "p_limit"?: number,"p_query": string,"p_scholarship"?: string }; Returns: {
               "answer": string,"id": string,"question": string,"score": number,"slug": string,"snippet": string
             }[]
                            },

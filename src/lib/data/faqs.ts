@@ -36,6 +36,12 @@ export async function faqCounts() {
   return Object.fromEntries(statuses.map((s, i) => [s, counts[i]!])) as Record<FaqStatus, number>;
 }
 
+export async function faqDraftCount() {
+  const supabase = await createClient();
+  const { count } = await supabase.from("faqs").select("id", { count: "exact", head: true }).eq("status", "draft");
+  return count ?? 0;
+}
+
 export async function getFaq(id: string) {
   const supabase = await createClient();
   const { data } = await supabase

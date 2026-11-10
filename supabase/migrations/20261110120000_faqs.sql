@@ -180,8 +180,9 @@ language sql immutable set search_path = '' as $$
 $$;
 
 -- Approved FAQs only (security definer, so it filters status itself). Rate-limited to 60 calls a
--- minute per signed-in user, or per IP address for visitors.
-create function public.search_faqs(p_query text, p_limit integer default 3)
+-- minute per signed-in user, or per IP address for visitors. With p_scholarship (the ask form's
+-- Topic), that scholarship's FAQs come first among the matches; it never lets a weak match through.
+create function public.search_faqs(p_query text, p_limit integer default 3, p_scholarship uuid default null)
 returns table (id uuid, slug text, question text, snippet text, answer text, score real)
 language plpgsql volatile security definer set search_path = '' as $$
 declare
@@ -233,9 +234,9 @@ begin
   from final s
   -- 0.5 keeps out a single word that appears only in an answer (0.44); see docs/faq-search.md.
   where s.total >= 0.5
-  order by s.total desc, s.created_at
+  order by (s.scholarship_id is not distinct from p_scholarship and p_scholarship is not null) desc, s.total desc, s.created_at
   limit least(greatest(coalesce(p_limit, 3), 1), 10);
 end $$;
 
-revoke execute on function public.search_faqs(text, integer) from public;
-grant execute on function public.search_faqs(text, integer) to anon, authenticated, service_role;
+revoke execute on function public.search_faqs(text, integer, uuid) from public;
+grant execute on function public.search_faqs(text, integer, uuid) to anon, authenticated, service_role;

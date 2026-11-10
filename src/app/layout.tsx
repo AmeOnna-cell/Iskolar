@@ -48,7 +48,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           <main id="main" tabIndex={-1} className="flex-1">
             {children}
           </main>
-          <Footer />
+          <Footer student={viewer?.role === "student"} />
           <TabBar items={primaryNav(viewer)} />
         </Providers>
       </body>

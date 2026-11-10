@@ -11,6 +11,11 @@ describe("accessFor", () => {
     expect(accessFor("/staff/listings")).toEqual({ kind: "roles", roles: ["coordinator", "admin"] });
     expect(accessFor("/admin/audit")).toEqual({ kind: "roles", roles: ["admin"] });
     expect(accessFor("/administrator")).toEqual({ kind: "public" });
+    // Visitors are sent to sign in for these three (and come back after).
+    expect(accessFor("/check")).toEqual({ kind: "roles", roles: ["student"] });
+    expect(accessFor("/applications")).toEqual({ kind: "roles", roles: ["student"] });
+    expect(accessFor("/announcements")).toEqual({ kind: "signed-in" });
+    expect(accessFor("/help")).toEqual({ kind: "public" });
   });
 });
 

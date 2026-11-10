@@ -18,6 +18,8 @@ const RULES: Array<[prefix: string, access: Access]> = [
   ["/applications", { kind: "roles", roles: ["student"] }],
   ["/alerts", { kind: "roles", roles: ["student"] }],
   ["/check", { kind: "roles", roles: ["student"] }],
+  // Signed-in only (team-leader revision, 2026-11-11; it was public before).
+  ["/announcements", { kind: "signed-in" }],
   ["/settings", { kind: "signed-in" }],
   ["/profile", { kind: "signed-in" }],
   ["/staff", { kind: "roles", roles: ["coordinator", "admin"] }],

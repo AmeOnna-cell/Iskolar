@@ -5,6 +5,7 @@ import { DocumentChecklist } from "@/components/scholarship/checklist";
 import { CriteriaList } from "@/components/scholarship/criteria";
 import { Section, Steps } from "@/components/scholarship/detail-body";
 import { ShareButton } from "@/components/scholarship/share-button";
+import { WhereToSubmit } from "@/components/scholarship/where-to-submit";
 import { buttonClass } from "@/components/ui/button";
 import { Notice } from "@/components/ui/notice";
 import { statusOf, type ScholarshipDetail } from "@/lib/data/scholarships";
@@ -99,6 +100,10 @@ export function ApplicationDetail({ s, app, evaluation }: { s: ScholarshipDetail
           <DocumentChecklist scholarshipId={s.id} slug={s.slug} docs={s.documents} checked={checked} canTrack tracked />
         </Section>
       ) : null}
+
+      <Section title="Where to submit" compact id={sid("submit")}>
+        <WhereToSubmit s={s} />
+      </Section>
 
       {s.steps.length ? (
         <Section title="How to apply" compact id={sid("steps")}>

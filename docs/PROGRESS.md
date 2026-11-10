@@ -10,14 +10,14 @@
 | Privacy note and `/privacy` | Done and deployed (`7ebb48a`) |
 | Team-leader revisions (groups A–F) | Done and pushed |
 | FAQ suggestions (rule-based, no AI) | Done and pushed (2026-11-10) |
-| Revisions group G (where to submit; sign-in for three pages) | Merged into main; migration `20261111120000_where_to_submit` not yet pushed |
+| Revisions group G (where to submit; sign-in for three pages) | Done and pushed (2026-11-11) |
 
 ## Revisions group G (2026-11-11)
 
 Two more team-leader revisions, built on the branch `revisions-g` and then merged into main.
 
 - **Where to submit:**
-  - **Migration `20261111120000_where_to_submit.sql`** (not pushed yet):
+  - **Migration `20261111120000_where_to_submit.sql`** (pushed with `--remote` before the code; the remote migration list matches):
     - `submission_method` (in person, online, mail, through your school), plus the place, address, hours, link and note. All are optional.
     - Checks: "online" needs a link, and links start with http(s). The app is stricter and only accepts https.
     - `save_scholarship` saves the six fields. Changes are audit-logged by the existing `audit_row` trigger.

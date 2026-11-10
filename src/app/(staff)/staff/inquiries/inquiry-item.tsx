@@ -1,12 +1,23 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
 import { useToast } from "@/components/ui/toast";
 import { replyInquiry, setInquiryStatus } from "@/lib/actions/staff";
 
-export function InquiryActions({ id, status }: { id: string; status: "open" | "answered" | "closed" }) {
+/** "Save as FAQ" (answered questions only): opens a draft FAQ filled in from the question and reply. */
+function SaveAsFaq({ href, question }: { href?: string; question: string }) {
+  if (!href) return null;
+  return (
+    <Link href={href} className="inline-flex min-h-11 items-center px-1 text-sm font-semibold nav:min-h-9">
+      Save as FAQ<span className="sr-only">: {question}</span>
+    </Link>
+  );
+}
+
+export function InquiryActions({ id, status, faqHref, question }: { id: string; status: "open" | "answered" | "closed"; faqHref?: string; question: string }) {
   const toast = useToast();
   const [pending, start] = useTransition();
   const [replying, setReplying] = useState(false);
@@ -24,9 +35,12 @@ export function InquiryActions({ id, status }: { id: string; status: "open" | "a
   if (status === "closed") {
     return (
       <div className="mt-4">
-        <Button variant="outline" size="sm" loading={pending} onClick={() => setStatus("open")}>
-          Reopen
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" loading={pending} onClick={() => setStatus("open")}>
+            Reopen
+          </Button>
+          <SaveAsFaq href={faqHref} question={question} />
+        </div>
       </div>
     );
   }
@@ -95,6 +109,7 @@ export function InquiryActions({ id, status }: { id: string; status: "open" | "a
           <Button variant="outline" size="sm" disabled={pending} onClick={() => setStatus("closed")}>
             Close question
           </Button>
+          <SaveAsFaq href={faqHref} question={question} />
         </div>
       )}
     </div>

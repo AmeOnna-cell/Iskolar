@@ -4,6 +4,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { Notice } from "@/components/ui/notice";
 import { requireRole } from "@/lib/auth/session";
 import { statusOf } from "@/lib/data/scholarships";
+import { faqDraftCount } from "@/lib/data/faqs";
 import { getStaffNames, getStaffOverview, listInquiries, listListings } from "@/lib/data/staff";
 import { ago, formatDate, plural, schoolDaysSince, todayPH, urgency } from "@/lib/format";
 
@@ -17,11 +18,12 @@ export default async function StaffHomePage({ searchParams }: { searchParams: Pr
   const isAdmin = user.role === "admin";
   const today = todayPH();
   const in7 = new Date(Date.parse(`${today}T00:00:00Z`) + 7 * 86_400_000).toISOString().slice(0, 10);
-  const [o, questions, closing] = await Promise.all([
+  const [o, questions, closing, faqDrafts] = await Promise.all([
     getStaffOverview(),
     listInquiries("open", 1, QUEUE),
     // ponytail: 50 covers any realistic week of deadlines; the "See all" link shows the rest.
     listListings({ q: "", status: null, verification: null, mine: false, closing: { from: today, to: in7 }, sort: "closes_on", dir: "asc", page: 1, pageSize: 50 }, user.id),
+    isAdmin ? faqDraftCount() : 0,
   ]);
   const names = await getStaffNames([...new Set(closing.rows.slice(0, QUEUE).map((r) => r.assigned_coordinator_id).filter(Boolean) as string[])]);
   const mineClosing = closing.rows.filter((r) => r.assigned_coordinator_id === user.id).length;
@@ -31,8 +33,9 @@ export default async function StaffHomePage({ searchParams }: { searchParams: Pr
     isAdmin && o.unverified ? `${plural(o.unverified, "listing")} ${o.unverified === 1 ? "needs" : "need"} verification` : null,
     !isAdmin && mineClosing ? `${mineClosing} of your listings ${mineClosing === 1 ? "closes" : "close"} this week` : null,
     o.open_inquiries ? `${plural(o.open_inquiries, "question")} ${o.open_inquiries === 1 ? "is" : "are"} waiting for a reply` : null,
+    faqDrafts ? `${plural(faqDrafts, "FAQ draft")} ${faqDrafts === 1 ? "is" : "are"} waiting for approval` : null,
   ].filter(Boolean);
-  const finding = parts.length ? `${parts.join(" and ")}.` : isAdmin ? "Everything is verified and every question has a reply." : "Every question has a reply.";
+  const finding = parts.length ? `${[parts.slice(0, -1).join(", "), parts.at(-1)].filter(Boolean).join(" and ")}.` : isAdmin ? "Everything is verified and every question has a reply." : "Every question has a reply.";
 
   const tiles: Array<[string, string, string, string]> = [
     ["Published listings", String(o.published), `${o.open} open now`, "/staff/listings?status=published"],
@@ -56,6 +59,11 @@ export default async function StaffHomePage({ searchParams }: { searchParams: Pr
           <p className="mt-2 text-base text-ink sm:text-title-sm sm:leading-normal" data-testid="staff-finding">
             {finding}
           </p>
+          {faqDrafts ? (
+            <Link href="/staff/faqs?status=draft" className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold">
+              Review FAQ drafts
+            </Link>
+          ) : null}
         </div>
         <ButtonLink href="/staff/listings/new">Add a listing</ButtonLink>
       </div>

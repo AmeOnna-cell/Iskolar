@@ -36,7 +36,7 @@ export function HeaderNav({ items }: { items: NavItem[] }) {
 /** Mobile bottom tab bar (<900px): five equal tabs, 24px icons over 12px labels, safe-area padding. */
 export function TabBar({ items: all, unread = 0 }: { items: NavItem[]; unread?: number }) {
   // Five equal tabs (DESIGN.md): Help lives in the header's "?" button at every width.
-  const items = all.filter((i) => i.href !== "/help");
+  const items = all.filter((i) => i.href !== "/help" && i.phone !== false);
   const pathname = usePathname();
   return (
     <nav

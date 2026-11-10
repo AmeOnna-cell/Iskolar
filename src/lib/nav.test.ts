@@ -18,6 +18,10 @@ describe("nav", () => {
     expect(coord).not.toContain("/admin/users");
     const admin = primaryNav({ name: null, email: "a@x.ph", role: "admin" }).map((i) => i.href);
     expect(admin).toContain("/admin/users");
+    expect(admin).toContain("/staff/faqs");
+    // Five tabs on phones for every role: FAQs is reached from Questions there.
+    expect(admin.filter((h) => h !== "/staff/faqs")).toHaveLength(5);
+    expect(primaryNav({ name: null, email: "a@x.ph", role: "admin" }).filter((i) => i.phone !== false)).toHaveLength(5);
     // Visitors and students: five tabs on phones plus Help (in the header "?" at every width).
     expect(primaryNav(null).map((i) => i.href)).toEqual(["/", "/explore", "/check", "/applications", "/announcements", "/help"]);
   });

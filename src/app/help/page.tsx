@@ -1,29 +1,20 @@
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/button";
 import { getSessionUser } from "@/lib/auth/session";
+import { listApprovedFaqs } from "@/lib/data/faqs";
 import { getScholarshipOptions } from "@/lib/data/scholarships";
 import { getMyInquiries } from "@/lib/data/student";
 import { ago } from "@/lib/format";
 import { AskForm } from "./ask-form";
+import { FaqList } from "./faq-list";
 
 export const metadata = { title: "Help and FAQ" };
-
-// [id, question, answer]: ids let other pages link straight to an answer (/help#faq-sample).
-const FAQ: Array<[string, string, React.ReactNode]> = [
-  ["faq-gwa", "What is GWA and where do I find mine?", "GWA (general weighted average) is your grades averaged by units. It’s on your Certificate of Grades or student portal. Most schools use 1.00 as the highest grade."],
-  ["faq-indigency", "Where do I get a Certificate of Indigency?", "At your barangay hall. Bring a valid ID and proof of residency. It’s usually free and released the same day, but lines get long near deadlines."],
-  ["faq-official", "Is the eligibility check an official decision?", <>No. It compares <Link href="/check">your answers</Link> with the requirements on file and shows which ones you meet. The provider always makes the final decision, and some requirements, like exams or interviews, can only be checked by them.</>],
-  ["faq-accurate", "How do I know a listing is accurate?", "Each listing shows its official source and when it was last checked. Listings marked “Unverified” came from unofficial posts, so confirm them with the provider before preparing documents."],
-  ["faq-sample", "Why are some listings marked “Sample listing”?", "They are example data to show how Iskolar works. Confirm everything with the provider’s official page before you apply."],
-  ["faq-two", "Can I receive more than one scholarship?", "Sometimes. Many government programs don’t allow two government grants at once, while private and school awards often do. Check “Obligations” on each listing or ask the provider."],
-  ["faq-reminders", "How do reminders work?", <>Save a scholarship or start preparing it, and we’ll remind you before it closes. Choose email, push or on-site alerts and how many days ahead in <Link href="/profile#reminders">My profile</Link>.</>],
-];
 
 export default async function HelpPage({ searchParams }: { searchParams: Promise<{ about?: string }> }) {
   const { about } = await searchParams;
   const user = await getSessionUser();
   const isStudent = user?.role === "student";
-  const [options, mine] = await Promise.all([getScholarshipOptions(), isStudent ? getMyInquiries() : []]);
+  const [options, mine, faqs] = await Promise.all([getScholarshipOptions(), isStudent ? getMyInquiries() : [], listApprovedFaqs()]);
   const aboutId = options.some((o) => o.id === about) ? about : undefined;
 
   return (
@@ -33,19 +24,11 @@ export default async function HelpPage({ searchParams }: { searchParams: Promise
       <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <section aria-labelledby="faq-h" className="overflow-hidden rounded-md border border-hairline bg-surface shadow-rest">
           <h2 id="faq-h" className="border-b border-hairline px-4 py-4 text-title-sm font-[650] text-ink sm:px-6 sm:text-title">Common questions</h2>
-          {FAQ.map(([id, q, a]) => (
-            <details key={id} id={id} className="group scroll-mt-24 border-t border-hairline first-of-type:border-t-0">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-4 font-semibold text-ink hover:bg-surface-hover sm:px-6 [&::-webkit-details-marker]:hidden">
-                {q}
-                <span aria-hidden="true" className="size-2.5 shrink-0 rotate-45 border-r-2 border-b-2 border-ink-hint transition-transform duration-150 group-open:-rotate-[135deg]" />
-              </summary>
-              <p className="max-w-[70ch] px-4 pb-6 text-ink-secondary sm:px-6">{a}</p>
-            </details>
-          ))}
+          <FaqList faqs={faqs} ask={isStudent ? "student" : user ? null : "visitor"} />
         </section>
         <div className={`flex flex-col gap-6 ${aboutId ? "max-lg:order-first" : ""}`}>
           <section aria-labelledby="ask-h" className="scroll-mt-24 rounded-md border border-hairline bg-surface p-4 shadow-rest sm:p-6">
-            <h2 id="ask-h" className="mb-4 text-title-sm font-[650] text-ink sm:text-title">Ask a question</h2>
+            <h2 id="ask-h" className="mb-4 text-title-sm font-[650] text-ink sm:text-title">Ask the scholarship office</h2>
             {isStudent ? (
               <AskForm options={options} about={aboutId} />
             ) : user ? (

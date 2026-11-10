@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Pill } from "@/components/scholarship/bits";
 import { Pagination } from "@/components/ui/table-bits";
 import { requireRole } from "@/lib/auth/session";
+import { faqDraftCount } from "@/lib/data/faqs";
 import { getStaffNames, inquiryCounts, listInquiries } from "@/lib/data/staff";
 import { ago, schoolDaysSince } from "@/lib/format";
 import { one, parsePaging } from "@/lib/paging";
@@ -21,15 +22,21 @@ export default async function InquiriesPage({ searchParams }: { searchParams: Pr
   const sp = await searchParams;
   const status = TABS.find(([s]) => s === one(sp.status))?.[0] ?? "open";
   const { page, pageSize } = parsePaging(sp, { size: 10 });
-  const [{ rows, total }, counts] = await Promise.all([listInquiries(status, page, pageSize), inquiryCounts()]);
+  const [{ rows, total }, counts, drafts] = await Promise.all([listInquiries(status, page, pageSize), inquiryCounts(), faqDraftCount()]);
   const names = await getStaffNames([...new Set(rows.flatMap((r) => r.replies.map((x) => x.author_id)).filter(Boolean) as string[])]);
   const pathname = "/staff/inquiries";
 
   return (
     <div className="page-container py-8">
       <div className="reading-column">
-        <h1 className="text-headline-sm font-bold tracking-tight text-ink sm:text-headline">Student questions</h1>
-        <p className="mt-2 text-ink-secondary">Students see your reply on their Help page. Aim to reply within 2 school days.</p>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h1 className="text-headline-sm font-bold tracking-tight text-ink sm:text-headline">Student questions</h1>
+          {/* The way into FAQs on phones, where the tab bar stays at five tabs. */}
+          <Link href="/staff/faqs" className="inline-flex min-h-11 items-center text-sm font-semibold">
+            FAQs{drafts ? ` · ${drafts} ${drafts === 1 ? "draft" : "drafts"}` : ""}
+          </Link>
+        </div>
+        <p className="mt-2 text-ink-secondary">Students see your reply on their Help page. Aim to reply within 2 school days. Use “Save as FAQ” on answers you give often.</p>
 
         <nav aria-label="Question status" className="mt-6 mb-4 flex gap-1 overflow-x-auto border-b border-hairline">
           {TABS.map(([key, label]) => (
@@ -69,7 +76,7 @@ export default async function InquiriesPage({ searchParams }: { searchParams: Pr
                       <span className="mt-1 block text-caption text-ink-hint">{ago(r.created_at)}</span>
                     </p>
                   ))}
-                  <InquiryActions id={q.id} status={q.status} />
+                  <InquiryActions id={q.id} status={q.status} faqHref={q.replies.length ? `/staff/faqs/new?from=${q.id}` : undefined} question={q.question} />
                 </li>
               ))}
             </ul>

@@ -10,7 +10,8 @@ export type Viewer = {
   subtitle?: string | null;
 } | null;
 
-export type NavItem = { href: string; label: string; short: string; icon: IconName };
+/** `phone: false` keeps an item out of the five-tab phone bar (reached another way there). */
+export type NavItem = { href: string; label: string; short: string; icon: IconName; phone?: false };
 
 export function homeHref(viewer: Viewer): string {
   if (!viewer) return "/";
@@ -24,6 +25,8 @@ export function primaryNav(viewer: Viewer): NavItem[] {
       { href: "/staff", label: "Overview", short: "Overview", icon: "grid" },
       { href: "/staff/listings", label: "Listings", short: "Listings", icon: "list" },
       { href: "/staff/inquiries", label: "Questions", short: "Questions", icon: "help" },
+      // On phones FAQs is reached from the Questions page, so the tab bar stays at five (DESIGN.md).
+      { href: "/staff/faqs", label: "FAQs", short: "FAQs", icon: "q", phone: false },
       { href: "/staff/announcements", label: "Announcements", short: "News", icon: "mega" },
     ];
     if (viewer.role === "admin") {

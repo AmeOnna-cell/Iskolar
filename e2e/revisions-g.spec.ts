@@ -53,8 +53,9 @@ test("signed out: scholarship details offer an account instead of the announceme
   await page.goto(`/s/${slug}`);
   await expect(page.getByText(/announcements? from the scholarship office\./)).toBeVisible();
   const next = encodeURIComponent(`/announcements?a=${slug}`);
-  await expect(page.getByRole("link", { name: "Create an account", exact: true })).toHaveAttribute("href", `/signup?next=${next}`);
-  await expect(page.getByRole("link", { name: "sign in", exact: true })).toHaveAttribute("href", `/login?next=${next}`);
+  const prompt = page.locator("p", { hasText: /announcements? from the scholarship office/ });
+  await expect(prompt.getByRole("link", { name: "Create an account", exact: true })).toHaveAttribute("href", `/signup?next=${next}`);
+  await expect(prompt.getByRole("link", { name: "sign in", exact: true })).toHaveAttribute("href", `/login?next=${next}`);
 });
 
 for (const path of ["/check", "/applications?tab=preparing", "/announcements?a=general"]) {
@@ -102,9 +103,13 @@ test("a listing with nothing set says to confirm with the provider", async ({ pa
     slug, provider_id: p!.id, name: `No submit info ${slug}`, amount_text: "₱1,000", source_label: "E2E", listing_status: "published",
   });
   expect(error).toBeNull();
-  await page.goto(`/s/${slug}`);
-  await expect(submitBlock(page)).toContainText("Confirm with the provider where to submit.");
-  await expect(submitBlock(page).getByTestId("where-to-submit")).toHaveCount(0);
+  try {
+    await page.goto(`/s/${slug}`);
+    await expect(submitBlock(page)).toContainText("Confirm with the provider where to submit.");
+    await expect(submitBlock(page).getByTestId("where-to-submit")).toHaveCount(0);
+  } finally {
+    await admin.from("scholarships").delete().eq("slug", slug); // keeps later specs' counts exact
+  }
 });
 
 test("a real address gets a Maps link; a link on an in-person listing is a Website", async ({ page }) => {
@@ -117,12 +122,16 @@ test("a real address gets a Maps link; a link on an in-person listing is a Websi
     submission_url: "https://example.org/forms",
   });
   expect(error).toBeNull();
-  await page.goto(`/s/${slug}`);
-  const block = submitBlock(page);
-  await expect(block.getByTestId("submit-lead")).toHaveText("In person at Student Center");
-  await expect(block.getByRole("link", { name: /Open in Maps/ })).toHaveAttribute("href", /google\.com\/maps\/search\/\?api=1&query=Student%20Center%2C%20Room%20101/);
-  await expect(block.getByText("Website")).toBeVisible();
-  await expect(block.getByText("Online", { exact: true })).toHaveCount(0);
+  try {
+    await page.goto(`/s/${slug}`);
+    const block = submitBlock(page);
+    await expect(block.getByTestId("submit-lead")).toHaveText("In person at Student Center");
+    await expect(block.getByRole("link", { name: /Open in Maps/ })).toHaveAttribute("href", /google\.com\/maps\/search\/\?api=1&query=Student%20Center%2C%20Room%20101/);
+    await expect(block.getByText("Website")).toBeVisible();
+    await expect(block.getByText("Online", { exact: true })).toHaveCount(0);
+  } finally {
+    await admin.from("scholarships").delete().eq("slug", slug);
+  }
 });
 
 test("My applications shows where to submit next to the checklist", async ({ page }) => {
@@ -182,7 +191,8 @@ test("signing up from a gated page: onboarding first, then back to where they we
   await expect(page).toHaveURL(/\/check\?welcome=1/);
   await page.getByRole("link", { name: "skip for now and go to Announcements" }).click();
   await expect(page).toHaveURL((u) => u.pathname + u.search === "/announcements?a=general");
-  // Used once: the results page is back to "Go to my dashboard".
-  await page.goto("/check/results");
-  await expect(page.getByRole("link", { name: "Go to my dashboard" })).toBeVisible();
+  // Used once: the welcome no longer offers to skip there.
+  await page.goto("/check?welcome=1");
+  await expect(page.getByText("Your email is confirmed")).toBeVisible();
+  await expect(page.getByRole("link", { name: /skip for now/ })).toHaveCount(0);
 });

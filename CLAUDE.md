@@ -62,8 +62,12 @@ Iskolar helps Filipino college students find scholarships, check eligibility (ex
   - The summary table is at the top of "Team-leader revisions" in `docs/PROGRESS.md`.
 - **Branch:** `main`. No work-in-progress branch.
 
+## Progress (2026-11-10): FAQ suggestions
+- Rule-based FAQ suggestions are built and merged into main. The details are in "FAQ suggestions" in `docs/PROGRESS.md`; the scoring rules are in `docs/faq-search.md`.
+- Migration `20261110120000_faqs` is not yet on the cloud. Push it with `db push --remote` before the code, and ask first.
+- Run the suite in steps (reset, then lint/typecheck/unit, then pgTAP, then build, then E2E with `--workers=1`). Check for stray `node` processes first: a "killed" background job once kept running and shared the DB and `.next`.
+
 ## Remaining work
-- Push group F and the summary docs (ask the user first; group F has no migration).
 - Waiting on the user: the deferred P2/P3 items in `docs/REPORT.md`, and the items left by choice in PROGRESS ("Summary: all revision groups").
 
 ## Open issues

@@ -8,7 +8,50 @@
 | 8 Polish/QA | Done and deployed |
 | 9 Tests + docs | Done and deployed (2026-11-08); see `docs/REPORT.md` |
 | Privacy note and `/privacy` | Done and deployed (`7ebb48a`) |
-| Team-leader revisions (groups A–F) | Done: A–E pushed (`a60e479`); F committed (`cc70fa8`), not pushed |
+| Team-leader revisions (groups A–F) | Done and pushed |
+| FAQ suggestions (rule-based, no AI) | Merged into main; migration `20261110120000_faqs` not yet pushed |
+
+## FAQ suggestions (2026-11-10)
+
+Rule-based FAQ suggestions with PostgreSQL full-text search and pg_trgm. How the scoring works is in `docs/faq-search.md`, written for the defense. Built on the branch `faq-wip`, then merged into main.
+
+- **Migration `20261110120000_faqs.sql`** (not pushed yet):
+  - **Table:** `faqs` with question, answer (plain text, `[text](/link)` links), keywords and an optional scholarship.
+  - **Statuses and stamps:** draft, approved or archived. The database sets `created_by`, `approved_by` and `approved_at`.
+  - **Slug:** set once from the question, so it never changes.
+  - **Search column:** a generated `search` column (question and keywords weighted A, answer weighted B, each in both `english` and `simple`). It has a GIN index, plus a GIN trigram index on the question.
+  - **RLS:** everyone, including visitors, reads approved FAQs. Coordinators create and edit drafts. Only admins approve, archive or edit approved FAQs. Nobody deletes.
+  - **Audit:** `faq.create`, `faq.update`, `faq.approve`, `faq.archive` and `faq.return_to_draft`.
+  - **Moved from the Help page:** the 7 hard-coded FAQs are now approved rows with their old `#faq-…` slugs.
+  - **`search_faqs(p_query, p_limit 3, p_scholarship)`:**
+    - Approved FAQs only.
+    - Score = `ts_rank_cd` (an OR across the meaningful words) + `strict_word_similarity` on the question (when ≥ 0.5). Shown when the score is ≥ 0.5.
+    - The chosen Topic's FAQs come first among the matches.
+    - 60 searches a minute per user or per IP, raising `PT429` above that.
+  - **User-approved choices:** `strict_word_similarity` instead of `word_similarity` (the plain version matched "school" to "scholarship"), and the 0.5 threshold.
+- **Help page:**
+  - "Ask the scholarship office" (renamed from "Ask a question"): "These answers might help" shows up to 3 matches while the student types (300ms after they pause, from 3 characters). It's a slim panel with one-line snippets, and each answer opens in place. Links inside it open in a new tab, so the draft isn't lost. The search follows the chosen Topic.
+  - A search box over "Common questions":
+    - Results stay on screen until the next ones arrive. The status line shows the number of matches, "Searching…", and a hint below 3 letters.
+    - A single result opens.
+    - "No matches" offers "Ask the scholarship office", which carries the words into an empty question box.
+    - A failed or rate-limited search keeps the full list.
+    - `/help#faq-…` opens the answer.
+  - Both the ask form and the staff FAQ form keep what was typed after a validation error. Their actions echo `values`; the ask form already had this bug before.
+- **Staff:**
+  - **Staff → FAQs** (`/staff/faqs`): Drafts / Approved / Archived tabs with counts, search and server-side paging.
+  - **Create and edit:** a "How students see it" preview under the answer.
+  - **Coordinators:** only "Save draft". Approved and archived FAQs are read-only for them.
+  - **Admins:** "Approve and publish", "Save draft", "Archive" and "Move back to draft".
+  - **Questions:** "Save as FAQ" in each answered question's action row opens a draft filled in from the question and the reply, with a note to remove personal details. "FAQs · N drafts" sits next to the title. That is the way in on phones, where the tab bar stays at five tabs; the desktop header has "FAQs".
+  - **Overview:** admins see "N FAQ drafts are waiting for approval" and "Review FAQ drafts".
+- **Critique:** dual-agent, 28/40 before fixes. The snapshot is in `.impeccable/critique/`.
+  - **Detector:** clean. The overlay flagged nested cards (fixed) and the font (a design-system choice). axe is clean.
+  - **All 12 findings fixed:** a failed search hid the list, typed text was lost on errors, the panel pushed Send down, the list jumped between searches, deep links didn't open, focus was lost, no-match wasn't announced, the draft was lost through links, locked FAQs showed as a disabled form, there was no answer preview, the chevron was clipped, and several small items.
+  - **Left by choice:** merging the FAQ search and the question box into one entry point.
+- **Incident:** a full-suite job reported as stopped for low memory kept running and overlapped a later run (shared DB and `.next`). Runs are now done in steps, with a check for stray node processes first.
+- **Tests (fresh reset, production build, one worker):** lint and typecheck clean, unit 56 of 56, pgTAP 330 of 330 (`97_faqs`: 47 assertions), E2E 111 of 111 (`e2e/faqs.spec.ts`; axe on the staff FAQ pages and the help states).
+- **Screenshots:** `docs/screenshots/faqs/`.
 
 ## Team-leader revisions (started 2026-11-08)
 

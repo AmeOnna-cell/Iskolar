@@ -2,7 +2,7 @@
 
 Iskolar suggests FAQ answers with fixed rules inside PostgreSQL. There is no AI and no outside service: the same text always gets the same results, and every step can be checked in SQL.
 
-- **Where it runs:** the `search_faqs(p_query, p_limit default 3)` function, migration `supabase/migrations/20261110120000_faqs.sql`.
+- **Where it runs:** the `search_faqs(p_query, p_limit default 3, p_scholarship default null)` function, migration `supabase/migrations/20261110120000_faqs.sql`.
 - **Where it's used:**
   - Help page, "Ask the scholarship office": as a student types (300ms after they stop, from 3 characters), up to 3 matches show above Send under "These answers might help".
   - Help page, the search box over "Common questions": the same function. When nothing matches, it offers the ask form.
@@ -75,7 +75,7 @@ If no meaningful words are left (for example "what is the"), there are no result
 - A single word found only in an answer scores about 0.44, so it stays out. Examples are "school" in "school uniform" and "apply" in "how do I apply".
 - Two answer words together, or any question or keyword word, or a typo of a question word, reach 0.5.
 
-Results are sorted by score (highest first), then by the oldest FAQ. Each one returns its id, slug (for the `/help#faq-…` link), question, a short snippet and the score:
+Results are sorted by score (highest first), then by the oldest FAQ. In the ask form, when the student picks a scholarship as the Topic (`p_scholarship`), that scholarship's FAQs come first among the matches. The topic only reorders FAQs that already passed the minimum score; it never lets a weak match through. Each one returns its id, slug (for the `/help#faq-…` link), question, a short snippet and the score:
 
 - **Snippet:** the answer with link markup removed, cut at a word boundary under 140 characters, with "…" added.
 - **Full answer:** also returned, so a suggestion can open in place.

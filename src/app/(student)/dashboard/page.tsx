@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Icon, type IconName } from "@/components/icons";
+import { unreadCount } from "@/lib/data/notifications";
 import { DueText, Meter } from "@/components/scholarship/bits";
 import { ScholarshipCard } from "@/components/scholarship/card";
 import { ButtonLink } from "@/components/ui/button";
@@ -8,7 +10,7 @@ import { completeness, doNext, headline, urgentItems, type NextRow, type Tracked
 import { parseSearchParams, searchScholarships, statusOf } from "@/lib/data/scholarships";
 import { getEligibilityCounts, getRecentAnnouncements, getRecentNotifications, getStudentProfile, listApplications } from "@/lib/data/student";
 import { requirementLabel, stepFor, type EligibilityItem } from "@/lib/eligibility";
-import { ago, formatDate, longDate, shortProvider, todayPH } from "@/lib/format";
+import { ago, formatDate, shortProvider, todayPH } from "@/lib/format";
 import { TaskAction } from "./task-action";
 
 export const metadata = { title: "Dashboard" };
@@ -61,23 +63,19 @@ function NextItem({ r }: { r: NextRow }) {
   );
 }
 
-function greeting() {
-  const hour = Number(new Date().toLocaleString("en-US", { hour: "numeric", hour12: false, timeZone: "Asia/Manila" }));
-  return hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-}
-
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ password?: string }> }) {
   const user = await requireRole("student");
   const { password } = await searchParams;
   const today = todayPH();
 
-  const [profile, apps, counts, matches, announcements, alerts] = await Promise.all([
+  const [profile, apps, counts, matches, announcements, alerts, unread] = await Promise.all([
     getStudentProfile(user.id),
     listApplications(),
     getEligibilityCounts(user.id),
     searchScholarships({ ...parseSearchParams({ sort: "deadline" }), mine: true, pageSize: 20 }, user),
     getRecentAnnouncements(3),
     getRecentNotifications(4),
+    unreadCount(),
   ]);
 
   const tracked: TrackedItem[] = apps.map((a) => {
@@ -126,30 +124,53 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const submitted = tracked.filter((t) => t.stage === "submitted");
   const profileState = completeness(profile as Record<string, unknown> | null);
   const firstMissing = profileState.missing[0];
-  const first = user.fullName?.trim().split(/\s+/)[0];
+  const stats: { label: string; value: number; icon: IconName }[] = [
+    { label: "Due soon", value: urgent.length, icon: "cal" },
+    { label: "Tracked", value: tracked.length, icon: "list" },
+    { label: "Preparing", value: tracked.filter((item) => item.stage === "preparing").length, icon: "check" },
+    { label: "Unread", value: unread, icon: "bell" },
+  ];
   const SHOWN = 3;
 
   return (
     <div className="page-container py-5 sm:py-8">
-      <div className="reading-column flex flex-col gap-6 sm:gap-8">
+      <div className="flex flex-col gap-6 sm:gap-8">
         {password === "updated" ? <Notice tone="ok">Your password is updated. Other devices were signed out.</Notice> : null}
 
-        {/* Act now: the greeting's one fact and action, then everything with a deadline or a question. */}
         <header>
-          <p className="text-caption text-ink-hint sm:text-sm">{longDate(today)}</p>
-          <h1 className="mt-1 text-title-sm font-bold tracking-tight text-ink sm:text-headline">
-            {greeting()}
-            {first ? `, ${first}` : ""}
-          </h1>
-          <p className="mt-1 text-sm font-medium text-ink sm:mt-2 sm:text-title-sm sm:font-normal sm:leading-normal" data-testid="dashboard-fact">
-            {head.fact}
-          </p>
-          <ButtonLink href={head.action.href} className="mt-3 sm:mt-4">
-            {head.action.label}
-          </ButtonLink>
+          <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+            <div>
+              <h1 className="text-headline-sm font-bold tracking-tight text-ink">Dashboard</h1>
+              <p className="mt-1 text-sm text-ink-secondary">Track preparation, updates, and upcoming deadlines.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <ButtonLink href="/check" variant="outline">
+                <Icon name="check" size={16} /> Check my eligibility
+              </ButtonLink>
+              <ButtonLink href="/explore">
+                <Icon name="search" size={16} /> Browse scholarships
+              </ButtonLink>
+            </div>
+          </div>
+          <dl className="mt-6 grid grid-cols-2 gap-x-4 gap-y-5 border-y border-hairline py-5 sm:mt-8 sm:grid-cols-4 sm:py-7">
+            {stats.map(({ label, value, icon }) => (
+              <div key={label}>
+                <dt className="flex items-center gap-2 text-sm text-ink-secondary">
+                  <Icon name={icon} size={16} /> {label}
+                </dt>
+                <dd className={`tnum mt-2 text-headline-sm font-semibold ${value === 0 ? "text-ink-hint" : "text-ink"}`}>{value}</dd>
+              </div>
+            ))}
+          </dl>
         </header>
 
         <Section id="next-h" title="Do this next">
+          <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+            <p className="text-ink-secondary" data-testid="dashboard-fact">{head.fact}</p>
+            {head.action.href !== "/check" && head.action.href !== "/explore" ? (
+              <Link href={head.action.href} className="font-semibold">{head.action.label}</Link>
+            ) : null}
+          </div>
           {rows.length ? (
             <div className="overflow-hidden rounded-md border border-hairline bg-surface shadow-rest">
               <ul data-testid="do-next-list">

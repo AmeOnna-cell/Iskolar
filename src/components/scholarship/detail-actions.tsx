@@ -6,7 +6,6 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { removeApplication, setApplicationStage } from "@/lib/actions/student";
 import { Pill } from "./bits";
-import { ShareButton } from "./share-button";
 
 type Stage = "saved" | "preparing" | "submitted" | null;
 
@@ -22,8 +21,6 @@ export function DetailActions({
   docsTotal,
   docsDone,
   dueText,
-  name,
-  sample,
   documentsId,
   className = "mt-6",
 }: {
@@ -38,8 +35,6 @@ export function DetailActions({
   docsDone: number;
   /** "closes in 4 days" / "closes today" while open, otherwise null. */
   dueText: string | null;
-  name: string;
-  sample: boolean;
   /** Id of the "Documents to prepare" heading (prefixed in the side panel). */
   documentsId: string;
   className?: string;
@@ -65,12 +60,9 @@ export function DetailActions({
   let main: React.ReactNode;
   if (!signedIn) {
     main = (
-      <>
-        <ButtonLink href="/signup">Create an account to save</ButtonLink>
-        <a href={`/login?next=/s/${slug}`} className="inline-flex min-h-11 items-center px-1 text-sm font-semibold">
-          Sign in
-        </a>
-      </>
+      <ButtonLink href={`/login?next=${encodeURIComponent(`/s/${slug}`)}`}>
+        Sign in to track and check eligibility
+      </ButtonLink>
     );
   } else if (!isStudent) {
     main = null;
@@ -128,7 +120,6 @@ export function DetailActions({
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
       {main}
-      <ShareButton slug={slug} name={name} sample={sample} />
       {official}
     </div>
   );

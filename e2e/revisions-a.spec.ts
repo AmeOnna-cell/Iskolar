@@ -89,15 +89,16 @@ test("the side panel keeps its header and actions in view while the body scrolls
   await expect(header.getByRole("button", { name: "Share" })).toBeInViewport();
 });
 
-test("My applications tab row has no vertical scrollbar; the phone footer is compact", async ({ page }) => {
+test("My applications opens a tracking status dialog; the phone footer is compact", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 780 });
   const student = await createUser("student", "tabs");
   await signIn(page, student.email);
   await page.goto("/applications");
-  const tabs = page.getByRole("navigation", { name: "Application stages" });
-  const { overflowY } = await tabs.evaluate((el) => ({ overflowY: el.scrollHeight - el.clientHeight }));
-  expect(overflowY).toBe(0);
-  expect(await tabs.evaluate((el) => getComputedStyle(el).overflowX)).toBe("auto");
+  await page.getByRole("button", { name: "Filter by tracking status" }).click();
+  const dialog = page.getByRole("dialog", { name: "Tracking status" });
+  await expect(dialog.getByRole("link", { name: "All scholarships" })).toHaveAttribute("aria-current", "true");
+  await dialog.getByRole("link", { name: "Preparing" }).click();
+  await expect(page).toHaveURL(/tab=preparing/);
 
   const footer = page.locator("footer");
   expect((await footer.boundingBox())!.height).toBeLessThan(240);

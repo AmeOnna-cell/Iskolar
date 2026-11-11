@@ -1,11 +1,11 @@
-import { Combobox } from "@/components/ui/combobox";
+import { Combobox, type ComboOption } from "@/components/ui/combobox";
 import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { ProviderMark } from "@/components/scholarship/bits";
 import { ScholarshipCard } from "@/components/scholarship/card";
 import { RequirementRows } from "@/components/scholarship/criteria";
 import { buttonClass } from "@/components/ui/button";
-import { getListingStats, getProvidersWithListings, parseSearchParams, searchScholarships } from "@/lib/data/scholarships";
+import { getListingStats, getProvidersWithListings, getScholarshipOptions, parseSearchParams, searchScholarships } from "@/lib/data/scholarships";
 import type { EligibilityItem } from "@/lib/eligibility";
 import { plural, shortProvider } from "@/lib/format";
 import { FIELD_OPTIONS, PROVIDER_TYPES } from "@/lib/reference";
@@ -19,11 +19,23 @@ const EXAMPLE: EligibilityItem[] = [
 
 // Signed-in visitors are redirected to their home by middleware, so this page is the public front door.
 export default async function LandingPage() {
-  const [stats, closing, providers] = await Promise.all([
+  const [stats, closing, providers, scholarships] = await Promise.all([
     getListingStats(),
     searchScholarships(parseSearchParams({ status: "open", sort: "deadline" }), null),
     getProvidersWithListings(),
+    getScholarshipOptions(),
   ]);
+
+  const searchOptions: ComboOption[] = [
+    ...new Set(scholarships.map(({ name }) => name).filter((name) => name.length <= 100)),
+  ].map((name) => [name, name]);
+  const knownQueries = new Set(searchOptions.map(([query]) => query));
+  for (const provider of providers) {
+    const query = provider.abbr || provider.name;
+    if (query.length > 100 || knownQueries.has(query)) continue;
+    searchOptions.push([query, provider.short_name ?? provider.name, `${provider.abbr} ${provider.name}`]);
+    knownQueries.add(query);
+  }
 
   return (
     <>
@@ -35,17 +47,19 @@ export default async function LandingPage() {
           <p className="mt-4 max-w-[56ch] text-base text-band-text-soft sm:text-title sm:leading-normal">
             Government, private and school scholarships in one place, with clear requirements and deadline reminders.
           </p>
-          <form action="/explore" role="search" className="mt-8 grid max-w-[860px] gap-2 rounded-lg bg-surface p-2 sm:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto]">
-            <label className="flex items-center gap-2 rounded-sm px-3 text-ink-hint focus-within:ring-2 focus-within:ring-primary">
-              <Icon name="search" size={18} />
-              <span className="sr-only">Keyword</span>
-              <input name="q" maxLength={100} placeholder="Scholarship name or provider" className="h-11 w-full bg-transparent text-base text-ink placeholder:text-ink-hint focus:outline-none" />
-            </label>
-            <div className="rounded-sm border-hairline px-3 focus-within:ring-2 focus-within:ring-primary max-sm:border-t sm:border-l">
-              <label htmlFor="hero-field" className="sr-only">Course area</label>
-              <Combobox id="hero-field" name="field" options={FIELD_OPTIONS} emptyLabel="Any course" className="h-11 w-full bg-transparent text-base text-ink placeholder:text-ink focus:outline-none" />
+          <form action="/explore" role="search" className="mt-7 grid w-full gap-2 rounded-lg bg-surface p-2 text-ink sm:grid-cols-[minmax(0,1fr)_minmax(9rem,0.45fr)_auto]">
+            <div className="min-w-0">
+              <label htmlFor="hero-search" className="sr-only">Scholarship or provider</label>
+              <div className="relative">
+                <Icon name="search" size={18} className="pointer-events-none absolute top-1/2 left-3 z-10 -translate-y-1/2 text-ink-hint" />
+                <Combobox id="hero-search" name="q" options={searchOptions} placeholder="Search by name or keyword" allowFreeText maxLength={100} className="h-11 w-full rounded-sm border border-hairline-strong bg-surface pl-9 text-base text-ink placeholder:text-ink-hint focus:outline-2 focus:outline-primary" />
+              </div>
             </div>
-            <button type="submit" className={buttonClass("primary", "md", "h-12 px-6")}>
+            <div className="min-w-0">
+              <label htmlFor="hero-field" className="sr-only">Course area</label>
+              <Combobox id="hero-field" name="field" options={FIELD_OPTIONS} emptyLabel="Any course" className="h-11 w-full rounded-sm border border-hairline-strong bg-surface pl-3 text-base text-ink placeholder:text-ink focus:outline-2 focus:outline-primary" />
+            </div>
+            <button type="submit" className={buttonClass("primary", "md", "h-11 px-4 md:px-6")}>
               Find scholarships
             </button>
           </form>
@@ -57,17 +71,17 @@ export default async function LandingPage() {
               </Link>
             ))}
           </p>
-          <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-4">
+          <dl className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/20 pt-4">
             {[
               [String(stats.open), "open now"],
               [String(stats.upcoming), "opening soon"],
               // Sample listings are never counted as verified.
               ...(stats.total > stats.sample ? [[`${stats.verified} of ${stats.total - stats.sample}`, "verified with official sources"]] : []),
-              ...(stats.sample ? [[String(stats.sample), stats.sample === 1 ? "sample listing, for trying Iskolar out" : "sample listings, for trying Iskolar out"]] : []),
+              ...(stats.sample ? [[String(stats.sample), stats.sample === 1 ? "sample listing" : "sample listings"]] : []),
             ].map(([value, label]) => (
-              <div key={label} className="flex flex-col-reverse">
+              <div key={label} className="flex flex-row-reverse items-baseline gap-2">
                 <dt className="text-sm text-band-text-soft">{label}</dt>
-                <dd className="tnum text-headline-sm font-bold">{value}</dd>
+                <dd className="tnum text-title-sm font-bold text-white">{value}</dd>
               </div>
             ))}
           </dl>
@@ -75,26 +89,24 @@ export default async function LandingPage() {
       </section>
 
       <div className="page-container flex flex-col gap-12 py-8 sm:py-12">
-        <section aria-labelledby="check-h" className="grid items-center gap-6 rounded-md border border-hairline bg-surface p-4 shadow-rest sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+        <section aria-labelledby="check-h" className="grid items-center gap-6 rounded-lg border border-hairline bg-surface p-5 shadow-rest sm:p-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-10">
           <div>
-            <h2 id="check-h" className="text-title-sm font-[650] text-ink sm:text-title">See why you qualify, not just whether</h2>
-            <p className="mt-2 max-w-[56ch] text-ink-secondary">
-              Answer a few questions about your course, grades and family. For every scholarship, we show each requirement you meet,
-              miss or still need to answer, using your own answers. It takes about 2 minutes with a free account.
+            <h2 id="check-h" className="text-title font-bold tracking-tight text-ink sm:text-headline-sm">Check which requirements you meet</h2>
+            <p className="mt-3 max-w-[42ch] text-ink-secondary">
+              Answer a few questions about your course, grades, and household. In about two minutes, you can see where you qualify and what you still need to confirm.
             </p>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <Link href="/signup" className={buttonClass("primary")}>Create an account to check</Link>
-              <Link href="/login?next=/check" className="inline-flex min-h-11 items-center px-1 text-sm font-semibold">Sign in</Link>
-            </div>
+            <Link href="/login?next=/check" className={buttonClass("primary", "md", "mt-5")}>
+              Sign in to check eligibility
+            </Link>
           </div>
-          <figure className="flex flex-col gap-3" aria-labelledby="example-cap">
-            <figcaption id="example-cap" className="text-caption text-ink-hint">
-              Example with made-up answers
+          <figure className="min-w-0 rounded-md bg-surface-hover p-3 sm:p-4" aria-labelledby="example-cap">
+            <figcaption id="example-cap" className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <span className="text-sm font-semibold text-ink">Example eligibility check</span>
+              <span className="text-caption text-ink-secondary">2 of 3 met · 1 unanswered</span>
             </figcaption>
-            <p className="flex items-center gap-2 rounded-sm bg-warn-wash px-4 py-3 text-sm font-semibold text-warn">
-              <Icon name="q" size={18} strokeWidth={2.2} /> You meet 2 of 3. One answer is missing.
-            </p>
-            <RequirementRows items={EXAMPLE} answered />
+            <div className="rounded-md bg-surface">
+              <RequirementRows items={EXAMPLE} answered />
+            </div>
           </figure>
         </section>
 
@@ -104,9 +116,9 @@ export default async function LandingPage() {
             <Link href="/explore" className="inline-flex min-h-11 items-center text-sm font-semibold nav:min-h-0">View all scholarships</Link>
           </div>
           {closing.rows.length ? (
-            <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <ul className="grid gap-x-4 gap-y-4 md:grid-cols-2 xl:grid-cols-3">
               {closing.rows.slice(0, 6).map((s) => (
-                <li key={s.id}>
+                <li key={s.id} className="grid md:row-span-5 md:grid-rows-subgrid md:gap-y-0 md:[&>article]:row-span-5 md:[&>article]:grid md:[&>article]:grid-rows-subgrid md:[&>article]:items-start">
                   <ScholarshipCard s={s} signedIn={false} />
                 </li>
               ))}
@@ -125,7 +137,7 @@ export default async function LandingPage() {
               <li key={type}>
                 <Link href={`/explore?type=${type}`} className="flex h-full flex-col gap-1 rounded-md border border-hairline bg-surface p-4 text-ink no-underline shadow-rest transition-colors duration-150 hover:border-hairline-strong sm:p-6">
                   <span className="text-base font-semibold">{label}</span>
-                  <span className="text-sm text-ink-secondary">{desc}</span>
+                  <span className="flex-1 text-sm text-ink-secondary">{desc}</span>
                   <span className={`mt-2 text-sm font-semibold ${stats.by_type[type] ? "text-primary" : "text-ink-hint"}`}>{plural(stats.by_type[type] ?? 0, "listing")} open or upcoming</span>
                 </Link>
               </li>
@@ -135,11 +147,11 @@ export default async function LandingPage() {
 
         <section aria-labelledby="providers-h">
           <h2 id="providers-h" className="mb-4 text-title-sm font-[650] text-ink sm:text-title">Providers on Iskolar</h2>
-          <ul className="flex flex-wrap gap-x-8 gap-y-4 rounded-md border border-hairline bg-surface p-4 shadow-rest sm:p-6">
+          <ul className="grid gap-x-6 gap-y-4 rounded-md border border-hairline bg-surface p-4 shadow-rest sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
             {providers.map((p) => (
-              <li key={p.id} className="flex items-center gap-3 text-sm font-medium text-ink">
+              <li key={p.id} className="grid grid-cols-[40px_minmax(0,1fr)] items-center gap-3 text-sm font-medium text-ink">
                 <ProviderMark abbr={p.abbr} color={p.color} size="sm" />
-                {p.short_name ?? shortProvider(p.name)}
+                <span className="[overflow-wrap:anywhere]">{p.short_name ?? shortProvider(p.name)}</span>
               </li>
             ))}
           </ul>

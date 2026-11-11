@@ -3,7 +3,7 @@ import { Icon } from "@/components/icons";
 import { reasonLine, type EligibilityItem } from "@/lib/eligibility";
 import { ago, shortProvider, splitAmount } from "@/lib/format";
 import { providerTypeLabel, type ProviderType } from "@/lib/reference";
-import { DueText, MatchPill, ProviderMark, TrustPills } from "./bits";
+import { DueText, MatchPill, Pill, ProviderMark } from "./bits";
 import { SaveButton } from "./save-button";
 
 export type CardData = {
@@ -53,11 +53,12 @@ export function ScholarshipCard({
 }) {
   const why = reason && (s.verdict === "no" || s.verdict === "maybe") ? reasonLine(s.first_gap as EligibilityItem | null) : null;
   const amount = splitAmount(s.amount_text);
-  const hasPills = Boolean(s.verdict && s.verdict !== "unknown") || s.is_sample || s.verification !== "verified";
+  const showUnverified = !s.is_sample && s.verification !== "verified";
+  const hasPills = Boolean(s.verdict && s.verdict !== "unknown") || showUnverified;
   return (
     <article
       data-testid="scholarship-card"
-      className={`relative rounded-md border bg-surface p-4 shadow-rest transition-colors duration-150 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary sm:p-5 ${
+      className={`relative flex flex-col rounded-md border bg-surface p-4 shadow-rest transition-colors duration-150 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary sm:p-5 ${
         // The selected ring marks the card shown in the side panel, which exists only from 1000px (lg).
         selected ? "border-hairline hover:border-hairline-strong lg:border-primary lg:ring-1 lg:ring-primary" : "border-hairline hover:border-hairline-strong"
       }`}
@@ -82,7 +83,7 @@ export function ScholarshipCard({
         {amount.main}
         {amount.period ? <span className="text-sm font-medium tracking-normal text-ink-secondary"> {amount.period}</span> : null}
       </p>
-      <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-ink-secondary">
+      <p className="mt-1 flex flex-wrap items-start gap-x-1.5 gap-y-1 text-sm text-ink-secondary">
         {s.location_label ? (
           <span className="inline-flex min-w-0 items-start gap-1">
             <Icon name="pin" size={15} className="mt-[3px] shrink-0 text-ink-hint" />
@@ -92,22 +93,26 @@ export function ScholarshipCard({
         <span className="rounded-sm border border-hairline px-1.5 leading-5">{providerTypeLabel[s.provider_type]}</span>
       </p>
 
-      {hasPills ? (
-        <div className="mt-3 flex flex-wrap gap-2" data-testid="decision-line">
-          <MatchPill verdict={s.verdict} />
-          <TrustPills verification={s.verification} isSample={s.is_sample} />
-        </div>
-      ) : null}
-      {why ? (
-        <p className="mt-2 flex gap-2 text-caption text-ink-secondary">
-          <Icon name="info" size={15} className="mt-0.5 shrink-0" />
-          <span>{why}</span>
-        </p>
-      ) : null}
+      <div>
+        {hasPills ? (
+          <div className="mt-3 flex flex-wrap gap-2" data-testid="decision-line">
+            <MatchPill verdict={s.verdict} />
+            {showUnverified ? <Pill tone="warn" icon="warn">Unverified</Pill> : null}
+          </div>
+        ) : null}
+        {why ? (
+          <p className="mt-2 flex gap-2 text-caption text-ink-secondary">
+            <Icon name="info" size={15} className="mt-0.5 shrink-0" />
+            <span>{why}</span>
+          </p>
+        ) : null}
 
-      <div className="mt-3 flex items-center justify-between gap-3 border-t border-hairline pt-3">
-        <DueText s={s} size="sm" />
-        {s.published_at ? <span className="text-caption text-ink-hint">Posted {ago(s.published_at)}</span> : null}
+      </div>
+      <div className="mt-auto pt-3">
+        <div className="flex items-center justify-between gap-3 border-t border-hairline pt-3">
+          <DueText s={s} size="sm" />
+          {s.published_at ? <span className="text-caption text-ink-hint">Posted {ago(s.published_at)}</span> : null}
+        </div>
       </div>
       <SaveButton scholarshipId={s.id} slug={s.slug} name={s.name} stage={stage} signedIn={signedIn} />
     </article>

@@ -5,10 +5,11 @@ import type { ScholarshipDetail } from "@/lib/data/scholarships";
 import { criteriaItems, type Evaluation } from "@/lib/eligibility";
 import { formatDate, plural, shortProvider, urgency } from "@/lib/format";
 import { providerTypeLabel } from "@/lib/reference";
-import { DUE_TONE, MatchPill, Pill, ProviderMark, SamplePill } from "./bits";
+import { DUE_TONE, MatchPill, Pill, ProviderMark } from "./bits";
 import { DocumentChecklist } from "./checklist";
 import { CriteriaList } from "./criteria";
 import { DetailActions } from "./detail-actions";
+import { ShareButton } from "./share-button";
 import { WhereToSubmit } from "./where-to-submit";
 
 type Props = {
@@ -86,8 +87,6 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
     <DetailActions
       scholarshipId={s.id}
       slug={s.slug}
-      name={s.name}
-      sample={s.is_sample}
       documentsId={sid("documents")}
       stage={application?.stage ?? null}
       status={state.status}
@@ -100,14 +99,7 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
       className={compact ? "mt-4" : "mt-6"}
     />
   );
-  const notice = s.is_sample ? (
-    <div className="mt-6">
-      <Notice>
-        <strong>Sample listing.</strong> Example data to show how Iskolar works, modelled on {shortProvider(provider.name)}&apos;s
-        program. Dates and amounts may not be current: check the official source before you apply.
-      </Notice>
-    </div>
-  ) : s.verification !== "verified" ? (
+  const notice = !s.is_sample && s.verification !== "verified" ? (
     <div className="mt-6">
       <Notice tone="warn">
         <strong>Not yet verified.</strong> Source: {s.source_label}. Confirm with {shortProvider(provider.name)} before spending on
@@ -141,7 +133,7 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
     <>
       <div className="flex items-start gap-4">
         <ProviderMark abbr={provider.abbr} color={provider.color} size={compact ? "md" : "lg"} />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1 break-words">
           <Title className={`${compact ? "text-title font-[650]" : "text-headline-sm font-bold sm:text-headline"} tracking-tight text-ink`}>
             {compact ? (
               <Link href={`/s/${s.slug}`} className="text-ink">
@@ -158,14 +150,13 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
             </p>
           ) : null}
         </div>
+        <ShareButton slug={s.slug} name={s.name} className="shrink-0" />
       </div>
       <div className={`${compact ? "mt-3" : "mt-4"} flex flex-wrap gap-2`}>
         <MatchPill verdict={evaluation?.verdict} />
-        <Pill tone="strong" icon="peso">{s.amount_text}</Pill>
+        <Pill tone="strong">{s.amount_text}</Pill>
         <Pill icon="building">{providerTypeLabel[provider.type]}</Pill>
-        {s.is_sample ? (
-          <SamplePill />
-        ) : s.verification === "verified" && s.last_verified_at ? (
+        {!s.is_sample && s.verification === "verified" && s.last_verified_at ? (
           <Pill icon="shield">Verified {formatDate(s.last_verified_at.slice(0, 10))}</Pill>
         ) : null}
       </div>
@@ -176,8 +167,8 @@ export function DetailBody({ s, state, evaluation, application, viewer, compact 
     <>
       {compact ? (
         <>
-          {/* Side panel: who, what and the actions stay in view while the body scrolls. */}
-          <div className="sticky top-0 z-10 border-b border-hairline bg-surface px-4 py-4 sm:px-6" data-testid="panel-header">
+          {/* Keep the summary pinned in the mobile drawer. */}
+          <div className="border-b border-hairline bg-surface px-4 py-4 max-lg:sticky max-lg:top-0 max-lg:z-10 sm:px-6" data-testid="panel-header">
             {header}
             {actions}
           </div>

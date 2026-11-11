@@ -40,6 +40,7 @@ test("coordinator drafts → admin verifies and publishes → students see it", 
   await expect(page.getByText("Draft", { exact: true })).toBeVisible();
   await expect(page.getByText(/Coordinator: Test Coordinator/)).toBeVisible();
 
+  await page.getByRole("link", { name: "Edit listing", exact: true }).click();
   // Move the deadline: recorded in the history
   await page.getByLabel(/^Deadline/).fill("2030-12-27");
   // Status actions wait until the edit is saved.
@@ -88,7 +89,7 @@ test("coordinator drafts → admin verifies and publishes → students see it", 
 
 test("a student's question gets a staff reply; announcements reach the dashboard", async ({ page, browser }) => {
   const student = await createUser("student", "wf-student");
-  const coordinator = await createUser("coordinator", "wf-reply");
+  const coordinator = await createUser("admin", "wf-reply");
   const question = `Is the COR enough? (${Date.now()})`;
   const title = `E2E notice ${Date.now()}`;
 
@@ -104,15 +105,15 @@ test("a student's question gets a staff reply; announcements reach the dashboard
   await signIn(sPage, coordinator.email);
   await sPage.goto("/staff/inquiries?status=open&size=50");
   await waitForHydration(sPage);
-  const item = sPage.locator("li").filter({ hasText: question });
-  await item.getByRole("button", { name: "Reply" }).click();
-  await expect(item.getByLabel("Reply")).toBeFocused();
+  await sPage.getByRole("link", { name: question, exact: true }).click();
+  const item = sPage.getByRole("region", { name: "Question details" });
   await item.getByLabel("Reply").fill("Yes, the COR from your student portal is fine.");
   await item.getByRole("button", { name: "Send reply" }).click();
   await expect(sPage.getByRole("status").filter({ hasText: "Reply sent." })).toBeVisible();
 
   await sPage.goto("/staff/announcements");
   await waitForHydration(sPage);
+  await sPage.getByRole("button", { name: "New announcement" }).click();
   // An empty post says what to fix and focuses the first field.
   await sPage.getByRole("button", { name: "Post announcement" }).click();
   await expect(sPage.getByText("2 things to fix below.")).toBeVisible();
@@ -123,7 +124,8 @@ test("a student's question gets a staff reply; announcements reach the dashboard
   await expect(sPage.getByRole("status").filter({ hasText: "Announcement posted." })).toBeVisible();
   await staff.close();
 
-  await page.goto("/help");
+  await page.goto("/help/questions");
+  await page.getByRole("link", { name: "General question", exact: true }).click();
   await expect(page.getByText("Yes, the COR from your student portal is fine.")).toBeVisible();
   await page.goto("/dashboard");
   await expect(page.getByText(title)).toBeVisible();

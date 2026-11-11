@@ -145,7 +145,7 @@ test("a coordinator drafts an FAQ, an admin approves it, and students then find 
 
 test("Save as FAQ on an answered question pre-fills a draft", async ({ page, browser }) => {
   const student = await createUser("student", "faq-from-q");
-  const coordinator = await createUser("coordinator", "faq-from-q");
+  const coordinator = await createUser("admin", "faq-from-q");
   const question = `Do I need a 2x2 photo (${Date.now()})?`;
 
   await signIn(page, student.email);
@@ -160,15 +160,16 @@ test("Save as FAQ on an answered question pre-fills a draft", async ({ page, bro
   await signIn(sPage, coordinator.email);
   await sPage.goto("/staff/inquiries?status=open&size=50");
   await waitForHydration(sPage);
-  const item = sPage.locator("li").filter({ hasText: question });
+  await sPage.getByRole("link", { name: question, exact: true }).click();
+  const item = sPage.getByRole("region", { name: "Question details" });
   await expect(item.getByRole("link", { name: /Save as FAQ/ })).toHaveCount(0); // not answered yet
-  await item.getByRole("button", { name: "Reply" }).click();
   await item.getByLabel("Reply").fill("Yes, one recent 2x2 photo with a white background.");
   await item.getByRole("button", { name: "Send reply" }).click();
   await expect(sPage.getByRole("status").filter({ hasText: "Reply sent." })).toBeVisible();
 
   await sPage.goto("/staff/inquiries?status=answered&size=50");
-  await sPage.locator("li").filter({ hasText: question }).getByRole("link", { name: /Save as FAQ/ }).click();
+  await sPage.getByRole("link", { name: question, exact: true }).click();
+  await sPage.getByRole("region", { name: "Question details" }).getByRole("link", { name: /Save as FAQ/ }).click();
   await expect(sPage.getByRole("heading", { name: "Add an FAQ" })).toBeVisible();
   await expect(sPage.getByLabel("Question", { exact: true })).toHaveValue(question);
   await expect(sPage.getByLabel("Answer", { exact: true })).toHaveValue("Yes, one recent 2x2 photo with a white background.");

@@ -114,6 +114,19 @@ export async function askQuestion(_prev: AskState, fd: FormData): Promise<AskSta
     return { status: "error", message: "You've sent 5 questions in the last hour. Wait a while before sending more.", values };
   }
   const supabase = await createClient();
+  if (parsed.data.scholarshipId) {
+    const { data: thread, error: lookupError } = await supabase.from("inquiries").select("id")
+      .eq("student_id", user.id).eq("scholarship_id", parsed.data.scholarshipId).neq("status", "closed")
+      .order("created_at", { ascending: false }).order("id", { ascending: false }).limit(1).maybeSingle();
+    if (lookupError) return { status: "error", message: "We couldn't send your question. Try again.", values };
+    if (thread) {
+      const { error } = await supabase.from("inquiry_replies").insert({ inquiry_id: thread.id, body: parsed.data.question });
+      if (error) return { status: "error", message: "We couldn't add your question to the conversation. Try again.", values };
+      revalidatePath("/help/questions");
+      revalidatePath("/staff/inquiries");
+      return { status: "success", message: "Question sent. The office usually replies within 2 school days." };
+    }
+  }
   const { data: sp } = await supabase.from("student_profiles").select("program, year_level").eq("user_id", user.id).maybeSingle();
   const context = [sp?.program, sp?.year_level ? `${sp.year_level}${["th", "st", "nd", "rd"][sp.year_level] ?? "th"} year` : null]
     .filter(Boolean)
@@ -126,5 +139,27 @@ export async function askQuestion(_prev: AskState, fd: FormData): Promise<AskSta
   });
   if (error) return { status: "error", message: "We couldn't send your question. Try again.", values };
   revalidatePath("/help");
+  revalidatePath("/help/questions");
   return { status: "success", message: "Question sent. The office usually replies within 2 school days." };
+}
+
+
+export async function followUpInquiry(_previous: AskState, fd: FormData): Promise<AskState> {
+  const user = await requireRole("student");
+  const parsed = z.object({
+    id: z.uuid(),
+    body: z.string().trim().min(1, "Write a message first.").max(4000, "Keep it under 4,000 characters."),
+  }).safeParse({ id: fd.get("inquiryId"), body: fd.get("body") });
+  if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
+  if (!(await rateLimitAll([[`inquiry:followup:${user.id}`, 20, 3600]]))) {
+    return { status: "error", message: "Too many messages. Try again later." };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.from("inquiry_replies").insert({
+    inquiry_id: parsed.data.id, author_id: user.id, body: parsed.data.body,
+  });
+  if (error) return { status: "error", message: "Message could not be sent. The inquiry may have been closed. Refresh and try again." };
+  revalidatePath("/help/questions");
+  revalidatePath("/staff/inquiries");
+  return { status: "success", message: "Message sent." };
 }

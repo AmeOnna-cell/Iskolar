@@ -19,7 +19,7 @@ export default async function NewFaqPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="page-container py-8">
-      <div className="reading-column">
+      <div className="w-full">
         <Link href="/staff/faqs" className="mb-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold">
           <Icon name="back" size={16} /> Back to FAQs
         </Link>

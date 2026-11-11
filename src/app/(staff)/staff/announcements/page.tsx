@@ -1,58 +1,68 @@
-import { Pagination } from "@/components/ui/table-bits";
+import { BoardList, FeedDrawer } from "@/app/announcements/board";
+import { AnnouncementFeed } from "@/app/announcements/feed";
+import { Notice } from "@/components/ui/notice";
 import { requireRole } from "@/lib/auth/session";
-import { getScholarshipOptions } from "@/lib/data/scholarships";
-import { getStaffNames, listAnnouncements } from "@/lib/data/staff";
+import { GENERAL, getAnnouncementBoard } from "@/lib/data/announcements";
+import { listAnnouncementScholarships } from "@/lib/data/staff";
 import { ago } from "@/lib/format";
-import { parsePaging } from "@/lib/paging";
-import { AnnouncementForm, AnnouncementRowActions } from "./announcement-form";
+import { AnnouncementRowActions, NewAnnouncement } from "./announcement-form";
 
 export const metadata = { title: "Announcements" };
 
-type SP = Record<string, string | string[] | undefined>;
-
-export default async function AnnouncementsPage({ searchParams }: { searchParams: Promise<SP> }) {
+export default async function AnnouncementsPage({ searchParams }: { searchParams: Promise<{ a?: string; d?: string }> }) {
   const user = await requireRole("coordinator", "admin");
+  const isAdmin = user.role === "admin";
   const sp = await searchParams;
-  const { page, pageSize } = parsePaging(sp, { size: 10 });
-  const [{ rows, total }, scholarships] = await Promise.all([listAnnouncements(page, pageSize), getScholarshipOptions()]);
-  const names = await getStaffNames([...new Set(rows.map((r) => r.author_id).filter(Boolean) as string[])]);
+  const [entries, scholarships] = await Promise.all([
+    getAnnouncementBoard(),
+    listAnnouncementScholarships(isAdmin ? undefined : user.id),
+  ]);
+  const canPostTo = new Set(scholarships.map(({ id }) => id));
+  const [general, ...listings] = entries;
+  const isAssigned = (id?: string) => !isAdmin && !!id && canPostTo.has(id);
+  const board = [general!, ...listings.sort((a, b) => Number(isAssigned(b.scholarship?.id)) - Number(isAssigned(a.scholarship?.id)))];
+  const entry = board.find(({ key }) => key === sp.a) ?? general!;
+  const inDrawer = sp.d === "1" && entry.key === sp.a;
+  const list = board.map(({ key, name, provider, count, latest, scholarship }) => ({
+    key, name, provider, count, latest: latest ? ago(latest) : null, unread: 0,
+    assigned: isAssigned(scholarship?.id),
+  }));
+  const selectedId = entry.scholarship?.id;
+  const actions = Object.fromEntries(entry.items.map((item) => [
+    item.id,
+    <AnnouncementRowActions
+      key={item.id}
+      a={{ ...item, scholarship_id: selectedId }}
+      scholarships={scholarships}
+      canEdit={isAdmin || (item.author_id === user.id && isAssigned(selectedId))}
+      allowGeneral={isAdmin}
+    />,
+  ]));
+  const feed = <AnnouncementFeed entry={entry} actions={actions} />;
 
   return (
-    <div className="page-container py-8">
-      <h1 className="text-headline-sm font-bold tracking-tight text-ink sm:text-headline">Announcements</h1>
-      <p className="mt-2 text-ink-secondary">Students see announcements on their dashboard, newest first.</p>
-      <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-        <section aria-labelledby="new-h" className="rounded-md border lg:col-start-2 lg:row-start-1 border-hairline bg-surface p-5 shadow-rest">
-          <h2 id="new-h" className="mb-4 text-title-sm font-[650] text-ink">Post an announcement</h2>
-          <AnnouncementForm scholarships={scholarships} />
+    <div className="page-container py-6 sm:py-8">
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-headline-sm font-bold tracking-tight text-ink sm:text-headline">Announcements</h1>
+          <p className="mt-1 text-ink-secondary">Browse updates by scholarship.</p>
+        </div>
+        <NewAnnouncement scholarships={scholarships} allowGeneral={isAdmin} selectedId={selectedId && canPostTo.has(selectedId) ? selectedId : undefined} />
+      </header>
+      {!isAdmin && !scholarships.length ? (
+        <div className="mt-4"><Notice>You can post once an admin assigns you a published scholarship.</Notice></div>
+      ) : null}
+      <div className="mt-5 grid items-start gap-6 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:gap-0 lg:rounded-md lg:border lg:border-hairline lg:bg-surface">
+        <section aria-label="Scholarships" className="min-w-0 lg:sticky lg:top-20 lg:h-[calc(100dvh-6rem)] lg:border-r lg:border-hairline lg:p-3">
+          <BoardList pathname="/staff/announcements" entries={list} selected={entry.key} autoOpen={Boolean(sp.a) && entry.key === sp.a && sp.d !== "1"} />
         </section>
-        <section aria-labelledby="list-h" className="lg:col-start-1 lg:row-start-1 overflow-hidden rounded-md border border-hairline bg-surface shadow-rest">
-          <h2 id="list-h" className="border-b border-hairline px-5 py-4 text-title-sm font-[650] text-ink">Posted</h2>
-          {rows.length === 0 ? (
-            <p className="px-5 py-10 text-center text-ink-secondary">No announcements yet. Post the first one.</p>
-          ) : (
-            <ul>
-              {rows.map((a) => (
-                <li key={a.id} className="border-t border-hairline px-5 py-5 first:border-t-0">
-                  <p className="font-semibold text-ink">{a.title}</p>
-                  <p className="mt-1 max-w-[70ch] text-sm whitespace-pre-line text-ink-secondary">{a.body}</p>
-                  <p className="mt-2 text-caption text-ink-hint">
-                    {a.posted_as} · {a.scholarship ? `${a.scholarship.name} · ` : ""}
-                    {ago(a.published_at)}
-                    {a.author_id ? ` · by ${names.get(a.author_id) ?? "staff"}` : ""}
-                  </p>
-                  <AnnouncementRowActions
-                    a={{ id: a.id, title: a.title, body: a.body, posted_as: a.posted_as, scholarship_id: a.scholarship?.id ?? "" }}
-                    scholarships={scholarships}
-                    canEdit={user.role === "admin" || a.author_id === user.id}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-          <Pagination pathname="/staff/announcements" sp={sp} page={page} pageSize={pageSize} total={total} />
-        </section>
+        {!inDrawer ? (
+          <section tabIndex={0} aria-label={`Announcements: ${entry.name}`} className="sticky top-20 hidden h-[calc(100dvh-6rem)] min-w-0 overflow-auto bg-surface lg:block">
+            {feed}
+          </section>
+        ) : null}
       </div>
+      {inDrawer ? <FeedDrawer title={entry.key === GENERAL ? entry.name : `Announcements: ${entry.name}`}>{feed}</FeedDrawer> : null}
     </div>
   );
 }

@@ -19,7 +19,7 @@ export default async function CheckPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="page-container py-6 sm:py-8">
-      <div className="mx-auto w-full max-w-[720px]">
+      <div className="w-full">
         {welcome ? (
           <div className="mb-4 sm:mb-6">
             <Notice tone="ok">

@@ -38,7 +38,7 @@ test("wide screens: General first, search, and a scholarship's posts with its da
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/announcements");
   await waitForHydration(page);
-  const list = page.getByRole("region", { name: "Scholarships with announcements" });
+  const list = page.getByRole("region", { name: "Scholarships" });
   await expect(list.getByRole("link").first()).toContainText("General announcements");
   const feed = page.getByRole("region", { name: /^Announcements: / });
   await expect(feed.getByRole("heading", { level: 2 })).toHaveText("General announcements");
@@ -55,7 +55,7 @@ test("wide screens: General first, search, and a scholarship's posts with its da
   await expect(feed.getByRole("link", { name: "View the scholarship" })).toHaveAttribute("href", `/s/${SLUG}`);
 
   await page.getByRole("searchbox", { name: "Search announcements by scholarship" }).fill("zzz");
-  await expect(page.getByText("No scholarship with announcements matches “zzz”.")).toBeVisible();
+  await expect(page.getByText("No scholarship matches “zzz”.")).toBeVisible();
 });
 
 test("phones: the list is the page; an entry opens in a drawer that Back closes", async ({ page }) => {
@@ -77,10 +77,11 @@ test("phones: the list is the page; an entry opens in a drawer that Back closes"
 
 test("posting about a scholarship links its details to the board (the details cache is refreshed)", async ({ page }) => {
   const title = `Board post ${Date.now()}`;
-  const coordinator = await createUser("coordinator", "board");
+  const coordinator = await createUser("admin", "board");
   await signIn(page, coordinator.email);
   await page.goto("/staff/announcements");
   await waitForHydration(page);
+  await page.getByRole("button", { name: "New announcement" }).click();
   await page.getByLabel("Title").first().fill(title);
   await page.getByLabel("Message").first().fill("Bring your COR to the interview.");
   await pickOption(page, "About a scholarship (optional)", "City Educational Assistance");

@@ -91,8 +91,18 @@ select throws_ok($$ update public.profiles set role = 'admin' where id = auth.ui
 select lives_ok($$ insert into public.inquiry_replies (inquiry_id, body)
                    select id, 'Yes, you can apply to both.' from public.inquiries where question like 'Can I apply for TDP%' $$,
   'Coordinators can reply to questions');
-select lives_ok($$ insert into public.announcements (title, body, posted_as) values ('TDP deadline extended', 'Three more days.', 'CHED Region III') $$,
-  'Coordinators can post announcements');
+select lives_ok($$ insert into public.announcements (title, body, posted_as, scholarship_id)
+  select 'TDP deadline extended', 'Three more days.', 'CHED Region III', tdp from ids $$,
+  'Coordinators can post to their assigned published scholarship');
+select throws_ok($$ insert into public.announcements (title, body, scholarship_id)
+  select 'Wrong assignment', 'Three more days.', tes from ids $$,
+  '42501', null, 'Coordinators cannot post to another scholarship');
+select throws_ok($$ insert into public.announcements (title, body)
+  values ('General update', 'Three more days.') $$,
+  '42501', null, 'Coordinators cannot post general announcements');
+select throws_ok($$ update public.announcements set scholarship_id = (select tes from ids)
+  where title = 'TDP deadline extended' $$,
+  '42501', null, 'Coordinators cannot move an announcement to another scholarship');
 select lives_ok($$ select public.log_audit('listing.viewed_history', 'scholarship', (select tdp::text from ids)) $$,
   'Staff can write an explicit audit entry as themselves');
 select throws_ok($$ select public.log_audit('user.ban', 'user', 'x', null, null, (select xandra from ids)) $$,

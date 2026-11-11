@@ -198,7 +198,7 @@ export function ListingForm({
       }
       setSaved(true); // the page reloads with the saved version; don't ask "leave without saving?"
       toast(v.id ? "Listing saved" : "Listing created as a draft");
-      router.replace(`/staff/listings/${res.id}?saved=1`);
+      router.replace(`/staff/listings/${res.id}?saved=1${v.id && !isAdmin ? "&mode=edit" : ""}`);
       router.refresh();
     });
 

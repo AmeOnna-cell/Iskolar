@@ -5,6 +5,7 @@ import { useOptimistic, useTransition } from "react";
 import { useToast } from "@/components/ui/toast";
 import { toggleDocument } from "@/lib/actions/student";
 import { Meter } from "./bits";
+import { useDocumentProgress } from "./document-progress";
 
 type Doc = { id: string; name: string; where_to_get: string };
 
@@ -25,6 +26,7 @@ export function DocumentChecklist({
   tracked: boolean;
 }) {
   const toast = useToast();
+  const progress = useDocumentProgress();
   const [, start] = useTransition();
   const [ready, setReady] = useOptimistic(checked, (state: string[], change: { id: string; on: boolean }) =>
     change.on ? [...new Set([...state, change.id])] : state.filter((x) => x !== change.id),
@@ -34,6 +36,7 @@ export function DocumentChecklist({
   const onToggle = (doc: Doc, on: boolean) =>
     start(async () => {
       setReady({ id: doc.id, on });
+      progress?.update({ slug, documentId: doc.id, checked: on });
       const res = await toggleDocument(scholarshipId, doc.id, on);
       if (!res.ok) toast(res.message, "danger");
       else if (res.added) toast(res.message);

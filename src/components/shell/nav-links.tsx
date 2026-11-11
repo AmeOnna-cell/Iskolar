@@ -6,7 +6,7 @@ import { Icon } from "@/components/icons";
 import { isActive, type NavItem } from "@/lib/nav";
 
 /** Desktop header links (≥900px). The active link is Civic Blue with a 2px underline on the header rule. */
-export function HeaderNav({ items }: { items: NavItem[] }) {
+export function HeaderNav({ items, tracked = 0 }: { items: NavItem[]; tracked?: number }) {
   const pathname = usePathname();
   return (
     <nav aria-label="Main" className="hidden h-full gap-1 nav:flex">
@@ -26,6 +26,9 @@ export function HeaderNav({ items }: { items: NavItem[] }) {
               }`}
             >
               {item.label}
+              {item.href === "/applications" && tracked > 0 ? (
+                <span aria-hidden="true" className="tnum ml-1.5 rounded-full bg-primary-wash px-1.5 text-caption font-semibold text-primary">{tracked}</span>
+              ) : null}
             </Link>
           );
         })}

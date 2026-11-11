@@ -149,15 +149,15 @@ export function ListingsTable({ rows, isAdmin }: { rows: ListingRow[]; isAdmin: 
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.id} className={`border-b border-hairline last:border-b-0 ${selected.has(r.id) ? "bg-primary-wash" : "hover:bg-surface-hover"}`}>
-                <td className="px-4 py-1">
+              <tr key={r.id} className={`relative border-b border-hairline last:border-b-0 ${selected.has(r.id) ? "bg-primary-wash" : "hover:bg-surface-hover"}`}>
+                <td className="relative z-10 px-4 py-1">
                   <CheckCell label={`Select ${r.name}`} checked={selected.has(r.id)} disabled={!selectable(r)} onChange={() => toggle(r.id)} />
                 </td>
                 <td className="max-w-[340px] px-4 py-3">
                   <div className="flex items-center gap-3">
                     <ProviderMark abbr={r.provider.abbr} color={r.provider.color} size="sm" />
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-ink">{r.name}</p>
+                      <Link href={`/staff/listings/${r.id}`} className="block truncate font-semibold text-ink no-underline after:absolute after:inset-0 hover:underline">{r.name}</Link>
                       <p className="truncate text-caption text-ink-secondary">{r.provider.name}</p>
                     </div>
                   </div>
@@ -170,9 +170,9 @@ export function ListingsTable({ rows, isAdmin }: { rows: ListingRow[]; isAdmin: 
                   <Trust r={r} />
                 </td>
                 <td className="px-4 py-3 text-ink-secondary">{r.coordinator}</td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
+                <td className="relative z-10 px-4 py-3 text-right whitespace-nowrap">
                   {r.canEdit ? (
-                    <Link href={`/staff/listings/${r.id}`} className="font-semibold">
+                    <Link href={`/staff/listings/${r.id}?mode=edit`} className="font-semibold">
                       Edit<span className="sr-only"> {r.name}</span>
                     </Link>
                   ) : (
@@ -190,14 +190,14 @@ export function ListingsTable({ rows, isAdmin }: { rows: ListingRow[]; isAdmin: 
       {/* Phone: stacked cards */}
       <ul className="lg:hidden">
         {rows.map((r) => (
-          <li key={r.id} className={`flex gap-3 border-b border-hairline px-4 py-4 last:border-b-0 ${selected.has(r.id) ? "bg-primary-wash" : ""}`}>
+          <li key={r.id} className={`relative flex gap-3 border-b border-hairline px-4 py-4 last:border-b-0 ${selected.has(r.id) ? "bg-primary-wash" : ""}`}>
             {pickable.length ? (
-              <span className="pt-0.5 pl-3">
+              <span className="relative z-10 pt-0.5 pl-3">
                 <CheckCell label={`Select ${r.name}`} checked={selected.has(r.id)} disabled={!selectable(r)} onChange={() => toggle(r.id)} />
               </span>
             ) : null}
             <div className="min-w-0 flex-1">
-              <p className="font-semibold text-ink">{r.name}</p>
+              <Link href={`/staff/listings/${r.id}`} className="font-semibold text-ink no-underline after:absolute after:inset-0">{r.name}</Link>
               <p className="text-caption text-ink-secondary">{r.provider.name}</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <Pill tone={STATUS[r.status][1]}>{STATUS[r.status][0]}</Pill>
@@ -207,7 +207,7 @@ export function ListingsTable({ rows, isAdmin }: { rows: ListingRow[]; isAdmin: 
                 <span className={DUE[r.urgency]}>Deadline {r.closes}</span> · {r.coordinator}
               </p>
             </div>
-            <Link href={`/staff/listings/${r.id}`} className={`inline-flex min-h-11 items-center self-center px-1 text-sm font-semibold ${r.canEdit ? "" : "text-ink-secondary"}`}>
+            <Link href={`/staff/listings/${r.id}${r.canEdit ? "?mode=edit" : ""}`} className={`relative z-10 inline-flex min-h-11 items-center self-center px-1 text-sm font-semibold ${r.canEdit ? "" : "text-ink-secondary"}`}>
               {r.canEdit ? "Edit" : "View"}
               <span className="sr-only"> {r.name}</span>
             </Link>

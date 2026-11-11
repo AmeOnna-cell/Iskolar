@@ -103,23 +103,23 @@ test("signed-out visitors can browse but must sign in to track", async ({ page }
   // Requirements are listed for everyone, even without answers.
   await expect(page.getByText("GWA of 3.00 or better")).toBeVisible();
   await expect(page.getByText("Household income of ₱400,000 a year or less")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Create an account to save" })).toHaveAttribute("href", "/signup");
-  await expect(page.locator("main").getByRole("link", { name: "Sign in", exact: true }).first()).toHaveAttribute("href", "/login?next=/s/tulong-dunong-program");
+  await expect(page.getByRole("link", { name: "Sign in to track and check eligibility", exact: true })).toHaveAttribute("href", "/login?next=%2Fs%2Ftulong-dunong-program");
   await expect(page.getByLabel(/Certificate of Registration/)).toBeDisabled();
 });
 
-test("sample listings are labelled and never shown as verified", async ({ page }) => {
+test("sample listings are counted separately and never shown as verified", async ({ page }) => {
   await page.goto("/explore");
   const card = page.getByTestId("scholarship-card").filter({ hasText: "Tulong Dunong Program" });
-  await expect(card.getByText("Sample listing")).toBeVisible();
+  await expect(card).toBeVisible();
+  await expect(card.getByText("Sample listing", { exact: true })).toHaveCount(0);
   await expect(card.getByText(/^(Verified|Unverified)/)).toHaveCount(0);
 
   await page.goto("/s/tulong-dunong-program");
-  await expect(page.getByText("Sample listing.", { exact: true })).toBeVisible(); // the notice
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", "Tulong Dunong Program (sample listing)");
   await expect(page.getByText(/^Verified /)).toHaveCount(0);
   await expect(page.getByText(/Last checked/)).toHaveCount(0);
 
   await page.goto("/");
-  await expect(page.getByText("sample listings, for trying Iskolar out")).toBeVisible();
+  await expect(page.getByText("sample listings")).toBeVisible();
   await expect(page.getByText("verified with official sources")).toHaveCount(0);
 });

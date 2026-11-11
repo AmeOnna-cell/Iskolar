@@ -7,6 +7,7 @@ import { TabBar } from "@/components/shell/nav-links";
 import { SignOutItem } from "@/components/shell/sign-out";
 import { headScript } from "@/lib/head-scripts";
 import { getSessionUser } from "@/lib/auth/session";
+import { countTrackedApplications } from "@/lib/data/student";
 import { unreadCount } from "@/lib/data/notifications";
 import { primaryNav, type Viewer } from "@/lib/nav";
 import "./globals.css";
@@ -30,7 +31,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const user = await getSessionUser();
   const viewer: Viewer =
     user && user.status === "active" ? { name: user.fullName, email: user.email, role: user.role } : null;
-  const unread = viewer?.role === "student" ? await unreadCount() : 0;
+  const [unread, tracked] = viewer?.role === "student" ? await Promise.all([unreadCount(), countTrackedApplications()]) : [0, 0];
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
@@ -44,7 +45,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           >
             Skip to content
           </a>
-          <Header viewer={viewer} userId={user?.id} unread={unread} signOut={<SignOutItem />} />
+          <Header viewer={viewer} userId={user?.id} unread={unread} tracked={tracked} signOut={<SignOutItem />} />
           <main id="main" tabIndex={-1} className="flex-1">
             {children}
           </main>

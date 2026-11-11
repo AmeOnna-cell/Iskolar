@@ -118,18 +118,60 @@ export async function getDeadlineHistory(id: string) {
 
 // ---------- Questions ----------
 
-export async function listInquiries(status: Enums["inquiry_status"], page: number, pageSize: number) {
+const INQUIRY_LIST_FIELDS = "id, question, status, student_id, student_context, created_at, scholarship:scholarships(name, slug)";
+
+export async function listInquiries(status: Enums["inquiry_status"], page: number, pageSize: number, search = "") {
   const supabase = await createClient();
   const from = (page - 1) * pageSize;
-  const { data, count, error } = await supabase
-    .from("inquiries")
-    .select("id, question, status, student_context, created_at, scholarship:scholarships ( name, slug ), replies:inquiry_replies ( id, body, created_at, author_id )", { count: "exact" })
-    .eq("status", status)
-    .order("created_at", { ascending: status === "open" })
-    .order("created_at", { referencedTable: "inquiry_replies" })
-    .range(from, from + pageSize - 1);
+  let query = supabase.from("inquiries").select(INQUIRY_LIST_FIELDS, { count: "exact" }).eq("status", status);
+  if (search) query = query.ilike("question", `%${escapeLike(search)}%`);
+  const { data, count, error } = await query
+    .order("created_at", { ascending: status === "open" }).order("id").range(from, from + pageSize - 1);
   if (error) throw new Error(`inquiries failed: ${error.message}`);
   return { rows: data ?? [], total: count ?? 0 };
+}
+
+export async function listStaffInquiryGroups(status: Enums["inquiry_status"], page: number, size: number, search: string) {
+  const supabase = await createClient();
+  const read = (current: number) => supabase.rpc("staff_inquiry_groups", {
+    p_status: status, p_search: search, p_page: current, p_size: size,
+  });
+  let { data, error } = await read(page);
+  if (error) throw new Error(error.message);
+  if (!data?.length && page > 1) {
+    page = 1;
+    ({ data, error } = await read(page));
+    if (error) throw new Error(error.message);
+  }
+  return { rows: data ?? [], total: data?.[0]?.total_count ?? 0, page };
+}
+
+export async function listStaffInquiryGroup(status: Enums["inquiry_status"], scholarshipId: string, page: number, search: string, name: string | null) {
+  const supabase = await createClient();
+  const size = 10;
+  const from = (page - 1) * size;
+  let query = supabase.from("inquiries").select("id, question, created_at, status", { count: "exact" })
+    .eq("status", status).eq("scholarship_id", scholarshipId);
+  if (search && !name?.toLowerCase().includes(search.toLowerCase())) query = query.ilike("question", `%${escapeLike(search)}%`);
+  const { data, count, error } = await query.order("created_at", { ascending: status === "open" }).order("id").range(from, from + size - 1);
+  if (error) throw new Error(error.message);
+  return { rows: data ?? [], pages: Math.max(1, Math.ceil((count ?? 0) / size)) };
+}
+
+export async function getStaffInquiry(id: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("inquiries")
+    .select(`${INQUIRY_LIST_FIELDS}, replies:inquiry_replies(id, body, created_at, author_id)`)
+    .eq("id", id).order("created_at", { referencedTable: "inquiry_replies" }).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function getSimilarPendingInquiries(id: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("similar_pending_inquiries", { p_inquiry: id });
+  if (error) throw new Error(`similar inquiries failed: ${error.message}`);
+  return data ?? [];
 }
 
 export async function inquiryCounts() {
@@ -143,16 +185,13 @@ export async function inquiryCounts() {
 
 // ---------- Announcements ----------
 
-export async function listAnnouncements(page: number, pageSize: number) {
+export async function listAnnouncementScholarships(coordinatorId?: string) {
   const supabase = await createClient();
-  const from = (page - 1) * pageSize;
-  const { data, count, error } = await supabase
-    .from("announcements")
-    .select("id, title, body, posted_as, published_at, author_id, scholarship:scholarships ( id, name )", { count: "exact" })
-    .order("published_at", { ascending: false })
-    .range(from, from + pageSize - 1);
-  if (error) throw new Error(`announcements failed: ${error.message}`);
-  return { rows: data ?? [], total: count ?? 0 };
+  let query = supabase.from("scholarships").select("id, name").eq("listing_status", "published");
+  if (coordinatorId) query = query.eq("assigned_coordinator_id", coordinatorId);
+  const { data, error } = await query.order("name");
+  if (error) throw error;
+  return data ?? [];
 }
 
 // ---------- Users (admin) ----------

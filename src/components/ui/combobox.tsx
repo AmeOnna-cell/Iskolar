@@ -20,6 +20,9 @@ export function Combobox({
   name,
   options,
   emptyLabel,
+  placeholder,
+  allowFreeText = false,
+  maxLength,
   value: controlled,
   defaultValue = "",
   onChange,
@@ -32,6 +35,9 @@ export function Combobox({
   name?: string;
   options: ComboOption[];
   emptyLabel?: string;
+  placeholder?: string;
+  allowFreeText?: boolean;
+  maxLength?: number;
   value?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;
@@ -60,8 +66,8 @@ export function Combobox({
   // A new value from outside (controlled, or a reset) shows its label.
   const shown = labelOf(value);
   useEffect(() => {
-    if (!open) setText(shown);
-  }, [shown, open]);
+    if (!open && !allowFreeText) setText(shown);
+  }, [shown, open, allowFreeText]);
 
   // Name the listbox after the field's own <label>, not its placeholder.
   useEffect(() => {
@@ -75,9 +81,9 @@ export function Combobox({
   const matches = q ? all.filter(([v, l, k]) => v && fold(`${l} ${k ?? ""}`).includes(q)) : all;
   const noMatch = matches.length === 0;
   // Nothing matched: say so, and keep every option in reach below the message.
-  const rows = noMatch ? all : matches;
+  const rows = noMatch && !allowFreeText ? all : matches;
   // After a miss, nothing is highlighted until the person moves to an option, so Enter can't pick by accident.
-  const current = noMatch && typed ? -1 : active;
+  const current = typed && (noMatch || allowFreeText) ? -1 : active;
 
   useEffect(() => {
     if (open && current >= 0) list.current?.querySelector(`#${CSS.escape(`${id}-opt-${current}`)}`)?.scrollIntoView({ block: "nearest" });
@@ -102,12 +108,13 @@ export function Combobox({
   };
   const choose = (v: string) => {
     if (controlled === undefined) setOwn(v);
-    setText(labelOf(v));
+    setText(allowFreeText ? v : labelOf(v));
     close();
     if (v !== value) onChange?.(v);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.nativeEvent.isComposing) return;
     const last = rows.length - 1;
     if (e.key === "ArrowDown" || e.key === "ArrowUp") setTyped(false);
     if (e.key === "ArrowDown") {
@@ -119,13 +126,17 @@ export function Combobox({
       if (!open) show(filtering ? last : undefined);
       else setActive(Math.max(0, current - 1));
     } else if (e.key === "Enter" && open) {
-      e.preventDefault(); // pick, don't submit the form
       const opt = rows[current];
+      if (allowFreeText && !opt) {
+        close();
+        return;
+      }
+      e.preventDefault(); // pick, don't submit the form
       if (opt) choose(opt[0]);
     } else if (e.key === "Escape" && open) {
       e.preventDefault();
       e.stopPropagation(); // close the list, not a surrounding dialog
-      setText(shown);
+      if (!allowFreeText) setText(shown);
       close();
     }
   };
@@ -133,6 +144,7 @@ export function Combobox({
   // Leaving the box: emptied clears the choice; one match (by label or keyword) picks it; anything else is undone.
   const onBlur = () => {
     if (!open && !filtering) return;
+    if (allowFreeText) return close();
     if (!text.trim()) return choose("");
     const exact = options.find(([, l]) => fold(l) === fold(text.trim()));
     const only = !noMatch && matches.length === 1 ? matches[0] : undefined;
@@ -152,6 +164,8 @@ export function Combobox({
         ref={input}
         id={id}
         type="text"
+        name={allowFreeText ? name : undefined}
+        maxLength={maxLength}
         role="combobox"
         aria-autocomplete="list"
         aria-expanded={open}
@@ -163,7 +177,7 @@ export function Combobox({
         spellCheck={false}
         disabled={disabled}
         value={text}
-        placeholder={emptyLabel}
+        placeholder={placeholder ?? emptyLabel}
         onChange={(e) => {
           setText(e.target.value);
           setFiltering(true);
@@ -180,7 +194,7 @@ export function Combobox({
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className={`pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-ink-hint transition-transform ${open ? "rotate-180" : ""}`}>
         <path d="m6 9 6 6 6-6" />
       </svg>
-      {name ? <input type="hidden" name={name} value={value} /> : null}
+      {name && !allowFreeText ? <input type="hidden" name={name} value={value} /> : null}
       <ul
         ref={list}
         id={listId}
@@ -193,7 +207,7 @@ export function Combobox({
       >
         {noMatch ? (
           <li role="option" aria-disabled="true" aria-selected={false} className="flex min-h-11 items-center border-b border-hairline px-3 text-sm text-ink-secondary">
-            No matches for “{text.trim()}”. Choose from the list:
+            {allowFreeText ? "No suggestions. Press Enter to search." : `No matches for “${text.trim()}”. Choose from the list:`}
           </li>
         ) : null}
         {rows.map(([v, l], i) => (

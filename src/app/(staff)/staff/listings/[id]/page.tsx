@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { Icon } from "@/components/icons";
 import { Pill, SamplePill } from "@/components/scholarship/bits";
+import { ButtonLink } from "@/components/ui/button";
 import { Notice } from "@/components/ui/notice";
 import { requireRole } from "@/lib/auth/session";
 import { getDeadlineHistory, getListingForEdit, getStaffNames, listCoordinators, listProviders } from "@/lib/data/staff";
@@ -10,31 +11,43 @@ import { ago, formatDate } from "@/lib/format";
 import { ListingForm } from "../listing-form";
 import { toFormInitial } from "../to-form";
 import { UnsavedProvider } from "../unsaved";
+import { ListingPreview } from "./listing-preview";
 import { StatusPanel } from "./status-panel";
 
-export const metadata = { title: "Edit listing" };
+export const metadata = { title: "Listing details" };
 
 const STATUS_LABEL = { draft: "Draft", in_review: "Sent for review", published: "Published", archived: "Archived" } as const;
 
-export default async function EditListingPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string }> }) {
+export default async function EditListingPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; mode?: string }> }) {
   const user = await requireRole("coordinator", "admin");
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
-  const { saved } = await searchParams;
+  const { saved, mode } = await searchParams;
   const s = await getListingForEdit(id);
   if (!s) notFound();
   const isAdmin = user.role === "admin";
   const canEdit = isAdmin || s.assigned_coordinator_id === user.id;
-  const [providers, coordinators, history] = await Promise.all([listProviders(), listCoordinators(), getDeadlineHistory(id)]);
+  const editing = canEdit && (isAdmin || mode === "edit");
+  const listingHref = `/staff/listings/${id}`;
+  const [providers, coordinators, history] = await Promise.all([listProviders(), isAdmin ? listCoordinators() : [], getDeadlineHistory(id)]);
   const names = await getStaffNames([...new Set([s.assigned_coordinator_id, ...history.map((h) => h.changed_by)].filter(Boolean) as string[])]);
 
   return (
     <div className="page-container py-8">
-      <div className="mx-auto w-full max-w-[840px]">
+      <div className="w-full">
         <Link href="/staff/listings" className="mb-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold">
           <Icon name="back" size={16} /> Back to listings
         </Link>
-        <h1 className="text-headline-sm font-bold tracking-tight text-ink sm:text-headline">{s.name}</h1>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h1 className="min-w-0 wrap-anywhere text-headline-sm font-bold tracking-tight text-ink sm:text-headline">{s.name}</h1>
+          {canEdit && !isAdmin ? (
+            editing ? (
+              <ButtonLink href={listingHref} variant="outline">Back to view</ButtonLink>
+            ) : (
+              <ButtonLink href={`${listingHref}?mode=edit`}><Icon name="edit" size={16} /> Edit listing</ButtonLink>
+            )
+          ) : null}
+        </div>
         <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-ink-secondary">
           <Pill tone={s.listing_status === "published" ? "ok" : s.listing_status === "in_review" ? "info" : "neutral"}>{STATUS_LABEL[s.listing_status]}</Pill>
           {s.is_sample ? (
@@ -58,16 +71,22 @@ export default async function EditListingPage({ params, searchParams }: { params
           </div>
         ) : null}
 
+        {!canEdit ? (
+          <div className="mt-4">
+            <Notice>You&apos;re viewing this listing in read-only mode. Only its assigned coordinator or an admin can edit it.</Notice>
+          </div>
+        ) : null}
+
         <UnsavedProvider>
-          {canEdit || history.length ? (
+          {editing || history.length ? (
             <section aria-labelledby="workflow-h" className="mt-6 rounded-md border border-hairline bg-surface p-5 shadow-rest sm:p-6">
               <h2 id="workflow-h" className="mb-3 text-title-sm font-[650] text-ink">Status</h2>
-              {canEdit ? <StatusPanel id={s.id} status={s.listing_status} verified={s.verification === "verified"} isAdmin={isAdmin} /> : null}
-              {canEdit && !isAdmin ? (
+              {editing ? <StatusPanel id={s.id} status={s.listing_status} verified={s.verification === "verified"} isAdmin={isAdmin} /> : null}
+              {editing && !isAdmin ? (
                 <p className="mt-3 text-sm text-ink-secondary">An admin verifies and publishes listings. You can edit listings assigned to you, including published ones.</p>
               ) : null}
               {history.length ? (
-                <div className={canEdit ? "mt-5 border-t border-hairline pt-4" : ""}>
+                <div className={editing ? "mt-5 border-t border-hairline pt-4" : ""}>
                   <h3 className="mb-2 text-sm font-semibold text-ink">Deadline changes</h3>
                   <ul className="flex flex-col gap-1 text-sm text-ink-secondary">
                     {history.map((h) => (
@@ -83,7 +102,7 @@ export default async function EditListingPage({ params, searchParams }: { params
           ) : null}
 
           <div className="mt-6">
-            {canEdit ? (
+            {editing ? (
               <ListingForm
                 key={s.updated_at}
                 initial={toFormInitial(s)}
@@ -92,9 +111,7 @@ export default async function EditListingPage({ params, searchParams }: { params
                 isAdmin={isAdmin}
               />
             ) : (
-              <Notice>
-                You can&apos;t edit this listing: it&apos;s assigned to {s.assigned_coordinator_id ? names.get(s.assigned_coordinator_id) : "no one"}. Ask an admin to assign it to you.
-              </Notice>
+              <ListingPreview listing={s} provider={providers.find((provider) => provider.id === s.provider_id)?.name} />
             )}
           </div>
         </UnsavedProvider>

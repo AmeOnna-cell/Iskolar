@@ -74,7 +74,6 @@ test("cards: amount with its period, location and provider type, deadline and po
   await expect(card.getByTestId("card-amount")).toHaveText("₱5,000 per semester");
   await expect(card).toContainText("Central Luzon (city residents)");
   await expect(card).toContainText("Local government");
-  await expect(card).toContainText("Sample listing");
   await expect(card).toContainText(/Closes in \d+ days?|Closes today/);
   await expect(card).toContainText(/Posted /);
   await expect(card.getByRole("link", { name: "Sign in to save City Educational Assistance" })).toBeVisible();
@@ -96,7 +95,7 @@ test.describe("phones", () => {
     await expect(drawer).toBeVisible();
     await expect(page).toHaveURL(/s=presidents-academic-award.*d=1|d=1.*s=presidents-academic-award/);
     await expect(drawer.getByRole("heading", { level: 2, name: "President’s Academic Award" })).toBeVisible();
-    await expect(drawer.getByText("Sample listing").first()).toBeVisible();
+    await expect(drawer.getByRole("button", { name: "Share", exact: true })).toBeVisible();
     await expect(drawer.getByRole("link", { name: "Open the full page" })).toHaveAttribute("href", "/s/presidents-academic-award");
 
     await page.goBack();

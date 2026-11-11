@@ -1,13 +1,14 @@
 "use client";
 
+import Link from "next/link";
+import { ListingSuggestions } from "./listing-suggestions";
 import { Combobox } from "@/components/ui/combobox";
 import { useActionState, useEffect, useRef, useState } from "react";
-import { FaqAnswer } from "@/components/faq/answer";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
 import { Notice } from "@/components/ui/notice";
 import { askQuestion, type AskState } from "@/lib/actions/student";
-import { chevron } from "./faq-list";
+import { FaqSuggestions } from "./faq-suggestions";
 import { ASK_EVENT, useFaqSearch } from "./use-faq-search";
 
 export function AskForm({ options, about }: { options: Array<{ id: string; name: string }>; about?: string }) {
@@ -47,6 +48,7 @@ export function AskForm({ options, about }: { options: Array<{ id: string; name:
       {state.message ? (
         <Notice tone={state.status === "success" ? "ok" : "danger"} live>
           {state.message}
+          {state.status === "success" ? <Link href="/help/questions" className="ml-1 font-semibold underline">View my questions</Link> : null}
         </Notice>
       ) : null}
       <div className="flex flex-col gap-2">
@@ -83,28 +85,8 @@ export function AskForm({ options, about }: { options: Array<{ id: string; name:
       <p aria-live="polite" className="sr-only">
         {settled && !searching && hits.length ? `${hits.length} ${hits.length === 1 ? "answer" : "answers"} might help, below your question.` : ""}
       </p>
-      {hits.length ? (
-        // Part of the form, not a card: a hairline, a label, one line per answer (it opens in place).
-        <section aria-labelledby="ask-suggest-h" className="-mt-1 border-t border-hairline pt-3">
-          <h3 id="ask-suggest-h" className="pb-1 text-sm font-semibold text-ink">These answers might help</h3>
-          <ul>
-            {hits.map((h) => (
-              <li key={h.id}>
-                <details className="group">
-                  <summary className="-mx-2 flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-sm px-2 py-1.5 hover:bg-surface-hover [&::-webkit-details-marker]:hidden">
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold text-ink">{h.question}</span>
-                      <span className="block truncate text-sm text-ink-secondary group-open:hidden">{h.snippet}</span>
-                    </span>
-                    <span aria-hidden="true" className={chevron} />
-                  </summary>
-                  <FaqAnswer answer={h.answer} newTab className="pt-1 pb-3 text-sm text-ink-secondary" />
-                </details>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <ListingSuggestions topic={topic} question={question} />
+      <FaqSuggestions hits={hits} headingId="ask-suggest-h" />
 
       <Button type="submit" loading={pending}>Send question</Button>
       <p className={hits.length ? "text-sm text-ink-secondary" : "text-caption text-ink-hint"}>

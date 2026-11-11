@@ -12,7 +12,7 @@ export default async function NewListingPage() {
   const [providers, coordinators] = await Promise.all([listProviders(), listCoordinators()]);
   return (
     <div className="page-container py-8">
-      <div className="mx-auto w-full max-w-[840px]">
+      <div className="w-full">
         <Link href="/staff/listings" className="mb-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold">
           <Icon name="back" size={16} /> Back to listings
         </Link>

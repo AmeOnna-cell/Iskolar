@@ -57,10 +57,12 @@ export async function faqFromInquiry(id: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("inquiries")
-    .select("question, scholarship_id, replies:inquiry_replies ( body, created_at )")
+    .select("question, scholarship_id, student_id, replies:inquiry_replies ( body, author_id, created_at )")
     .eq("id", id)
     .order("created_at", { referencedTable: "inquiry_replies", ascending: false })
     .maybeSingle();
-  if (!data?.replies.length) return null;
-  return { question: data.question.slice(0, 200), answer: data.replies[0]!.body, scholarship_id: data.scholarship_id };
+  if (!data) return null;
+  const reply = data.replies.find((item) => !item.author_id || item.author_id !== data.student_id);
+  if (!reply) return null;
+  return { question: data.question.slice(0, 200), answer: reply.body, scholarship_id: data.scholarship_id };
 }

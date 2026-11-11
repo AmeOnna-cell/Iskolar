@@ -10,6 +10,7 @@ import { plural } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { activeFilters } from "./filter-labels";
 import { DetailDrawer, SplitLinks } from "@/components/scholarship/split";
+import { ExploreDetailPanel } from "./detail-panel";
 import { ExploreFilters, SortSelect } from "./filters";
 
 export const metadata = { title: "Find scholarships" };
@@ -120,10 +121,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: SP }
             ) : null}
           </section>
           {panel && !inDrawer ? (
-            <aside
-              aria-label="Selected scholarship"
-              className="sticky top-20 hidden max-h-[calc(100dvh-6rem)] scroll-pt-56 overflow-auto rounded-md border border-hairline bg-surface shadow-rest lg:block"
-            >
+            <ExploreDetailPanel>
               <DetailBody {...panel} compact />
               {/* Pinned footer: shows the panel continues, and opens the full page. */}
               <p className="sticky bottom-0 border-t border-hairline bg-surface px-6 py-3 text-sm">
@@ -131,7 +129,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: SP }
                   Open the full page
                 </Link>
               </p>
-            </aside>
+            </ExploreDetailPanel>
           ) : null}
         </div>
       )}

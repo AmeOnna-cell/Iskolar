@@ -100,9 +100,43 @@ export async function replyInquiry(inquiryId: string, body: string): Promise<{ o
   if (!parsed.success) return { ok: false, message: parsed.error.issues[0]!.message };
   const supabase = await createClient();
   const { error } = await supabase.from("inquiry_replies").insert({ inquiry_id: parsed.data.id, body: parsed.data.body });
-  if (error) return { ok: false, message: "We couldn't send the reply. Try again." };
+  if (error) {
+    if (error.code === "P0001") {
+      revalidatePath(`/staff/inquiries/${parsed.data.id}`);
+      return { ok: false, message: "This inquiry is closed. Reopen it to send a reply." };
+    }
+    return { ok: false, message: "We couldn't send the reply. Check that you still have access to this inquiry." };
+  }
   revalidatePath("/staff/inquiries");
+  revalidatePath("/staff/inquiries/[id]", "page");
+  revalidatePath("/help/questions");
   return { ok: true, message: "Reply sent. The student sees it on the Help page." };
+}
+
+export async function replyToSimilarInquiries(inquiryId: string, additional: string[], body: string) {
+  await requireRole("coordinator", "admin");
+  const parsed = z.object({
+    inquiryId: z.uuid(),
+    additional: z.array(z.uuid()).min(1).max(8),
+    body: z.string().trim().min(1).max(4000),
+  }).safeParse({ inquiryId, additional, body });
+  if (!parsed.success) return { ok: false, message: "Write a reply and select up to 8 related inquiries." };
+  const supabase = await createClient();
+  const { data: count, error } = await supabase.rpc("reply_to_pending_inquiries", {
+    p_inquiry: parsed.data.inquiryId, p_additional: parsed.data.additional, p_body: parsed.data.body,
+  });
+  if (error) {
+    if (error.code === "P0001") {
+      revalidatePath("/staff/inquiries");
+      revalidatePath("/staff/inquiries/[id]", "page");
+      return { ok: false, message: "One or more selected questions changed. Review the matches and try again." };
+    }
+    return { ok: false, message: "We couldn't send the replies. Try again." };
+  }
+  revalidatePath("/staff/inquiries");
+  revalidatePath("/staff/inquiries/[id]", "page");
+  revalidatePath("/help/questions");
+  return { ok: true, message: `Reply sent to ${count} inquiries.` };
 }
 
 export async function setInquiryStatus(inquiryId: string, status: string): Promise<{ ok: boolean; message: string }> {
@@ -110,9 +144,11 @@ export async function setInquiryStatus(inquiryId: string, status: string): Promi
   const parsed = z.object({ id: z.uuid(), status: z.enum(["open", "answered", "closed"]) }).safeParse({ id: inquiryId, status });
   if (!parsed.success) return { ok: false, message: "That didn't work." };
   const supabase = await createClient();
-  const { error } = await supabase.from("inquiries").update({ status: parsed.data.status }).eq("id", parsed.data.id);
-  if (error) return { ok: false, message: "We couldn't update the question." };
+  const { error, count } = await supabase.from("inquiries").update({ status: parsed.data.status }, { count: "exact" }).eq("id", parsed.data.id);
+  if (error || !count) return { ok: false, message: "We couldn't update the question. Check that you still have access to it." };
   revalidatePath("/staff/inquiries");
+  revalidatePath("/staff/inquiries/[id]", "page");
+  revalidatePath("/help/questions");
   return { ok: true, message: parsed.data.status === "closed" ? "Question closed" : "Question reopened" };
 }
 
@@ -129,7 +165,7 @@ const announcement = z.object({
 export type AnnouncementState = { status: "idle" | "error" | "success"; message?: string; fieldErrors?: Record<string, string> };
 
 export async function saveAnnouncement(_prev: AnnouncementState, fd: FormData): Promise<AnnouncementState> {
-  await requireRole("coordinator", "admin");
+  const user = await requireRole("coordinator", "admin");
   const parsed = announcement.safeParse(Object.fromEntries(fd));
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
@@ -138,11 +174,16 @@ export async function saveAnnouncement(_prev: AnnouncementState, fd: FormData): 
   }
   const { id, scholarship_id, ...rest } = parsed.data;
   const supabase = await createClient();
+  if (user.role === "coordinator") {
+    const { data: assigned } = scholarship_id ? await supabase.from("scholarships").select("id")
+      .eq("id", scholarship_id).eq("assigned_coordinator_id", user.id).eq("listing_status", "published").maybeSingle() : { data: null };
+    if (!assigned) return { status: "error", message: "Choose a published scholarship assigned to you." };
+  }
   const row = { ...rest, scholarship_id: scholarship_id || null };
-  const { error } = id
-    ? await supabase.from("announcements").update(row).eq("id", id)
+  const { error, count } = id
+    ? await supabase.from("announcements").update(row, { count: "exact" }).eq("id", id)
     : await supabase.from("announcements").insert(row);
-  if (error) return { status: "error", message: "We couldn't save the announcement. You can only edit your own." };
+  if (error || (id && count === 0)) return { status: "error", message: "We couldn't save the announcement. You can only edit your own." };
   revalidatePath("/staff/announcements");
   revalidatePath("/dashboard");
   revalidatePath("/announcements");

@@ -23,6 +23,28 @@ export type Database = {
           }
         },"public": {
           Tables: {
+            "announcement_reads": {
+                  Row: { "announcement_id": string, "student_id": string }
+                  ComputedFields: never
+                  Insert: { "announcement_id": string, "student_id": string }
+                  Update: { "announcement_id"?: string, "student_id"?: string }
+                  Relationships: [
+                    {
+                      foreignKeyName: "announcement_reads_announcement_id_fkey"
+                      columns: ["announcement_id"]
+                      isOneToOne: false
+                      referencedRelation: "announcements"
+                      referencedColumns: ["id"]
+                    },
+                    {
+                      foreignKeyName: "announcement_reads_student_id_fkey"
+                      columns: ["student_id"]
+                      isOneToOne: false
+                      referencedRelation: "profiles"
+                      referencedColumns: ["id"]
+                    }
+                  ]
+                },
             "announcements": {
                   Row: {
                     "author_id": string | null,"body": string,"created_at": string,"id": string,"posted_as": string,"published_at": string,"scholarship_id": string | null,"title": string,"updated_at": string
@@ -494,9 +516,38 @@ isOneToOne: true
                 }
           }
           Views: {
-            [_ in never]: never
+            "student_inquiry_threads": {
+              Row: {
+                id: string
+                student_id: string | null
+                scholarship_id: string | null
+                created_at: string
+                status: Database["public"]["Enums"]["inquiry_status"]
+                scholarship_name: string | null
+              }
+              Relationships: []
+            }
           }
           Functions: {
+            "staff_can_manage_inquiry_topic": {
+              Args: { p_scholarship: string | null }
+              Returns: boolean
+            }
+            "staff_inquiry_groups": {
+              Args: { p_status: Database["public"]["Enums"]["inquiry_status"]; p_search: string; p_page: number; p_size: number }
+              Returns: {
+                group_id: string; scholarship_id: string | null; scholarship_name: string | null;
+                inquiry_id: string; question: string; created_at: string; inquiry_count: number; total_count: number;
+              }[]
+            }
+            "similar_pending_inquiries": {
+              Args: { p_inquiry: string }
+              Returns: { id: string; question: string; updated_at: string }[]
+            }
+            "reply_to_pending_inquiries": {
+              Args: { p_inquiry: string; p_additional: string[]; p_body: string }
+              Returns: number
+            }
             "admin_set_role":
 { Args: { "p_role": Database["public"]['Enums']["app_role"],"p_user": string }; Returns: undefined
                            },

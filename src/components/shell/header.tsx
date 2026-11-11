@@ -6,10 +6,10 @@ import { AlertsBell } from "./alerts-bell";
 import { HeaderNav, SignedOutLinks } from "./nav-links";
 import { ThemeToggle } from "./theme-toggle";
 
-type Props = { viewer: Viewer; userId?: string; unread?: number; signOut?: React.ReactNode };
+type Props = { viewer: Viewer; userId?: string; unread?: number; tracked?: number; signOut?: React.ReactNode };
 
 /** Sticky 64px header (56px under 900px). Primary nav moves to the bottom tab bar on small screens. */
-export function Header({ viewer, userId, unread = 0, signOut }: Props) {
+export function Header({ viewer, userId, unread = 0, tracked = 0, signOut }: Props) {
   const isStudent = viewer?.role === "student";
   return (
     <>
@@ -32,7 +32,7 @@ export function Header({ viewer, userId, unread = 0, signOut }: Props) {
             <LogoMark size={30} />
             Iskolar
           </Link>
-          <HeaderNav items={primaryNav(viewer)} />
+          <HeaderNav items={primaryNav(viewer)} tracked={tracked} />
           <div className="ml-auto flex items-center gap-1">
             {/* Signed-out phones: no room beside "Create account"; the system theme still applies. */}
             <span className={viewer ? "contents" : "contents max-sm:hidden"}>
@@ -44,7 +44,7 @@ export function Header({ viewer, userId, unread = 0, signOut }: Props) {
               title="Help"
               className="grid size-11 place-items-center rounded-full text-ink-secondary hover:bg-surface-hover hover:text-ink"
             >
-              <Icon name="help" size={20} />
+              <Icon name="faq" size={20} />
             </Link>
             {isStudent && userId ? <AlertsBell userId={userId} initial={unread} /> : null}
             {viewer ? (

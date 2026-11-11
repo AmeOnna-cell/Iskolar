@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/icons";
 import { Combobox } from "@/components/ui/combobox";
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { deleteAnnouncement, saveAnnouncement, type AnnouncementState } from "@/
 type Initial = { id?: string; title?: string; body?: string; posted_as?: string; scholarship_id?: string };
 type Option = { id: string; name: string };
 
-export function AnnouncementForm({ initial = {}, scholarships, onDone }: { initial?: Initial; scholarships: Option[]; onDone?: () => void }) {
+export function AnnouncementForm({ initial = {}, scholarships, allowGeneral = true, onDone }: { initial?: Initial; scholarships: Option[]; allowGeneral?: boolean; onDone?: () => void }) {
   const toast = useToast();
   const [state, action, pending] = useActionState<AnnouncementState, FormData>(saveAnnouncement, { status: "idle" });
   const form = useRef<HTMLFormElement>(null);
@@ -62,9 +63,9 @@ export function AnnouncementForm({ initial = {}, scholarships, onDone }: { initi
       </div>
       <div className="flex flex-col gap-2">
         <label htmlFor={`${prefix}-sch`} className="text-sm font-semibold text-ink">
-          About a scholarship <span className="font-normal text-ink-hint">(optional)</span>
+          About a scholarship {allowGeneral ? <span className="font-normal text-ink-hint">(optional)</span> : null}
         </label>
-        <Combobox id={`${prefix}-sch`} name="scholarship_id" options={scholarships.map((s) => [s.id, s.name])} emptyLabel="Not about one scholarship" defaultValue={initial.scholarship_id ?? ""} className={`${inputClass} border-hairline-strong`} />
+        <Combobox id={`${prefix}-sch`} name="scholarship_id" options={scholarships.map((s) => [s.id, s.name])} emptyLabel={allowGeneral ? "Not about one scholarship" : "Choose an assigned scholarship"} defaultValue={initial.scholarship_id ?? ""} className={`${inputClass} border-hairline-strong`} />
       </div>
       <div>
         <Button type="submit" loading={pending}>{initial.id ? "Save changes" : "Post announcement"}</Button>
@@ -73,7 +74,7 @@ export function AnnouncementForm({ initial = {}, scholarships, onDone }: { initi
   );
 }
 
-export function AnnouncementRowActions({ a, scholarships, canEdit }: { a: Required<Pick<Initial, "id">> & Initial; scholarships: Option[]; canEdit: boolean }) {
+export function AnnouncementRowActions({ a, scholarships, canEdit, allowGeneral = true }: { a: Required<Pick<Initial, "id">> & Initial; scholarships: Option[]; canEdit: boolean; allowGeneral?: boolean }) {
   const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [confirm, setConfirm] = useState(false);
@@ -84,7 +85,7 @@ export function AnnouncementRowActions({ a, scholarships, canEdit }: { a: Requir
       <Button variant="outline" size="sm" onClick={() => setEditing(true)}>Edit<span className="sr-only"> {a.title}</span></Button>
       <Button variant="outline-danger" size="sm" onClick={() => setConfirm(true)}>Delete<span className="sr-only"> {a.title}</span></Button>
       <Dialog open={editing} onOpenChange={setEditing} title="Edit announcement">
-        <AnnouncementForm initial={a} scholarships={scholarships} onDone={() => setEditing(false)} />
+        <AnnouncementForm initial={a} scholarships={scholarships} allowGeneral={allowGeneral} onDone={() => setEditing(false)} />
       </Dialog>
       <Dialog open={confirm} onOpenChange={setConfirm} title="Delete this announcement?" description="Students won't see it on their dashboard anymore.">
         <div className="flex justify-end gap-2">
@@ -105,5 +106,26 @@ export function AnnouncementRowActions({ a, scholarships, canEdit }: { a: Requir
         </div>
       </Dialog>
     </div>
+  );
+}
+
+
+export function NewAnnouncement({ scholarships, allowGeneral, selectedId }: { scholarships: Option[]; allowGeneral: boolean; selectedId?: string }) {
+  const [open, setOpen] = useState(false);
+  if (!allowGeneral && !scholarships.length) return null;
+  return (
+    <>
+      <Button type="button" aria-haspopup="dialog" onClick={() => setOpen(true)}>
+        <Icon name="plus" size={16} /> New announcement
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen} title="Post an announcement">
+        <AnnouncementForm
+          initial={{ scholarship_id: selectedId ?? (allowGeneral ? "" : scholarships[0]?.id) }}
+          scholarships={scholarships}
+          allowGeneral={allowGeneral}
+          onDone={() => setOpen(false)}
+        />
+      </Dialog>
+    </>
   );
 }

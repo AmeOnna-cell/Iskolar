@@ -114,7 +114,7 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="w-field" className={LABEL}>Course area <span className="font-normal text-ink-hint">(needed)</span></label>
-              <div className="max-w-[420px]">
+              <div>
                 <Combobox id="w-field" name="field" options={FIELD_OPTIONS} emptyLabel="Select your course area" defaultValue={(a.field as string | null) ?? ""} aria-invalid={Boolean(e.field)} aria-describedby={e.field ? "w-field-err" : undefined} className={`${inputClass} ${e.field ? "border-danger" : "border-hairline-strong"}`} />
               </div>
               {e.field ? <p id="w-field-err" className={ERROR}>{e.field}</p> : null}
@@ -123,7 +123,7 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
               <label htmlFor="w-program" className={LABEL}>
                 Program <span className="font-normal text-ink-hint">(optional)</span>
               </label>
-              <input id="w-program" name="program" maxLength={120} placeholder="e.g. BS Biology" defaultValue={(a.program as string | null) ?? ""} className={`${inputClass} max-w-[420px] border-hairline-strong`} />
+              <input id="w-program" name="program" maxLength={120} placeholder="e.g. BS Biology" defaultValue={(a.program as string | null) ?? ""} className={`${inputClass} border-hairline-strong`} />
             </div>
             <Question legend={<>Year level <span className="font-normal text-ink-hint">(needed)</span></>} error={e.year_level} id="w-year">
               <div className="flex flex-wrap gap-2">
@@ -159,7 +159,7 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
                 disabled={gwaUnknown}
                 aria-invalid={e.gwa ? true : undefined}
                 aria-describedby={`w-gwa-hint${e.gwa ? " w-gwa-err" : ""}`}
-                className={`${inputClass} max-w-[200px] ${e.gwa ? "border-danger" : "border-hairline-strong"}`}
+                className={`${inputClass} ${e.gwa ? "border-danger" : "border-hairline-strong"}`}
               />
               {e.gwa ? <p id="w-gwa-err" className={ERROR}>{e.gwa}</p> : null}
             </div>
@@ -179,7 +179,7 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
               </p>
             </div>
             <Question legend="Combined yearly household income" hint="Add up the yearly income of everyone who supports you. An estimate is fine." id="w-income">
-              <div className="flex max-w-[420px] flex-col gap-2">
+              <div className="flex flex-col gap-2">
                 {INCOME.map(([v, l]) => (
                   <Choice key={v} name="income_bracket" value={v} label={l} checked={a.income_bracket === v} />
                 ))}
@@ -214,7 +214,7 @@ export function Wizard({ step, answers, hasAnswers }: { step: 1 | 2 | 3 | 4; ans
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="w-region" className={LABEL}>Home region</label>
-              <div className="max-w-[420px]">
+              <div>
                 <Combobox id="w-region" name="region" options={REGION_OPTIONS} emptyLabel="Select your region" defaultValue={(a.region as string | null) ?? ""} className={`${inputClass} border-hairline-strong`} />
               </div>
             </div>

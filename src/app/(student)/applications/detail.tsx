@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Icon } from "@/components/icons";
-import { DueText, MatchPill, Pill, ProviderMark, SamplePill } from "@/components/scholarship/bits";
+import { DueText, MatchPill, Pill, ProviderMark } from "@/components/scholarship/bits";
 import { DocumentChecklist } from "@/components/scholarship/checklist";
 import { CriteriaList } from "@/components/scholarship/criteria";
 import { Section, Steps } from "@/components/scholarship/detail-body";
@@ -40,18 +40,23 @@ export function ApplicationDetail({ s, app, evaluation }: { s: ScholarshipDetail
             <p className="text-ink-secondary">{provider.name}</p>
             <DueText s={{ ...st, opens_on: s.opens_on, closes_on: s.closes_on }} size="sm" className="mt-1 block" />
           </div>
+          <ShareButton slug={s.slug} name={s.name} icon="shareNodes" className="shrink-0" />
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <MatchPill verdict={evaluation?.verdict} />
           <Pill icon="building">{providerTypeLabel[provider.type]}</Pill>
-          {s.is_sample ? (
-            <SamplePill />
-          ) : s.verification === "verified" ? (
+          {s.is_sample ? null : s.verification === "verified" ? (
             <Pill icon="shield">Source checked {formatDate((s.last_verified_at ?? s.updated_at).slice(0, 10), true)}</Pill>
           ) : (
             <Pill tone="warn" icon="warn">Unverified</Pill>
           )}
         </div>
+        {s.amount_text ? (
+          <p className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span className="text-sm text-ink-secondary">Listed award</span>
+            <span className="font-semibold text-ink">{s.amount_text}</span>
+          </p>
+        ) : null}
         <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-hairline pt-4 sm:grid-cols-3">
           <div>
             <dt className="text-caption text-ink-hint">Applications open</dt>
@@ -66,18 +71,18 @@ export function ApplicationDetail({ s, app, evaluation }: { s: ScholarshipDetail
             <dd className="text-sm font-semibold text-ink">{date(s.updated_at)}</dd>
           </div>
         </dl>
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {s.source_url ? (
-            <a href={s.source_url} target="_blank" rel="noopener noreferrer" className={buttonClass("outline", "md")}>
-              Official source <Icon name="ext" size={16} />
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
-          ) : null}
-          <ShareButton slug={s.slug} name={s.name} sample={s.is_sample} />
-        </div>
         <div className="mt-4 rounded-md bg-surface-subtle px-3 py-3">
-          <p className="mb-2 text-caption text-ink-hint">Your application</p>
-          <RowControl applicationId={app.id} scholarshipId={s.id} name={s.name} stage={app.stage} result={app.result} docsDone={docsDone} docsTotal={s.documents.length} />
+          <div className={s.source_url ? "grid items-start gap-2 sm:grid-cols-3" : "grid gap-2"}>
+            <div className="min-w-0 sm:col-span-2 [&>div]:w-full [&>div>button:first-of-type]:flex-1">
+              <RowControl applicationId={app.id} scholarshipId={s.id} name={s.name} stage={app.stage} result={app.result} docsDone={docsDone} docsTotal={s.documents.length} />
+            </div>
+            {s.source_url ? (
+              <a href={s.source_url} target="_blank" rel="noopener noreferrer" className={buttonClass("outline", "sm", "w-full")}>
+                Official source <Icon name="ext" size={16} />
+                <span className="sr-only">(opens in a new tab)</span>
+              </a>
+            ) : null}
+          </div>
           {app.stage !== "submitted" ? (
             // The answer to "where do I bring this?" next to the control, with the details below.
             <p className="mt-3 text-sm text-ink-secondary" data-testid="submit-summary">

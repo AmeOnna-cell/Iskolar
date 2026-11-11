@@ -38,7 +38,7 @@ test("wide screens: General first, search, and a scholarship's posts with its da
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/announcements");
   await waitForHydration(page);
-  const list = page.getByRole("region", { name: "Scholarships with announcements" });
+  const list = page.getByRole("region", { name: "Scholarships" });
   await expect(list.getByRole("link").first()).toContainText("General announcements");
   const feed = page.getByRole("region", { name: /^Announcements: / });
   await expect(feed.getByRole("heading", { level: 2 })).toHaveText("General announcements");
@@ -55,7 +55,7 @@ test("wide screens: General first, search, and a scholarship's posts with its da
   await expect(feed.getByRole("link", { name: "View the scholarship" })).toHaveAttribute("href", `/s/${SLUG}`);
 
   await page.getByRole("searchbox", { name: "Search announcements by scholarship" }).fill("zzz");
-  await expect(page.getByText("No scholarship with announcements matches “zzz”.")).toBeVisible();
+  await expect(page.getByText("No scholarship matches “zzz”.")).toBeVisible();
 });
 
 test("phones: the list is the page; an entry opens in a drawer that Back closes", async ({ page }) => {
@@ -77,14 +77,16 @@ test("phones: the list is the page; an entry opens in a drawer that Back closes"
 
 test("posting about a scholarship links its details to the board (the details cache is refreshed)", async ({ page }) => {
   const title = `Board post ${Date.now()}`;
-  const coordinator = await createUser("coordinator", "board");
+  const coordinator = await createUser("admin", "board");
   await signIn(page, coordinator.email);
   await page.goto("/staff/announcements");
   await waitForHydration(page);
-  await page.getByLabel("Title").first().fill(title);
-  await page.getByLabel("Message").first().fill("Bring your COR to the interview.");
+  await page.getByRole("button", { name: "New announcement" }).click();
+  const composer = page.getByRole("dialog", { name: "Post an announcement" });
+  await composer.getByLabel("Title", { exact: true }).fill(title);
+  await composer.getByLabel("Message", { exact: true }).fill("Bring your COR to the interview.");
   await pickOption(page, "About a scholarship (optional)", "City Educational Assistance");
-  await page.getByRole("button", { name: "Post announcement" }).click();
+  await composer.getByRole("button", { name: "Post announcement" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Announcement posted." })).toBeVisible();
 
   await page.goto(`/s/${SLUG}`);
@@ -128,6 +130,6 @@ test("an unknown or non-public entry says so and shows the general announcements
   await asStudent(page);
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/announcements?a=no-such-scholarship");
-  await expect(page.getByText("That scholarship has no public announcements right now.")).toBeVisible();
+  await expect(page.getByText("That scholarship is unavailable. Showing general announcements.")).toBeVisible();
   await expect(page.getByRole("region", { name: /^Announcements: / }).getByRole("heading", { level: 2 })).toHaveText("General announcements");
 });

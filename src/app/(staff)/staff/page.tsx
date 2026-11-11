@@ -109,7 +109,7 @@ export default async function StaffHomePage({ searchParams }: { searchParams: Pr
                         </p>
                       ) : null}
                     </div>
-                    <Link href="/staff/inquiries" className="inline-flex min-h-11 shrink-0 items-center text-sm font-semibold">
+                    <Link href={`/staff/inquiries/${q.id}`} className="inline-flex min-h-11 shrink-0 items-center text-sm font-semibold">
                       Reply<span className="sr-only"> to “{q.question}”</span>
                     </Link>
                   </li>

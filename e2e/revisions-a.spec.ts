@@ -1,4 +1,4 @@
-// Team-leader revisions, group A: combobox, Share, sticky panel header, tab row overflow, compact phone footer.
+// Team-leader revisions, group A: combobox, Share, scrollable side panel, tab row overflow, compact phone footer.
 // (The dashboard button's destination and label are unit-tested in src/lib/dashboard.test.ts.)
 import { expect, test } from "@playwright/test";
 import { createUser, signIn, waitForHydration } from "./support";
@@ -34,7 +34,7 @@ test("long dropdowns are type-to-search comboboxes that work by keyboard and pos
   // Students' own words find the category; leaving the box with one match picks it.
   await box.fill("nursing");
   await expect(page.getByRole("option")).toHaveText(["Health Sciences"]);
-  await page.getByPlaceholder("Scholarship name or provider").focus();
+  await page.getByRole("combobox", { name: "Scholarship or provider", exact: true }).focus();
   await expect(box).toHaveValue("Health Sciences");
 
   await page.getByRole("button", { name: "Find scholarships" }).click();
@@ -44,31 +44,31 @@ test("long dropdowns are type-to-search comboboxes that work by keyboard and pos
 test.describe("Share", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
-  test("uses the share sheet when there is one", async ({ page }) => {
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, "share", { configurable: true, value: async (d: ShareData) => void ((window as unknown as { __shared: ShareData }).__shared = d) });
-    });
+  test("opens a share dialog with a QR code and the public link", async ({ page }) => {
     await page.goto("/s/tulong-dunong-program");
     await waitForHydration(page);
-    await page.getByRole("button", { name: "Share" }).click();
-    const shared = await page.evaluate(() => (window as unknown as { __shared: ShareData }).__shared);
-    expect(shared.url).toMatch(/\/s\/tulong-dunong-program$/);
-    // Sample listings say so wherever they're shared: the share title and the link preview.
-    expect(shared.title).toBe("Tulong Dunong Program (sample listing)");
-    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", "Tulong Dunong Program (sample listing)");
-    await expect(page.locator('meta[property="og:description"]')).toHaveAttribute("content", /^Sample listing · Deadline /);
+    const share = page.getByRole("button", { name: "Share" });
+    await share.click();
+    const dialog = page.getByRole("dialog", { name: "Share scholarship" });
+    await expect(dialog.getByText("Tulong Dunong Program", { exact: true })).toBeVisible();
+    await expect(dialog.getByRole("img", { name: "Public scholarship link" })).toBeVisible();
+    await expect(dialog.getByRole("textbox", { name: "Public scholarship link" })).toHaveValue(/\/s\/tulong-dunong-program$/);
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(share).toBeFocused();
   });
 
-  test("otherwise copies the link and says so", async ({ page, context }) => {
+  test("copies the link from the share dialog and says so", async ({ page, context }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-    await page.addInitScript(() => Object.defineProperty(navigator, "share", { configurable: true, value: undefined }));
     await page.goto("/explore");
     await waitForHydration(page);
     const panel = page.getByRole("complementary", { name: "Selected scholarship" });
-    await panel.getByRole("button", { name: "Share" }).click();
-    await expect(page.getByRole("status").filter({ hasText: "Link copied" })).toBeVisible();
-    const copied = await page.evaluate(() => navigator.clipboard.readText());
     const slug = await panel.getByRole("heading", { level: 2 }).first().getByRole("link").getAttribute("href");
+    await panel.getByRole("button", { name: "Share" }).click();
+    const dialog = page.getByRole("dialog", { name: "Share scholarship" });
+    await dialog.getByRole("button", { name: "Copy link" }).click();
+    await expect(dialog.getByRole("status")).toHaveText("Link copied");
+    const copied = await page.evaluate(() => navigator.clipboard.readText());
     expect(new URL(copied).pathname).toBe(slug);
     // The shared link opens that scholarship.
     await page.goto(copied);
@@ -76,28 +76,38 @@ test.describe("Share", () => {
   });
 });
 
-test("the side panel keeps its header and actions in view while the body scrolls", async ({ page }) => {
+test("the side panel stays visible at the end of the results and scrolls independently", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/explore");
+  await waitForHydration(page);
   const panel = page.getByRole("complementary", { name: "Selected scholarship" });
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  const topbar = page.locator("body > header");
+  await expect.poll(async () => {
+    const bounds = await panel.boundingBox();
+    const bar = await topbar.boundingBox();
+    return !!bounds && !!bar && bounds.y >= bar.y + bar.height && bounds.y + bounds.height <= 800;
+  }).toBe(true);
+
+  const pageScroll = await page.evaluate(() => window.scrollY);
   const header = panel.getByTestId("panel-header");
   const before = (await header.boundingBox())!;
   await panel.evaluate((el) => el.scrollTo(0, el.scrollHeight));
   await expect.poll(() => panel.evaluate((el) => el.scrollTop)).toBeGreaterThan(200);
-  const after = (await header.boundingBox())!;
-  expect(Math.abs(after.y - before.y)).toBeLessThan(2);
-  await expect(header.getByRole("button", { name: "Share" })).toBeInViewport();
+  expect((await header.boundingBox())!.y).toBeLessThan(before.y - 100);
+  expect(await page.evaluate(() => window.scrollY)).toBe(pageScroll);
 });
 
-test("My applications tab row has no vertical scrollbar; the phone footer is compact", async ({ page }) => {
+test("My applications opens a tracking status dialog; the phone footer is compact", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 780 });
   const student = await createUser("student", "tabs");
   await signIn(page, student.email);
   await page.goto("/applications");
-  const tabs = page.getByRole("navigation", { name: "Application stages" });
-  const { overflowY } = await tabs.evaluate((el) => ({ overflowY: el.scrollHeight - el.clientHeight }));
-  expect(overflowY).toBe(0);
-  expect(await tabs.evaluate((el) => getComputedStyle(el).overflowX)).toBe("auto");
+  await page.getByRole("button", { name: "Filter by tracking status" }).click();
+  const dialog = page.getByRole("dialog", { name: "Tracking status" });
+  await expect(dialog.getByRole("link", { name: "All scholarships" })).toHaveAttribute("aria-current", "true");
+  await dialog.getByRole("link", { name: "Preparing" }).click();
+  await expect(page).toHaveURL(/tab=preparing/);
 
   const footer = page.locator("footer");
   expect((await footer.boundingBox())!.height).toBeLessThan(240);

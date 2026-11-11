@@ -20,7 +20,8 @@ test("questions are validated on the server and limited to 5 an hour per student
     const text = `Rate limit check number ${i}: is the COR enough?`;
     await page.getByLabel("Your question", { exact: true }).fill(text);
     await page.getByRole("button", { name: "Send question" }).click();
-    await expect(page.getByText(text, { exact: true })).toBeVisible(); // listed under "Your questions"
+    await expect(page.getByText("Question sent.")).toBeVisible();
+    await expect(page.getByLabel("Your question", { exact: true })).toBeEmpty();
   }
   await page.getByLabel("Your question", { exact: true }).fill("Rate limit check number 6: one too many?");
   await page.getByRole("button", { name: "Send question" }).click();

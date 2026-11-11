@@ -45,7 +45,7 @@ export default async function FaqsPage({ searchParams }: { searchParams: Promise
 
   return (
     <div className="page-container py-8">
-      <div className="reading-column">
+      <div className="w-full">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-headline-sm font-bold tracking-tight text-ink sm:text-headline">FAQs</h1>

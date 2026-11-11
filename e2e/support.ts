@@ -60,7 +60,7 @@ export async function pickOption(page: Page, name: string, option: string) {
 export const formAlert = (page: Page) => page.locator("main").getByRole("alert");
 export const formStatus = (page: Page) => page.locator("main").getByRole("status");
 
-export async function signIn(page: Page, email: string, password = PASSWORD, path = "/login") {
+export async function signIn(page: Page, email: string, password = PASSWORD, path = "/login", timeout = 15_000) {
   await page.goto(path);
   await waitForHydration(page);
   await page.getByLabel("Email").fill(email);
@@ -69,8 +69,8 @@ export async function signIn(page: Page, email: string, password = PASSWORD, pat
   // Wait for the outcome (left /login, or the form shows an error) so a following page.goto()
   // can't cancel the sign-in before its session cookie is set.
   await Promise.race([
-    page.waitForURL((u) => !u.pathname.startsWith("/login"), { timeout: 15_000 }),
-    formAlert(page).filter({ hasText: /\S/ }).first().waitFor({ timeout: 15_000 }),
+    page.waitForURL((u) => !u.pathname.startsWith("/login"), { timeout }),
+    formAlert(page).filter({ hasText: /\S/ }).first().waitFor({ timeout }),
   ]);
 }
 

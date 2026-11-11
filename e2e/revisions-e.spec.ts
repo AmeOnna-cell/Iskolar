@@ -32,8 +32,8 @@ test("wide screens: tracking list with search and progress, the selected applica
   await expect(list.getByRole("link")).toHaveCount(2);
   const row = list.getByRole("link", { name: /Tulong Dunong Program/ });
   await expect(row).toContainText("Preparing");
-  await expect(row).toContainText(/Deadline [A-Z][a-z]{2} \d+·Closes in \d+ days?/); // "Deadline" is sr-only
-  await expect(row).toContainText("Not checked"); // no eligibility answers yet
+  await expect(row).toContainText(/Deadline [A-Z][a-z]{2} \d+/);
+  await expect(row).toContainText(/Closes in \d+ days?/);
 
   // Selecting a row changes the panel in place.
   await row.click();
@@ -50,15 +50,13 @@ test("wide screens: tracking list with search and progress, the selected applica
   await panel.getByLabel(/Certificate of Registration/).check();
   await expect(page.getByRole("meter", { name: "Documents for Tulong Dunong Program" })).toHaveAttribute("aria-valuenow", "1");
 
-  // Search looks across every stage (the tabs step aside); a miss offers a way back.
-  await page.getByRole("link", { name: /^Saved/ }).click();
-  await expect(page).toHaveURL(/tab=saved/);
-  const search = page.getByRole("searchbox", { name: "Search your applications" });
+  const search = page.getByRole("searchbox", { name: "Search tracked scholarships" });
   await search.fill("zzz");
-  await expect(page.getByText("None of your applications matches “zzz”.")).toBeVisible();
-  await page.getByRole("button", { name: "Clear search" }).click();
+  await search.press("Enter");
+  await expect(page.getByText("No tracked scholarships match these filters.")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Scholarship details" })).toContainText("No scholarship selected");
   await search.fill("city");
-  await expect(page.getByText("1 match across all stages")).toBeVisible();
+  await search.press("Enter");
   await expect(list.getByRole("link")).toHaveCount(1);
   await expect(list.getByRole("link")).toContainText("Preparing");
 

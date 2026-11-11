@@ -49,12 +49,6 @@ export function MatchPill({ verdict }: { verdict: Verdict | string | null | unde
   return null;
 }
 
-/** Sample (seeded example) rows are never presented as verified, or as unverified real listings. */
-export function TrustPills({ verification, isSample }: { verification: string; isSample: boolean }) {
-  if (isSample) return <SamplePill />;
-  return verification !== "verified" ? <Pill tone="warn" icon="warn">Unverified</Pill> : null;
-}
-
 export function SamplePill() {
   return <Pill tone="info" icon="info">Sample listing</Pill>;
 }

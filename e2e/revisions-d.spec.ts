@@ -82,10 +82,11 @@ test("posting about a scholarship links its details to the board (the details ca
   await page.goto("/staff/announcements");
   await waitForHydration(page);
   await page.getByRole("button", { name: "New announcement" }).click();
-  await page.getByLabel("Title").first().fill(title);
-  await page.getByLabel("Message").first().fill("Bring your COR to the interview.");
+  const composer = page.getByRole("dialog", { name: "Post an announcement" });
+  await composer.getByLabel("Title", { exact: true }).fill(title);
+  await composer.getByLabel("Message", { exact: true }).fill("Bring your COR to the interview.");
   await pickOption(page, "About a scholarship (optional)", "City Educational Assistance");
-  await page.getByRole("button", { name: "Post announcement" }).click();
+  await composer.getByRole("button", { name: "Post announcement" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Announcement posted." })).toBeVisible();
 
   await page.goto(`/s/${SLUG}`);
@@ -129,6 +130,6 @@ test("an unknown or non-public entry says so and shows the general announcements
   await asStudent(page);
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/announcements?a=no-such-scholarship");
-  await expect(page.getByText("That scholarship has no public announcements right now.")).toBeVisible();
+  await expect(page.getByText("That scholarship is unavailable. Showing general announcements.")).toBeVisible();
   await expect(page.getByRole("region", { name: /^Announcements: / }).getByRole("heading", { level: 2 })).toHaveText("General announcements");
 });

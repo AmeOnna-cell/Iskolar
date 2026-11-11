@@ -114,13 +114,14 @@ test("a student's question gets a staff reply; announcements reach the dashboard
   await sPage.goto("/staff/announcements");
   await waitForHydration(sPage);
   await sPage.getByRole("button", { name: "New announcement" }).click();
+  const composer = sPage.getByRole("dialog", { name: "Post an announcement" });
   // An empty post says what to fix and focuses the first field.
-  await sPage.getByRole("button", { name: "Post announcement" }).click();
+  await composer.getByRole("button", { name: "Post announcement" }).click();
   await expect(sPage.getByText("2 things to fix below.")).toBeVisible();
-  await expect(sPage.getByLabel("Title").first()).toBeFocused();
-  await sPage.getByLabel("Title").first().fill(title);
-  await sPage.getByLabel("Message").first().fill("Forms are at window 3 this week.");
-  await sPage.getByRole("button", { name: "Post announcement" }).click();
+  await expect(composer.getByLabel("Title", { exact: true })).toBeFocused();
+  await composer.getByLabel("Title", { exact: true }).fill(title);
+  await composer.getByLabel("Message", { exact: true }).fill("Forms are at window 3 this week.");
+  await composer.getByRole("button", { name: "Post announcement" }).click();
   await expect(sPage.getByRole("status").filter({ hasText: "Announcement posted." })).toBeVisible();
   await staff.close();
 
